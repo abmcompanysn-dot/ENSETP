@@ -702,6 +702,43 @@ ok
   </div>
 </section>
 
+<!-- J'Y SERAI — SECTION PARTAGE -->
+<section id="jy-serai" style="background:linear-gradient(135deg,rgba(212,175,55,0.06),rgba(10,10,10,0));border-top:1px solid rgba(212,175,55,0.12);padding:60px 5%;">
+  <div class="section-header reveal" style="margin-bottom:32px;">
+    <div class="section-tag">★ Faites passer le mot ★</div>
+    <h2 class="section-title">J'y <span>Serai !</span></h2>
+    <div class="gold-line"></div>
+    <p class="section-desc" style="margin-top:14px">Invitez vos amis et partagez l'événement sur vos réseaux.</p>
+  </div>
+  <div style="max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+    <!-- Carte aperçu événement -->
+    <div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1.5px solid rgba(212,175,55,0.3);border-radius:18px;padding:28px 28px 22px;text-align:center;">
+      <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">ENSETP · Université Cheikh Anta Diop</div>
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;font-style:italic;color:var(--gold);line-height:1.1;margin-bottom:4px;">Dîner de Gala</div>
+      <div style="font-size:0.62rem;letter-spacing:3px;color:#aaa;text-transform:uppercase;margin-bottom:18px;">De Fin d'Année · ENSETP 2026</div>
+      <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-weight:700;color:#fff;font-size:0.85rem;">Samedi 20 Juin 2026</div></div>
+        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Lieu</div><div style="font-weight:700;color:#fff;font-size:0.85rem;">Au Magic Land · Dakar</div></div>
+        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Entrée</div><div style="font-weight:700;color:var(--gold);font-size:0.85rem;">GRATUITE</div></div>
+      </div>
+      <div style="font-size:0.7rem;color:var(--text-muted);font-style:italic;">ZOU NAME · MIST CASH · BLM PRO · ME MAN · NIKO</div>
+    </div>
+    <!-- Boutons de partage -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button onclick="shareEventWhatsApp()" style="flex:1;min-width:140px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:#25D366;color:#fff;font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> WhatsApp
+      </button>
+      <button onclick="copyEventLink()" style="flex:1;min-width:140px;padding:14px;border-radius:28px;cursor:pointer;background:transparent;border:1.5px solid rgba(212,175,55,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.4)'">
+        <i class="fas fa-link"></i> Copier le lien
+      </button>
+      <button onclick="shareEventNative()" id="btn-native-share" style="flex:1;min-width:140px;padding:14px;border-radius:28px;cursor:pointer;background:rgba(212,175,55,0.08);border:1.5px solid rgba(212,175,55,0.2);color:var(--gold-light);font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:none;align-items:center;justify-content:center;gap:10px;transition:all .3s;">
+        <i class="fas fa-share-alt"></i> Partager
+      </button>
+    </div>
+    <div style="text-align:center;font-size:0.62rem;color:var(--text-muted);margin-top:4px;">Invitez vos proches — l'entrée est gratuite !</div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-logos">
@@ -784,6 +821,18 @@ ok
       <div class="modal-actions">
         <button class="btn-print" onclick="printTicket()"><i class="fas fa-print"></i> Imprimer</button>
         <button class="btn-close-modal" style="border:1.5px solid var(--gold)!important;background:transparent;color:var(--gold)" onclick="closeTicketModal()">Fermer</button>
+      </div>
+      <!-- PARTAGE TICKET -->
+      <div id="ticket-share" style="margin-top:14px;display:none;">
+        <div style="font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-bottom:10px;">Partager & Inviter</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button id="btn-whatsapp" onclick="shareTicketWhatsApp()" style="flex:1;min-width:130px;padding:11px;border-radius:25px;border:none;cursor:pointer;background:#25D366;color:#fff;font-family:'Cinzel',serif;font-size:0.7rem;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fab fa-whatsapp" style="font-size:1rem;"></i> WhatsApp
+          </button>
+          <button onclick="copyInviteLink()" style="flex:1;min-width:130px;padding:11px;border-radius:25px;border:1.5px solid rgba(212,175,55,0.4);cursor:pointer;background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fas fa-link"></i> Copier l'invitation
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -972,8 +1021,13 @@ function showTicket(o){
     }, 150);
   } catch(e){ console.warn('QRCode error:', e); }
 
+  _currentShareOrder = o;
+  document.getElementById('ticket-share').style.display = 'block';
+  if(navigator.share){
+    const nb=document.getElementById('btn-native-share'); if(nb) nb.style.display='flex';
+  }
   document.getElementById('ticket-modal').classList.add('active');
-  notify('success', 'Ticket généré !', `Bienvenue ${fullName} — vérifiez votre e-mail.`);
+  notify('success', 'Ticket généré !', `Bienvenue ${fullName} — votre e-mail est en route.`);
 }
 
 /* ===== PRINT ===== */
@@ -1204,7 +1258,51 @@ function _showLocalTicket(id){
   if(p.get('type')) selectTicket(p.get('type'),parseInt(p.get('price')||1000));
 })();
 
+/* ===== PARTAGE TICKET ===== */
+let _currentShareOrder = null;
+
+function shareTicketWhatsApp(){
+  if(!_currentShareOrder) return;
+  const o = _currentShareOrder;
+  const msg = `🎉 J'ai mon ticket pour le Dîner de Gala ENSETP 2026 !\n\n👤 ${o.prenom} ${o.nom} — ${String(o.type).toUpperCase()}\n📅 Samedi 20 Juin 2026 · 19h\n📍 Au Magic Land, Dakar\n🎟️ Places GRATUITES → https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #MagicLand`;
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function copyInviteLink(){
+  if(!_currentShareOrder) return;
+  const o = _currentShareOrder;
+  const msg = `🎉 ${o.prenom} ${o.nom} sera au Dîner de Gala ENSETP 2026 !\n📅 Sam. 20 Juin · Magic Land, Dakar\n🎟️ Places gratuites : https://ensetp.mahu.cards\n#ENSETP #GalaDîner2026`;
+  navigator.clipboard.writeText(msg).then(()=>notify('success','Copié !','Message d\'invitation copié. Collez-le sur vos réseaux !'))
+    .catch(()=>{
+      const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      notify('success','Copié !','Message d\'invitation copié.');
+    });
+}
+
+/* ===== PARTAGE ÉVÉNEMENT ===== */
+function shareEventWhatsApp(){
+  const msg = `🎉 Dîner de Gala de Fin d'Année ENSETP 2026 !\n\n📅 Samedi 20 Juin 2026 à 19h\n📍 Au Magic Land, Dakar\n🎟️ Entrée GRATUITE — places limitées !\n\nArtistes : ZOU NAME · MIST CASH · BLM PRO · ME MAN · NIKO\n\n👉 Réserve ta place ici : https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #FPT #MagicLand`;
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function copyEventLink(){
+  const text = 'https://ensetp.mahu.cards';
+  navigator.clipboard.writeText(text).then(()=>notify('success','Lien copié !','Partagez ensetp.mahu.cards avec vos amis.'))
+    .catch(()=>{
+      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      notify('success','Lien copié !','Partagez ensetp.mahu.cards avec vos amis.');
+    });
+}
+
+function shareEventNative(){
+  if(navigator.share){
+    navigator.share({ title:'Dîner de Gala ENSETP 2026', text:'🎉 Places gratuites pour le Gala ENSETP 2026 — Samedi 20 Juin au Magic Land !', url:'https://ensetp.mahu.cards' }).catch(()=>{});
+  }
+}
+
 /* ===== INIT ===== */
+// Afficher bouton "Partager" natif si disponible (mobile)
+if(navigator.share) document.querySelectorAll('#btn-native-share').forEach(b=>{b.style.display='flex';});
 initLikes();
 
 /* ===== REVEAL OBSERVER ===== */
