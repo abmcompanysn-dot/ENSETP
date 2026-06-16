@@ -344,12 +344,11 @@ function getStats() {
   for (var i = 1; i < data.length; i++) {
     total++;
     var t = String(data[i][5]).toLowerCase();
-    if (t === 'standard') std++;
-    else if (t === 'vip')   vip++;
-    else if (t === 'table') table++;
+    if (t === 'solo')   std++;
+    else if (t === 'couple') vip++;
     recettes += Number(data[i][8]) || 0;
   }
-  return { total: total, standard: std, vip: vip, table: table, recettes: recettes };
+  return { total: total, solo: std, couple: vip, recettes: recettes };
 }
 
 // ── EMAILS ─────────────────────────────────────────────────
@@ -515,6 +514,7 @@ function testSendTicket() {
     qty:      1,
     price:    1000,
     total:    1000,
+    type:     'solo',
     payment:  'wave',
     date:     new Date().toISOString(),
     status:   'paid'

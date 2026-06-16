@@ -645,11 +645,11 @@ ok
     <div class="gold-line"></div>
     <p class="section-desc" style="margin-top:14px">Sécurisez votre place dès maintenant. Places limitées – 500 tickets disponibles.</p>
   </div>
-  <div class="ticket-types">
-    <div class="ticket-card reveal" onclick="selectTicket('standard',1000)">
-      <div class="ticket-type-lbl">Standard</div>
+  <div class="ticket-types" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:680px;">
+    <div class="ticket-card reveal" onclick="selectTicket('solo',1000)">
+      <div class="ticket-type-lbl">Solo</div>
       <div class="ticket-price">1 000</div>
-      <div class="ticket-currency">FCFA / personne</div>
+      <div class="ticket-currency">FCFA · 1 personne</div>
       <ul class="ticket-features">
         <li><i class="fas fa-check"></i>Accès à la soirée Gala</li>
         <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
@@ -658,31 +658,19 @@ ok
       </ul>
       <button class="btn-ticket-outline">Choisir</button>
     </div>
-    <div class="ticket-card popular reveal" onclick="selectTicket('vip',2000)">
-      <div class="popular-badge">Populaire</div>
-      <div class="ticket-type-lbl">VIP</div>
+    <div class="ticket-card popular reveal" onclick="selectTicket('couple',2000)">
+      <div class="popular-badge">Recommandé</div>
+      <div class="ticket-type-lbl">Couple</div>
       <div class="ticket-price">2 000</div>
-      <div class="ticket-currency">FCFA / personne</div>
+      <div class="ticket-currency">FCFA · 2 personnes</div>
       <ul class="ticket-features">
-        <li><i class="fas fa-check"></i>Accès VIP prioritaire</li>
-        <li><i class="fas fa-check"></i>Dîner Gastronomique</li>
-        <li><i class="fas fa-check"></i>Table prioritaire</li>
-        <li><i class="fas fa-check"></i>Rencontre artistes</li>
-        <li><i class="fas fa-check"></i>E-Ticket VIP QR Code</li>
+        <li><i class="fas fa-heart"></i>2 places ensemble</li>
+        <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
+        <li><i class="fas fa-check"></i>Prestations Live</li>
+        <li><i class="fas fa-check"></i>Table côte à côte</li>
+        <li><i class="fas fa-check"></i>2 E-Tickets QR Code</li>
       </ul>
       <button class="btn-ticket">Choisir</button>
-    </div>
-    <div class="ticket-card reveal" onclick="selectTicket('table',5000)">
-      <div class="ticket-type-lbl">Table Entière</div>
-      <div class="ticket-price">5 000</div>
-      <div class="ticket-currency">FCFA / table (10 pers.)</div>
-      <ul class="ticket-features">
-        <li><i class="fas fa-check"></i>Table réservée (10 places)</li>
-        <li><i class="fas fa-check"></i>Service prioritaire</li>
-        <li><i class="fas fa-check"></i>Accès backstage</li>
-        <li><i class="fas fa-check"></i>10 E-Tickets QR Code</li>
-      </ul>
-      <button class="btn-ticket-outline">Choisir</button>
     </div>
   </div>
 
@@ -702,9 +690,8 @@ ok
       </div>
       <div class="form-group full"><label>Type de ticket</label>
         <select id="f-type" onchange="updateTotal()">
-          <option value="standard" data-price="1000">Standard – 1 000 FCFA</option>
-          <option value="vip" data-price="2000">VIP – 2 000 FCFA</option>
-          <option value="table" data-price="5000">Table Entière – 5 000 FCFA</option>
+          <option value="solo" data-price="1000">Solo – 1 000 FCFA (1 personne)</option>
+          <option value="couple" data-price="2000">Couple – 2 000 FCFA (2 personnes)</option>
         </select>
       </div>
     </div>
@@ -941,9 +928,8 @@ ok
       </div>
       <div class="admin-stats">
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-ticket-alt"></i></div><div class="admin-stat-num" id="stat-total">0</div><div class="admin-stat-lbl">Tickets Vendus</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user"></i></div><div class="admin-stat-num" id="stat-std">0</div><div class="admin-stat-lbl">Standard</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-star"></i></div><div class="admin-stat-num" id="stat-vip">0</div><div class="admin-stat-lbl">VIP</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-table"></i></div><div class="admin-stat-num" id="stat-table">0</div><div class="admin-stat-lbl">Tables</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user"></i></div><div class="admin-stat-num" id="stat-std">0</div><div class="admin-stat-lbl">Solo</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-heart"></i></div><div class="admin-stat-num" id="stat-vip">0</div><div class="admin-stat-lbl">Couple</div></div>
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user-check"></i></div><div class="admin-stat-num" id="stat-conf">0</div><div class="admin-stat-lbl">Présences</div></div>
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-coins"></i></div><div class="admin-stat-num" id="stat-rev">0</div><div class="admin-stat-lbl">FCFA Perçus</div></div>
       </div>
@@ -1042,7 +1028,7 @@ const EVENT_DATE = new Date('2026-06-20T19:00:00');
 const CONTACT_EMAIL = 'contact@mahu.cards';
 
 let orders = JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-let selType = 'standard', selPrice = 1000, selPayment = 'wave';
+let selType = 'solo', selPrice = 1000, selPayment = 'wave';
 let currentCommentArtist = null;
 
 /* ===== PARTICLES ===== */
@@ -1250,9 +1236,8 @@ function renderOrderRows(ords){
 function loadAdmin(){
   const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
   document.getElementById('stat-total').textContent=ords.length;
-  document.getElementById('stat-std').textContent=ords.filter(o=>o.type==='standard').length;
-  document.getElementById('stat-vip').textContent=ords.filter(o=>o.type==='vip').length;
-  document.getElementById('stat-table').textContent=ords.filter(o=>o.type==='table').length;
+  document.getElementById('stat-std').textContent=ords.filter(o=>o.type==='solo').length;
+  document.getElementById('stat-vip').textContent=ords.filter(o=>o.type==='couple').length;
   document.getElementById('stat-conf').textContent=ords.filter(o=>o.confirmed).length;
   document.getElementById('stat-rev').textContent=ords.reduce((s,o)=>s+(o.total||0),0).toLocaleString('fr-FR');
   renderOrderRows(ords);
