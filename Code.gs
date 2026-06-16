@@ -217,13 +217,15 @@ function doPost(e) {
     var action  = payload.action;
     var result  = {};
 
-    // Validation signature pour les webhooks Paydunia
-    if (action === 'payduniaWebhook') {
-      var sig = e.parameter ? e.parameter.signature : null;
+    // Paydunia envoie son propre format sans champ 'action'
+    // → auto-détection si order_id / transaction_ref / reference présent
+    if (!action && (payload.order_id || payload.transaction_ref || payload.reference)) {
+      var sig = (e.parameter && e.parameter.signature) || payload.signature || null;
       if (!validatePayduniaSignature(rawBody, sig)) {
         Logger.log('Signature Paydunia invalide — requête rejetée.');
         return _jsonOut({ error: 'Signature invalide', code: 401 });
       }
+      return _jsonOut(handlePayduniaWebhook(payload));
     }
 
     if      (action === 'createOrder')     result = handleCreateOrder(payload.order);
