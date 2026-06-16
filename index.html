@@ -268,62 +268,6 @@ ok
     .notif-text p { font-size:0.78rem; font-weight:600; color:var(--white); margin-bottom:3px; }
     .notif-text span { font-size:0.7rem; color:var(--text-muted); }
 
-    /* ADMIN PAGE */
-    #admin-panel { display:none; position:fixed; inset:0; z-index:4000; background:#080808; overflow-y:auto; }
-    #admin-panel.active { display:block; }
-    /* Admin top bar */
-    .admin-topbar { position:sticky; top:0; z-index:10; background:rgba(8,8,8,0.96); backdrop-filter:blur(12px); border-bottom:1px solid rgba(212,175,55,0.18); padding:0 5%; height:64px; display:flex; align-items:center; justify-content:space-between; }
-    .admin-topbar-left { display:flex; align-items:center; gap:14px; }
-    .admin-topbar-logo { font-family:'Cinzel',serif; font-size:0.9rem; color:var(--gold); letter-spacing:3px; }
-    .admin-topbar-title { font-size:0.72rem; color:var(--text-muted); letter-spacing:1px; padding-left:14px; border-left:1px solid rgba(212,175,55,0.2); }
-    .admin-close { display:flex; align-items:center; gap:8px; background:transparent; border:1px solid rgba(212,175,55,0.25); color:#ccc; padding:8px 18px; border-radius:24px; cursor:pointer; font-size:0.74rem; letter-spacing:1.5px; text-transform:uppercase; font-family:'Cinzel',serif; transition:all .3s; }
-    .admin-close:hover { border-color:var(--gold); color:var(--gold); background:rgba(212,175,55,0.06); }
-    .admin-body { padding:40px 5%; max-width:1200px; margin:0 auto; }
-    /* Admin hero banner */
-    .admin-banner { background:linear-gradient(135deg,rgba(212,175,55,0.08) 0%,rgba(212,175,55,0.02) 50%,transparent 100%); border:1px solid rgba(212,175,55,0.15); border-radius:20px; padding:32px 36px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; }
-    .admin-banner-info h2 { font-family:'Cinzel',serif; font-size:1.4rem; color:var(--gold); margin-bottom:6px; }
-    .admin-banner-info p { font-size:0.78rem; color:var(--text-muted); }
-    .admin-banner-icon { font-size:3.5rem; color:rgba(212,175,55,0.15); }
-    /* Stats */
-    .admin-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:32px; }
-    .admin-stat { background:var(--dark2); border:1px solid rgba(212,175,55,0.15); border-radius:14px; padding:24px 20px; text-align:center; position:relative; overflow:hidden; transition:border-color .3s; }
-    .admin-stat:hover { border-color:rgba(212,175,55,0.4); }
-    .admin-stat::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(212,175,55,0.04),transparent); pointer-events:none; }
-    .admin-stat-icon { font-size:1.4rem; color:rgba(212,175,55,0.3); margin-bottom:10px; }
-    .admin-stat-num { font-family:'Cinzel',serif; font-size:2rem; color:var(--gold); line-height:1; }
-    .admin-stat-lbl { font-size:0.62rem; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; margin-top:6px; }
-    /* Table */
-    .admin-table-wrap { background:var(--dark2); border:1px solid rgba(212,175,55,0.12); border-radius:16px; overflow:hidden; margin-bottom:28px; }
-    .admin-table-hdr { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid rgba(212,175,55,0.1); flex-wrap:wrap; gap:12px; }
-    .admin-table-hdr h3 { font-family:'Cinzel',serif; font-size:0.88rem; color:var(--gold); }
-    .admin-search { background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.15); border-radius:8px; padding:8px 14px; color:#fff; font-family:'Montserrat',sans-serif; font-size:0.8rem; outline:none; width:220px; }
-    .admin-search:focus { border-color:var(--gold); }
-    .table-scroll { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; font-size:0.78rem; }
-    th { background:rgba(212,175,55,0.07); color:var(--gold); padding:12px 16px; text-align:left; font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; border-bottom:1px solid rgba(212,175,55,0.12); white-space:nowrap; }
-    td { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:#ccc; white-space:nowrap; }
-    tr:last-child td { border-bottom:none; }
-    tbody tr { transition:background .2s; }
-    tbody tr:hover td { background:rgba(212,175,55,0.04); }
-    .status-paid { color:#2ecc71; font-size:0.68rem; font-weight:700; background:rgba(46,204,113,0.1); padding:3px 10px; border-radius:20px; }
-    .status-pending { color:var(--gold); font-size:0.68rem; font-weight:700; background:rgba(212,175,55,0.1); padding:3px 10px; border-radius:20px; }
-    .btn-regen { background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:5px 12px; border-radius:20px; cursor:pointer; font-size:0.66rem; transition:all .3s; }
-    .btn-regen:hover { background:rgba(212,175,55,0.1); border-color:var(--gold); }
-    /* Config */
-    .admin-config { background:var(--dark2); border:1px solid rgba(212,175,55,0.12); border-radius:16px; padding:28px 28px; }
-    .admin-config-title { font-family:'Cinzel',serif; color:var(--gold); margin-bottom:20px; font-size:0.88rem; display:flex; align-items:center; gap:10px; }
-    .config-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
-    .config-field { display:flex; flex-direction:column; gap:8px; }
-    .config-field label { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); }
-    .admin-config input { background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.18); border-radius:8px; padding:11px 14px; color:#fff; font-family:'Montserrat',sans-serif; font-size:0.82rem; outline:none; width:100%; transition:border-color .3s; }
-    .admin-config input:focus { border-color:var(--gold); }
-    .admin-actions-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; }
-    .admin-btn { display:flex; align-items:center; gap:8px; padding:10px 22px; border-radius:24px; border:none; cursor:pointer; font-family:'Cinzel',serif; font-size:0.74rem; letter-spacing:1.5px; text-transform:uppercase; transition:all .3s; }
-    .admin-btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:var(--black); }
-    .admin-btn-gold:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(212,175,55,0.4); }
-    .admin-btn-outline { background:transparent; border:1px solid rgba(212,175,55,0.3)!important; color:var(--gold); border:none; }
-    .admin-btn-outline:hover { background:rgba(212,175,55,0.08); border-color:var(--gold)!important; }
-
     /* PARTNER FEATURED */
     .partner-featured { border-color:rgba(212,175,55,0.35) !important; background:linear-gradient(135deg,rgba(212,175,55,0.07),var(--dark2)) !important; }
     .partner-featured img { height:55px; }
@@ -367,30 +311,6 @@ ok
     .presence-result.ok p { color:#2ecc71; }
     .presence-result.err p { color:#e74c3c; }
 
-    /* ADMIN TABS */
-    .admin-tabs { display:flex; gap:4px; margin-bottom:28px; background:rgba(212,175,55,0.05); border:1px solid rgba(212,175,55,0.12); border-radius:12px; padding:6px; flex-wrap:wrap; }
-    .admin-tab { flex:1; min-width:100px; padding:10px 14px; text-align:center; border-radius:8px; border:none; background:transparent; color:var(--text-muted); font-family:'Cinzel',serif; font-size:0.72rem; letter-spacing:1.5px; cursor:pointer; transition:all .3s; white-space:nowrap; }
-    .admin-tab.active { background:rgba(212,175,55,0.15); color:var(--gold); border:1px solid rgba(212,175,55,0.25); }
-    .admin-tab-content { display:none; }
-    .admin-tab-content.active { display:block; }
-    /* Sub-admin table */
-    .sub-admin-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin-bottom:24px; }
-    .sub-admin-card { background:var(--dark2); border:1px solid rgba(212,175,55,0.15); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px; }
-    .sub-admin-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; color:var(--black); font-size:1rem; flex-shrink:0; }
-    .sub-admin-info { flex:1; }
-    .sub-admin-name { font-size:0.88rem; font-weight:600; color:var(--white); margin-bottom:2px; }
-    .sub-admin-email { font-size:0.72rem; color:var(--text-muted); }
-    .sub-admin-role { display:inline-block; font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; padding:2px 10px; border-radius:10px; margin-top:6px; }
-    .role-full { background:rgba(212,175,55,0.15); color:var(--gold); border:1px solid rgba(212,175,55,0.3); }
-    .role-readonly { background:rgba(100,100,255,0.1); color:#8888ff; border:1px solid rgba(100,100,255,0.3); }
-    .sub-admin-actions { display:flex; gap:6px; }
-    .btn-del-admin { background:transparent; border:1px solid rgba(231,76,60,0.3); color:#e74c3c; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:0.68rem; transition:all .3s; }
-    .btn-del-admin:hover { background:rgba(231,76,60,0.1); }
-    /* Presences tab */
-    .presence-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px; }
-    .presence-stat { background:var(--dark2); border:1px solid rgba(26,107,53,0.2); border-radius:12px; padding:20px; text-align:center; }
-    .presence-stat-num { font-family:'Cinzel',serif; font-size:1.8rem; color:var(--green-light); }
-    .presence-stat-lbl { font-size:0.62rem; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; margin-top:5px; }
 
     /* EXTRA ANIMATIONS */
     @keyframes pulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0)} 50%{box-shadow:0 0 0 8px rgba(212,175,55,0)} }
@@ -456,7 +376,7 @@ ok
     <a href="#tickets" onclick="closeDrawer()"><i class="fas fa-ticket-alt"></i>Tickets</a>
     <a href="#partenaires" onclick="closeDrawer()"><i class="fas fa-handshake"></i>Partenaires</a>
     <div class="nav-divider"></div>
-    <a href="#" class="nav-admin" onclick="closeDrawer();openAdmin();return false;"><i class="fas fa-lock"></i>Admin</a>
+    <a href="admin.html" class="nav-admin" onclick="closeDrawer()"><i class="fas fa-lock"></i>Admin</a>
   </nav>
   <div class="drawer-cta-wrap">
     <a href="#tickets" class="drawer-cta" onclick="closeDrawer()"><i class="fas fa-ticket-alt"></i> Réserver mon ticket</a>
@@ -880,150 +800,9 @@ ok
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
-<div class="modal-overlay" id="admin-login-modal">
-  <div style="background:var(--dark2);border:1px solid rgba(212,175,55,0.3);border-radius:16px;padding:40px 34px;max-width:340px;width:90%;text-align:center;position:relative;">
-    <button onclick="document.getElementById('admin-login-modal').classList.remove('active')" style="position:absolute;top:12px;right:16px;font-size:1.4rem;color:#888;cursor:pointer;background:none;border:none;">&times;</button>
-    <i class="fas fa-lock" style="font-size:2rem;color:var(--gold);margin-bottom:14px;"></i>
-    <div style="font-family:Cinzel,serif;font-size:1.05rem;color:var(--gold);margin-bottom:8px;">Accès Admin</div>
-    <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:22px;">Entrez le mot de passe administrateur</div>
-    <input type="password" id="admin-pw" placeholder="Mot de passe" onkeypress="if(event.key==='Enter')checkAdmin()"
-      style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.3);border-radius:8px;padding:12px 16px;color:#fff;font-family:Montserrat,sans-serif;font-size:0.88rem;outline:none;margin-bottom:14px;" />
-    <button onclick="checkAdmin()" style="width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:Cinzel,serif;font-size:0.85rem;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--black);">Accéder</button>
-  </div>
-</div>
-
-<!-- ADMIN PAGE -->
-<div id="admin-panel">
-  <!-- Top Bar -->
-  <div class="admin-topbar">
-    <div class="admin-topbar-left">
-      <img src="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" alt="ENSETP" style="height:36px;width:auto;object-fit:contain;" />
-      <span class="admin-topbar-logo">ENSETP</span>
-      <span class="admin-topbar-title">Panel Administrateur · Gala 2026</span>
-    </div>
-    <button class="admin-close" onclick="document.getElementById('admin-panel').classList.remove('active')">
-      <i class="fas fa-arrow-left"></i> Retour au site
-    </button>
-  </div>
-
-  <div class="admin-body">
-    <!-- Tabs -->
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchTab('dashboard')"><i class="fas fa-chart-line"></i> Tableau</button>
-      <button class="admin-tab" onclick="switchTab('orders')"><i class="fas fa-ticket-alt"></i> Commandes</button>
-      <button class="admin-tab" onclick="switchTab('presences')"><i class="fas fa-user-check"></i> Présences</button>
-      <button class="admin-tab" onclick="switchTab('team')"><i class="fas fa-users-cog"></i> Équipe</button>
-      <button class="admin-tab" onclick="switchTab('config')"><i class="fas fa-cog"></i> Config</button>
-    </div>
-
-    <!-- TAB: DASHBOARD -->
-    <div class="admin-tab-content active" id="tab-dashboard">
-      <div class="admin-banner">
-        <div class="admin-banner-info">
-          <h2>Tableau de Bord</h2>
-          <p>Dîner de Gala de Fin d'Année ENSETP 2026 · Samedi 20 Juin 2026 · Au Magic Land</p>
-        </div>
-        <div class="admin-banner-icon"><i class="fas fa-chart-line"></i></div>
-      </div>
-      <div class="admin-stats">
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-ticket-alt"></i></div><div class="admin-stat-num" id="stat-total">0</div><div class="admin-stat-lbl">Tickets Vendus</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user"></i></div><div class="admin-stat-num" id="stat-std">0</div><div class="admin-stat-lbl">Solo</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-heart"></i></div><div class="admin-stat-num" id="stat-vip">0</div><div class="admin-stat-lbl">Couple</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user-check"></i></div><div class="admin-stat-num" id="stat-conf">0</div><div class="admin-stat-lbl">Présences</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-coins"></i></div><div class="admin-stat-num" id="stat-rev">0</div><div class="admin-stat-lbl">FCFA Perçus</div></div>
-      </div>
-    </div>
-
-    <!-- TAB: COMMANDES -->
-    <div class="admin-tab-content" id="tab-orders">
-      <div class="admin-table-wrap">
-        <div class="admin-table-hdr">
-          <h3><i class="fas fa-list"></i> Toutes les Commandes</h3>
-          <input class="admin-search" id="admin-search" placeholder="🔍 Rechercher..." oninput="filterOrders(this.value)" />
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>ID</th><th>Prénom</th><th>Nom</th><th>E-mail</th><th>Tél.</th><th>Type</th><th>Qté</th><th>Montant</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
-            <tbody id="admin-tbody"><tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:50px 20px;">Aucune commande.</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="admin-actions-row" style="margin-top:16px">
-        <button class="admin-btn admin-btn-gold" onclick="exportCSV()"><i class="fas fa-download"></i> Exporter CSV</button>
-        <button class="admin-btn admin-btn-outline" style="border:1px solid rgba(220,50,50,0.4);color:#e55" onclick="clearOrders()"><i class="fas fa-trash"></i> Vider les données</button>
-      </div>
-    </div>
-
-    <!-- TAB: PRESENCES -->
-    <div class="admin-tab-content" id="tab-presences">
-      <div class="presence-stats">
-        <div class="presence-stat"><div class="presence-stat-num" id="p-total">0</div><div class="presence-stat-lbl">Confirmations</div></div>
-        <div class="presence-stat"><div class="presence-stat-num" id="p-today">0</div><div class="presence-stat-lbl">Aujourd'hui</div></div>
-        <div class="presence-stat"><div class="presence-stat-num" id="p-rate">0%</div><div class="presence-stat-lbl">Taux Confirmation</div></div>
-      </div>
-      <div class="admin-table-wrap">
-        <div class="admin-table-hdr"><h3><i class="fas fa-user-check"></i> Présences Confirmées</h3></div>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>ID Ticket</th><th>Nom</th><th>E-mail</th><th>Confirmé le</th><th>Statut</th></tr></thead>
-            <tbody id="presence-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:50px 20px;">Aucune présence confirmée.</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: EQUIPE -->
-    <div class="admin-tab-content" id="tab-team">
-      <div style="background:var(--dark2);border:1px solid rgba(212,175,55,0.15);border-radius:14px;padding:28px;margin-bottom:24px;">
-        <div style="font-family:Cinzel,serif;color:var(--gold);font-size:0.9rem;margin-bottom:20px;"><i class="fas fa-user-plus"></i> Ajouter un Admin</div>
-        <div class="form-grid">
-          <div class="form-group"><label>Prénom & Nom</label><input type="text" id="sa-name" placeholder="Nom complet" /></div>
-          <div class="form-group"><label>E-mail</label><input type="email" id="sa-email" placeholder="email@exemple.com" /></div>
-          <div class="form-group">
-            <label>Rôle</label>
-            <select id="sa-role" style="background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px 16px;color:#fff;outline:none;">
-              <option value="readonly">Lecture seule</option>
-              <option value="full">Accès complet</option>
-            </select>
-          </div>
-          <div class="form-group" style="align-self:flex-end">
-            <button class="admin-btn admin-btn-gold" onclick="addSubAdmin()" style="width:100%;justify-content:center;padding:12px 20px"><i class="fas fa-plus"></i> Ajouter</button>
-          </div>
-        </div>
-      </div>
-      <div class="sub-admin-grid" id="sub-admin-grid">
-        <div style="color:var(--text-muted);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:30px">Aucun admin délégué pour l'instant.</div>
-      </div>
-    </div>
-
-    <!-- TAB: CONFIG -->
-    <div class="admin-tab-content" id="tab-config">
-      <div class="admin-config">
-        <div class="admin-config-title"><i class="fas fa-cog"></i> Configuration des Intégrations</div>
-        <div class="config-grid">
-          <div class="config-field"><label>URL Google Apps Script</label><input id="as-url" placeholder="https://script.google.com/macros/s/.../exec" onchange="saveCfg()" /></div>
-          <div class="config-field"><label>Clé API Paydunia</label><input id="pd-key" placeholder="Votre clé API Paydunia" onchange="saveCfg()" type="password" /></div>
-          <div class="config-field"><label>Email de contact (notifications)</label><input id="cfg-email" value="contact@mahu.cards" onchange="saveCfg()" /></div>
-          <div class="config-field"><label>Mot de passe Admin (actuel)</label><input id="cfg-pw" placeholder="ENSETP@2026" type="password" onchange="saveCfg()" /></div>
-        </div>
-        <div class="admin-actions-row">
-          <button class="admin-btn admin-btn-gold" onclick="saveCfg();notify('success','Sauvegardé','Configuration enregistrée.')"><i class="fas fa-save"></i> Sauvegarder</button>
-          <button class="admin-btn admin-btn-outline" style="border:1px solid rgba(212,175,55,0.3)" onclick="exportCSV()"><i class="fas fa-download"></i> Exporter CSV</button>
-        </div>
-        <div style="margin-top:24px;padding:16px;background:rgba(212,175,55,0.04);border-radius:10px;font-size:0.76rem;color:var(--text-muted);line-height:1.8;">
-          <strong style="color:var(--gold)">Mahu Cards · contact@mahu.cards</strong><br>
-          Toutes les notifications et confirmations sont envoyées à cette adresse.<br>
-          Plateforme créée avec <strong style="color:var(--gold)">Mahu Events</strong> · mahu.cards
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ===== CONFIG ===== */
-const ADMIN_PW = 'ENSETP@2026';
 const EVENT_DATE = new Date('2026-06-20T19:00:00');
 const CONTACT_EMAIL = 'contact@mahu.cards';
 const AS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxvWRz-gnuVgZhb2JY7aRulluEV4TMI_NH_fyWLwcvS0F4ifRjvxngiUIhemDe50h1_/exec';
@@ -1197,7 +976,7 @@ function printTicket(){
 function openFlyerModal(src,cap){document.getElementById('flyer-modal-img').src=src;document.getElementById('flyer-modal-cap').textContent=cap;document.getElementById('flyer-modal').classList.add('active');}
 function closeFlyerModal(){document.getElementById('flyer-modal').classList.remove('active');}
 function closeTicketModal(){document.getElementById('ticket-modal').classList.remove('active');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFlyerModal();closeTicketModal();document.getElementById('admin-login-modal').classList.remove('active');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFlyerModal();closeTicketModal();}});
 
 /* ===== NOTIFY ===== */
 function notify(type,title,msg){
@@ -1207,79 +986,6 @@ function notify(type,title,msg){
   inner.className='notif-inner '+type;
   ico.className={success:'fas fa-check-circle',error:'fas fa-exclamation-circle',info:'fas fa-info-circle'}[type];
   el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),4200);
-}
-
-/* ===== ADMIN ===== */
-function openAdmin(){document.getElementById('admin-pw').value='';document.getElementById('admin-login-modal').classList.add('active');}
-function checkAdmin(){
-  if(document.getElementById('admin-pw').value===ADMIN_PW){
-    document.getElementById('admin-login-modal').classList.remove('active');
-    loadAdmin(); document.getElementById('admin-panel').classList.add('active');
-  }else{notify('error','Accès refusé','Mot de passe incorrect.');}
-}
-function renderOrderRows(ords){
-  const tb=document.getElementById('admin-tbody');
-  if(!ords.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:50px 20px">Aucune commande.</td></tr>';return;}
-  tb.innerHTML=ords.map(o=>`<tr>
-    <td style="color:var(--gold);font-size:0.66rem;font-family:Cinzel,serif">${o.id}</td>
-    <td>${o.prenom||'–'}</td>
-    <td>${o.nom||'–'}</td>
-    <td>${o.email||'–'}</td>
-    <td>${o.tel||'–'}</td>
-    <td><span style="text-transform:uppercase;font-weight:700;font-size:0.72rem">${o.type}</span></td>
-    <td style="text-align:center">${o.qty||1}</td>
-    <td style="color:var(--gold-light);font-weight:600">${(o.total||0).toLocaleString('fr-FR')} F</td>
-    <td style="font-size:0.7rem;color:var(--text-muted)">${new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}</td>
-    <td><span class="${o.status==='paid'?'status-paid':'status-pending'}">${o.status==='paid'?'✓ PAYÉ':'⏳ ATTENTE'}</span></td>
-    <td><button class="btn-regen" onclick="regenTicket('${o.id}')"><i class="fas fa-redo"></i></button></td>
-  </tr>`).join('');
-}
-function loadAdmin(){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  document.getElementById('stat-total').textContent=ords.length;
-  document.getElementById('stat-std').textContent=ords.filter(o=>o.type==='solo').length;
-  document.getElementById('stat-vip').textContent=ords.filter(o=>o.type==='couple').length;
-  document.getElementById('stat-conf').textContent=ords.filter(o=>o.confirmed).length;
-  document.getElementById('stat-rev').textContent=ords.reduce((s,o)=>s+(o.total||0),0).toLocaleString('fr-FR');
-  renderOrderRows(ords);
-  document.getElementById('as-url').value=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-  document.getElementById('pd-key').value=localStorage.getItem('ensetp_pd_key')||'';
-  const cfgEmail=localStorage.getItem('ensetp_cfg_email');
-  if(cfgEmail) document.getElementById('cfg-email').value=cfgEmail;
-}
-function filterOrders(q){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  const s=q.toLowerCase();
-  renderOrderRows(s?ords.filter(o=>(o.prenom+o.nom+o.email+o.id+o.type).toLowerCase().includes(s)):ords);
-}
-function clearOrders(){
-  if(!confirm('Supprimer TOUTES les commandes ? Cette action est irréversible.'))return;
-  localStorage.removeItem('ensetp_orders'); orders=[]; loadAdmin();
-  notify('info','Données effacées','Toutes les commandes ont été supprimées.');
-}
-function regenTicket(id){const o=orders.find(x=>x.id===id);if(o){document.getElementById('admin-panel').classList.remove('active');showTicket(o);}}
-function saveCfg(){
-  localStorage.setItem('ensetp_as_url',document.getElementById('as-url').value);
-  localStorage.setItem('ensetp_pd_key',document.getElementById('pd-key').value);
-  const ce=document.getElementById('cfg-email');
-  if(ce&&ce.value) localStorage.setItem('ensetp_cfg_email',ce.value);
-}
-function exportCSV(){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  if(!ords.length){notify('error','Aucune donnée','Pas de commandes à exporter.');return;}
-  const h='ID,Prénom,Nom,Email,Téléphone,Type,Quantité,Total,Paiement,Date,Statut\n';
-  const rows=ords.map(o=>[o.id,o.prenom,o.nom,o.email,o.tel||'',o.type,o.qty||1,o.total||0,o.payment||'',o.date,o.status].join(',')).join('\n');
-  const blob=new Blob([h+rows],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tickets_ensetp_gala_2026.csv'; a.click();
-}
-
-/* ===== TAB SWITCHER ===== */
-function switchTab(name){
-  const tabs=['dashboard','orders','presences','team','config'];
-  document.querySelectorAll('.admin-tab').forEach((b,i)=>b.classList.toggle('active',tabs[i]===name));
-  document.querySelectorAll('.admin-tab-content').forEach(el=>el.classList.toggle('active',el.id==='tab-'+name));
-  if(name==='presences') loadPresencesTab();
-  if(name==='team') loadSubAdmins();
 }
 
 /* ===== LIKES ===== */
@@ -1377,64 +1083,6 @@ function confirmPresence(){
   notify('success','Présence confirmée !','Nous avons bien enregistré votre présence.');
   const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'confirmPresence',orderId:order.id,name:order.prenom+' '+order.nom,email:order.email})}).catch(()=>{});
-}
-
-/* ===== SUB-ADMINS ===== */
-function addSubAdmin(){
-  const name=document.getElementById('sa-name').value.trim();
-  const email=document.getElementById('sa-email').value.trim();
-  const role=document.getElementById('sa-role').value;
-  if(!name||!email){notify('error','Champs requis','Nom et e-mail obligatoires.');return;}
-  const list=JSON.parse(localStorage.getItem('ensetp_sub_admins')||'[]');
-  if(list.find(a=>a.email===email)){notify('error','Doublon','Cet e-mail est déjà enregistré.');return;}
-  list.push({name,email,role,date:new Date().toISOString()});
-  localStorage.setItem('ensetp_sub_admins',JSON.stringify(list));
-  document.getElementById('sa-name').value='';
-  document.getElementById('sa-email').value='';
-  loadSubAdmins();
-  notify('success','Admin ajouté',`${name} a été ajouté comme ${role==='full'?'admin complet':'lecteur'}.`);
-}
-function loadSubAdmins(){
-  const list=JSON.parse(localStorage.getItem('ensetp_sub_admins')||'[]');
-  const grid=document.getElementById('sub-admin-grid');
-  if(!list.length){grid.innerHTML='<div style="color:var(--text-muted);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:30px">Aucun admin délégué pour l\'instant.</div>';return;}
-  grid.innerHTML=list.map(a=>`<div class="sub-admin-card">
-    <div class="sub-admin-avatar">${a.name.charAt(0).toUpperCase()}</div>
-    <div class="sub-admin-info">
-      <div class="sub-admin-name">${a.name}</div>
-      <div class="sub-admin-email">${a.email}</div>
-      <span class="sub-admin-role ${a.role==='full'?'role-full':'role-readonly'}">${a.role==='full'?'Accès Complet':'Lecture Seule'}</span>
-    </div>
-    <div class="sub-admin-actions"><button class="btn-del-admin" onclick="deleteSubAdmin('${a.email}')"><i class="fas fa-trash"></i></button></div>
-  </div>`).join('');
-}
-function deleteSubAdmin(email){
-  if(!confirm('Supprimer cet admin délégué ?')) return;
-  let list=JSON.parse(localStorage.getItem('ensetp_sub_admins')||'[]');
-  list=list.filter(a=>a.email!==email);
-  localStorage.setItem('ensetp_sub_admins',JSON.stringify(list));
-  loadSubAdmins();
-  notify('info','Supprimé','Admin délégué retiré.');
-}
-
-/* ===== PRESENCES TAB ===== */
-function loadPresencesTab(){
-  const all=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  const confirmed=all.filter(o=>o.confirmed);
-  const today=new Date().toDateString();
-  const todayConf=confirmed.filter(o=>new Date(o.confirmedAt||0).toDateString()===today);
-  document.getElementById('p-total').textContent=confirmed.length;
-  document.getElementById('p-today').textContent=todayConf.length;
-  document.getElementById('p-rate').textContent=all.length?Math.round(confirmed.length/all.length*100)+'%':'0%';
-  const tb=document.getElementById('presence-tbody');
-  if(!confirmed.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:50px 20px">Aucune présence confirmée.</td></tr>';return;}
-  tb.innerHTML=confirmed.map(o=>`<tr>
-    <td style="color:var(--gold);font-size:0.66rem;font-family:Cinzel,serif">${o.id}</td>
-    <td>${o.prenom||'–'} ${o.nom||''}</td>
-    <td style="font-size:0.78rem;color:var(--text-muted)">${o.email||'–'}</td>
-    <td style="font-size:0.75rem;color:var(--text-muted)">${new Date(o.confirmedAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
-    <td><span class="status-paid">✓ CONFIRMÉ</span></td>
-  </tr>`).join('');
 }
 
 /* ===== PAYDUNIA CALLBACK ===== */
