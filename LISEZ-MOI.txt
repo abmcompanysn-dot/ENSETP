@@ -1,0 +1,130 @@
+===========================================================
+  PLATEFORME DÎNER DE GALA ENSETP 2026 — GUIDE DE MISE EN PLACE
+===========================================================
+
+STRUCTURE DES FICHIERS
+-----------------------
+ENSETP/
+├── index.html          ← Site web principal (ouvrir dans navigateur)
+├── Code.gs             ← Script Google Apps Script (backend)
+├── LISEZ-MOI.txt       ← Ce fichier
+└── images/             ← Dossier où placer toutes les images
+    ├── logo-ensetp.png       ← Logo ENSETP
+    ├── logo-ucad.png         ← Logo UCAD (Université Cheikh Anta Diop)
+    ├── flyer-zou-name.jpg    ← Affiche Zou Name
+    ├── flyer-blm-pro.jpg     ← Affiche BLM Pro
+    ├── flyer-me-man.jpg      ← Affiche Me Man
+    ├── flyer-mist-cash.jpg   ← Affiche Mist Cash
+    ├── flyer-niko.jpg        ← Affiche Niko
+    ├── flyer-groupe.jpg      ← Affiche groupe (4 artistes)
+    ├── flyer-conference.jpg  ← Affiche journée d'orientation
+    ├── logo-cbao.png         ← Logo CBAO
+    ├── logo-elitecad.png     ← Logo EliteCAD Solution
+    └── logo-fatou.png        ← Logo Jus de N. Fatou (optionnel)
+
+
+ÉTAPE 1 — AJOUTER LES IMAGES
+-------------------------------
+Copiez vos affiches (JPG ou PNG) dans le dossier "images/"
+en les renommant exactement comme indiqué ci-dessus.
+Sans images, des icônes de remplacement s'affichent automatiquement.
+
+
+ÉTAPE 2 — TESTER LE SITE LOCALEMENT
+--------------------------------------
+Double-cliquez sur index.html → il s'ouvre dans votre navigateur.
+→ Le site fonctionne entièrement en mode démo (sans Apps Script).
+→ Les tickets générés sont sauvegardés dans le navigateur (localStorage).
+→ Panel Admin : cliquez "Admin" dans le menu → mot de passe : ENSETP@2026
+
+
+ÉTAPE 3 — DÉPLOYER GOOGLE APPS SCRIPT (pour e-mails + Paydunia)
+------------------------------------------------------------------
+1. Allez sur https://script.google.com
+2. Cliquez "Nouveau projet"
+3. Copiez tout le contenu de Code.gs → collez-le dans l'éditeur
+4. Modifiez la variable CFG en haut du fichier :
+   - ADMIN_EMAIL : votre adresse e-mail
+   - EMAIL_FROM  : adresse expéditeur des tickets
+   - PAYDUNIA_KEY / PAYDUNIA_SECRET : vos clés Paydunia
+   - CALLBACK_URL : l'URL de votre site hébergé
+5. Cliquez "Déployer" → "Nouveau déploiement"
+   - Type : Application Web
+   - Exécuter en tant que : Moi
+   - Accès : Tout le monde
+6. Copiez l'URL du déploiement (ex: https://script.google.com/macros/s/.../exec)
+7. Sur le site : cliquez "Admin" → collez cette URL dans "URL Apps Script"
+
+
+ÉTAPE 4 — INTÉGRATION PAYDUNIA (paiement en ligne)
+----------------------------------------------------
+1. Créez un compte sur https://paydunia.com
+2. Obtenez votre clé API et secret depuis le dashboard
+3. Dans Code.gs → CFG → PAYDUNIA_KEY et PAYDUNIA_SECRET
+4. CALLBACK_URL = URL de votre site (ex: https://monsite.com/index.html)
+5. Sur le site : Admin → collez votre clé Paydunia dans "Clé API Paydunia"
+
+MODES DE PAIEMENT ACCEPTÉS VIA PAYDUNIA :
+  • Wave (Sénégal)
+  • Orange Money
+  • Free Money
+  • Carte bancaire Visa/Mastercard
+
+
+ÉTAPE 5 — HÉBERGER LE SITE EN LIGNE (optionnel)
+-------------------------------------------------
+Pour rendre la plateforme accessible sur internet :
+
+Option A — GitHub Pages (GRATUIT) :
+  1. Créez un compte GitHub
+  2. Créez un dépôt public nommé "ensetp-gala"
+  3. Uploadez index.html + dossier images/
+  4. Activez GitHub Pages dans les paramètres
+  5. URL : https://VOTRENOM.github.io/ensetp-gala
+
+Option B — Netlify (GRATUIT) :
+  1. Allez sur https://netlify.com
+  2. Glissez-déposez le dossier ENSETP/ sur la page d'accueil
+  3. Netlify génère automatiquement une URL
+
+
+FONCTIONNALITÉS DU SITE
+-------------------------
+✓ Page d'accueil animée avec compte à rebours
+✓ Section artistes (Zou Name, Mist Cash, BLM Pro, Me Man, Niko)
+✓ Section conférence / journée d'orientation
+✓ Galerie des affiches officielles (cliquez pour agrandir)
+✓ Achat de tickets (Standard / VIP / Table Entière)
+  - Génération automatique de QR Code unique par ticket
+  - Envoi e-mail automatique via Apps Script
+  - Intégration Paydunia (Wave, Orange Money, Carte)
+✓ Panel Admin (mot de passe : ENSETP@2026)
+  - Statistiques en temps réel
+  - Liste de toutes les commandes
+  - Regénération de tickets
+  - Export CSV
+✓ Design responsive (mobile, tablette, ordinateur)
+
+
+CHANGER LE MOT DE PASSE ADMIN
+-------------------------------
+Dans index.html, cherchez :
+   const ADMIN_PW = 'ENSETP@2026';
+Remplacez 'ENSETP@2026' par votre nouveau mot de passe.
+
+
+CHANGER LES PRIX DES TICKETS
+------------------------------
+Dans index.html, cherchez les onclick="selectTicket('standard', 15000)"
+et modifiez les montants (15000, 25000, 100000) selon vos prix.
+Modifiez aussi les <option data-price="..."> dans le formulaire.
+
+
+CONTACT & SUPPORT
+------------------
+Plateforme créée pour :
+ENSETP — École Normale Supérieure d'Enseignement Technique et Professionnel
+Université Cheikh Anta Diop de Dakar
+Dîner de Gala de Fin d'Année 2026 — Au Magic Land — Samedi 20 Juin 2026
+
+===========================================================
