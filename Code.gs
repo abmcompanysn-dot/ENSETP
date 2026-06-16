@@ -10,9 +10,7 @@ var CFG = {
   PRESENCES_SHEET:  'Présences',
   ADMINS_SHEET:     'Sous-Admins',
 
-  // ► ID du Google Sheet (trouvez-le dans l'URL de votre feuille) :
-  //   https://docs.google.com/spreadsheets/d/ ►ID_ICI◄ /edit
-  //   Laisser vide = feuille liée au script (créée automatiquement)
+  // Script lié à la feuille via Extensions → Apps Script → laisser vide
   SHEET_ID:         '',
 
   EMAIL_FROM:       'contact@mahu.cards',   // Adresse expéditeur des tickets
