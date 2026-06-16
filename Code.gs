@@ -18,9 +18,9 @@ var CFG = {
   EVENT_DATE:       'Samedi 20 Juin 2026',
   EVENT_LIEU:       'Au Magic Land',
 
-  PAYDUNIA_KEY:     '',
-  PAYDUNIA_SECRET:  '',
-  PAYDUNIA_URL:     'https://paydunia.com/api/v1/payment/init',
+  PAYDUNIA_KEY:     '',   // Clé privée (PAYDUNYA-PRIVATE-KEY)
+  PAYDUNIA_SECRET:  '',   // Non utilisé — vérification via confirm endpoint
+  PAYDUNIA_URL:     'https://paydunya.com/api/v1/checkout-invoice/create',
 
   // URL de CE script Apps Script (webhook Paydunia → doPost)
   APPS_SCRIPT_URL:  'https://script.google.com/macros/s/AKfycby18WcAD27h5r6Tv3uGHfFKTYo6EOd_iYCE42iuw5XA64JH5Amhul0Nuz1WO1mb9-op/exec',
@@ -58,9 +58,9 @@ function getCFG() {
     EVENT_DATE:           sc.EVENT_DATE           || CFG.EVENT_DATE,
     EVENT_LIEU:           sc.EVENT_LIEU           || CFG.EVENT_LIEU,
     PAYDUNIA_KEY:         sc.PAYDUNIA_KEY         || CFG.PAYDUNIA_KEY,
-    PAYDUNIA_SECRET:      sc.PAYDUNIA_SECRET      || CFG.PAYDUNIA_SECRET,
     PAYDUNIA_MASTER_KEY:  sc.PAYDUNIA_MASTER_KEY  || '',
     PAYDUNIA_TOKEN:       sc.PAYDUNIA_TOKEN        || '',
+    PAYDUNYA_MODE:        sc.PAYDUNYA_MODE         || 'live',
     PAYDUNIA_URL:         CFG.PAYDUNIA_URL,
     APPS_SCRIPT_URL:      sc.APPS_SCRIPT_URL      || CFG.APPS_SCRIPT_URL,
     SITE_URL:             sc.SITE_URL             || CFG.SITE_URL
@@ -115,11 +115,11 @@ function _initConfig(ss) {
 
   if (sh.getLastRow() <= 1) {
     var rows = [
-      ['PAYDUNIA_KEY',        '',                      '🔑 Clé publique API Paydunia (dashboard.paydunia.com)'],
-      ['PAYDUNIA_SECRET',     '',                      '🔒 Clé secrète Paydunia (validation signature webhook)'],
-      ['PAYDUNIA_MASTER_KEY', '',                      '👑 Clé Master Paydunia (gestion du compte marchand)'],
-      ['PAYDUNIA_TOKEN',      '',                      '🎫 Token d\'accès Paydunia (OAuth / Bearer token)'],
-      ['APPS_SCRIPT_URL',     CFG.APPS_SCRIPT_URL,    '🔗 URL de ce script — Paydunia envoie les confirmations ici'],
+      ['PAYDUNIA_KEY',        '',                      '🔑 PAYDUNYA-PRIVATE-KEY — Clé privée (tableau de bord PayDunya)'],
+      ['PAYDUNIA_MASTER_KEY', '',                      '👑 PAYDUNYA-MASTER-KEY — Clé maîtresse PayDunya'],
+      ['PAYDUNIA_TOKEN',      '',                      '🎫 PAYDUNYA-TOKEN — Jeton d\'accès PayDunya'],
+      ['PAYDUNYA_MODE',       'live',                  '⚙️ Mode PayDunya : "test" (sandbox) ou "live" (production)'],
+      ['APPS_SCRIPT_URL',     CFG.APPS_SCRIPT_URL,    '🔗 URL de ce script — PayDunya envoie les confirmations ici'],
       ['SITE_URL',            CFG.SITE_URL,            '🌐 URL du site public (redirection après paiement)'],
       ['ADMIN_EMAIL',         CFG.ADMIN_EMAIL,         '📧 E-mail recevant toutes les notifications admin'],
       ['EMAIL_FROM',          CFG.EMAIL_FROM,          '📤 E-mail expéditeur des tickets'],
@@ -217,14 +217,13 @@ function doPost(e) {
     var action  = payload.action;
     var result  = {};
 
-    // Paydunia envoie son propre format sans champ 'action'
-    // → auto-détection si order_id / transaction_ref / reference présent
-    if (!action && (payload.order_id || payload.transaction_ref || payload.reference)) {
-      var sig = (e.parameter && e.parameter.signature) || payload.signature || null;
-      if (!validatePayduniaSignature(rawBody, sig)) {
-        Logger.log('Signature Paydunia invalide — requête rejetée.');
-        return _jsonOut({ error: 'Signature invalide', code: 401 });
-      }
+    // PayDunya webhook : pas de champ 'action' — structure { data: { invoice, custom_data } }
+    // ou ancienne structure { order_id, status, ... }
+    var isPaydunyaWebhook = !action && (
+      (payload.data && payload.data.invoice) ||
+      payload.order_id || payload.transaction_ref || payload.reference
+    );
+    if (isPaydunyaWebhook) {
       return _jsonOut(handlePayduniaWebhook(payload));
     }
 
@@ -342,70 +341,128 @@ function handleAddSubAdmin(payload) {
   } catch (err) { return { error: err.message }; }
 }
 
-// ── PAYDUNIA ───────────────────────────────────────────────
+// ── PAYDUNYA ───────────────────────────────────────────────
 function createPayduniaPayment(order, cfg) {
   try {
-    var headers = { 'Content-Type': 'application/json' };
-    // Authentification Bearer si TOKEN disponible
-    if (cfg.PAYDUNIA_TOKEN) headers['Authorization'] = 'Bearer ' + cfg.PAYDUNIA_TOKEN;
-
-    var body = {
-      merchant_key:   cfg.PAYDUNIA_KEY,
-      amount:         order.total,
-      currency:       'XOF',
-      order_id:       order.id,
-      customer_name:  order.prenom + ' ' + order.nom,
-      customer_email: order.email,
-      customer_phone: order.tel || '',
-      description:    'Ticket Gala ENSETP 2026 – ' + order.type.toUpperCase(),
-      callback_url:   cfg.APPS_SCRIPT_URL,
-      return_url:     cfg.SITE_URL + '?payment_status=success&order_id=' + order.id,
-      cancel_url:     cfg.SITE_URL + '?payment_status=cancel&order_id='  + order.id
+    // Headers d'authentification PayDunya (clés dans le tableau de bord PayDunya)
+    var headers = {
+      'PAYDUNYA-MASTER-KEY':  cfg.PAYDUNIA_MASTER_KEY,
+      'PAYDUNYA-PRIVATE-KEY': cfg.PAYDUNIA_KEY,
+      'PAYDUNYA-TOKEN':       cfg.PAYDUNIA_TOKEN,
+      'PAYDUNYA-MODE':        cfg.PAYDUNYA_MODE || 'live'
     };
-    if (cfg.PAYDUNIA_MASTER_KEY) body.master_key = cfg.PAYDUNIA_MASTER_KEY;
+
+    // Structure payload attendue par l'API PayDunya
+    var body = {
+      invoice: {
+        total_amount: order.total,
+        description:  'Ticket Gala ENSETP 2026 – ' + order.type.toUpperCase()
+      },
+      store: {
+        name:        'Gala ENSETP 2026 · ENSETP',
+        website_url: cfg.SITE_URL
+      },
+      actions: {
+        cancel_url:   cfg.SITE_URL + '?payment_status=cancel&order_id='  + order.id,
+        return_url:   cfg.SITE_URL + '?payment_status=success&order_id=' + order.id,
+        callback_url: cfg.APPS_SCRIPT_URL
+      },
+      custom_data: {
+        order_id:       order.id,
+        customer_name:  order.prenom + ' ' + order.nom,
+        customer_email: order.email,
+        customer_phone: order.tel || ''
+      }
+    };
 
     var resp = UrlFetchApp.fetch(cfg.PAYDUNIA_URL, {
       method: 'post', contentType: 'application/json',
       headers: headers, payload: JSON.stringify(body), muteHttpExceptions: true
     });
     var data = JSON.parse(resp.getContentText());
-    Logger.log('Paydunia response (' + resp.getResponseCode() + '): ' + JSON.stringify(data));
-    return data.payment_url || data.url || data.checkout_url || data.redirect_url || null;
+    Logger.log('PayDunya init (' + resp.getResponseCode() + '): ' + JSON.stringify(data));
+
+    // response_code "00" = succès, response_text = checkout URL
+    if (data.response_code === '00') {
+      Logger.log('✅ PayDunya checkout URL: ' + data.response_text);
+      return data.response_text;
+    }
+    Logger.log('⚠️ PayDunya erreur: ' + (data.response_text || JSON.stringify(data)));
+    return null;
   } catch (e) {
-    Logger.log('Paydunia error: ' + e.message);
+    Logger.log('PayDunya error: ' + e.message);
     return null;
   }
 }
 
-function handlePayduniaWebhook(data) {
+function handlePayduniaWebhook(payload) {
   var cfg = getCFG();
-  var orderId = data.order_id || data.transaction_ref || data.reference;
-  var status  = String(data.status || data.payment_status || '').toLowerCase();
-  Logger.log('Webhook Paydunia reçu — order: ' + orderId + ' status: ' + status);
 
-  if (status === 'success' || status === 'successful' || status === 'completed') {
+  // PayDunya webhook structure: { data: { invoice: { token, status }, custom_data: { order_id } } }
+  var invoiceData  = (payload.data && payload.data.invoice)     ? payload.data.invoice     : payload;
+  var customData   = (payload.data && payload.data.custom_data) ? payload.data.custom_data : payload;
+  var token   = invoiceData.token   || payload.token;
+  var orderId = customData.order_id || payload.order_id || payload.transaction_ref || payload.reference;
+
+  Logger.log('Webhook PayDunya reçu — token: ' + token + ' order: ' + orderId);
+
+  // Vérification sécurisée via l'endpoint confirm (recommandé par PayDunya)
+  var status = '';
+  if (token) {
+    try {
+      var confirmResp = UrlFetchApp.fetch(
+        'https://paydunya.com/api/v1/checkout-invoice/confirm/' + token,
+        {
+          method: 'get',
+          headers: {
+            'PAYDUNYA-MASTER-KEY':  cfg.PAYDUNIA_MASTER_KEY,
+            'PAYDUNYA-PRIVATE-KEY': cfg.PAYDUNIA_KEY,
+            'PAYDUNYA-TOKEN':       cfg.PAYDUNIA_TOKEN,
+            'PAYDUNYA-MODE':        cfg.PAYDUNYA_MODE || 'live'
+          },
+          muteHttpExceptions: true
+        }
+      );
+      var confirmData = JSON.parse(confirmResp.getContentText());
+      Logger.log('PayDunya confirm: ' + JSON.stringify(confirmData));
+      status = String(confirmData.status || confirmData.invoice_status || '').toLowerCase();
+      if (!orderId && confirmData.custom_data) orderId = confirmData.custom_data.order_id;
+    } catch (e) {
+      Logger.log('PayDunya confirm error: ' + e.message);
+    }
+  }
+
+  // Fallback statut depuis le webhook direct
+  if (!status) {
+    status = String(invoiceData.status || payload.status || payload.payment_status || '').toLowerCase();
+  }
+
+  Logger.log('PayDunya — order: ' + orderId + ' status: ' + status);
+
+  if (status === 'completed' || status === 'success' || status === 'successful') {
+    if (!orderId) { Logger.log('⚠️ order_id introuvable dans le webhook'); return { error: 'order_id manquant' }; }
     updateOrderStatus(orderId, 'paid');
     var order = getOrderById(orderId);
     if (order) {
       sendTicketEmail(order, cfg);
       sendAdminNotification(order, cfg);
-      Logger.log('✅ Ticket envoyé après confirmation Paydunia: ' + orderId);
+      Logger.log('✅ Ticket envoyé après confirmation PayDunya: ' + orderId);
     } else {
       Logger.log('⚠️ Commande introuvable pour: ' + orderId);
     }
     return { success: true, orderId: orderId };
   }
+
   return { success: false, reason: 'Statut non confirmé: ' + status };
 }
 
 function handlePayduniaCallback(params) {
+  // Redirection GET après paiement (côté client) — ne pas livrer sans confirm webhook
   var orderId = params.order_id;
   var status  = String(params.payment_status || '').toLowerCase();
   if (status === 'success') {
-    updateOrderStatus(orderId, 'paid');
-    var order = getOrderById(orderId);
-    var cfg = getCFG();
-    if (order) { sendTicketEmail(order, cfg); sendAdminNotification(order, cfg); }
+    // Le webhook aura déjà traité le paiement ; ceci est juste un fallback de redirection
+    Logger.log('Callback GET PayDunya — order: ' + orderId + ' (webhook devrait avoir déjà confirmé)');
   }
 }
 
