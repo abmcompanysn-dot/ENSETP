@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mahu Events – La Plateforme Numérique de Vos Événements</title>
+  <meta name="description" content="Mahu Events : créez votre profil d'événement, gérez votre billetterie, agenda, carte de visite digitale et section J'y Serai." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #D4AF37; --gold-light: #F5D66A; --gold-dark: #A07820;
+      --black: #0A0A0A; --dark: #111111; --dark2: #1A1A1A;
+      --white: #FFF; --muted: #888;
+      --green: #1A6B35; --green-light: #2E9A52;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--black); color: var(--white); overflow-x: hidden; }
+    a { text-decoration: none; color: inherit; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(10,10,10,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(212,175,55,0.15);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-brand .logo-m { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 900; color: var(--gold); letter-spacing: 2px; }
+    .nav-brand .logo-e { font-family: 'Cinzel', serif; font-size: 0.6rem; color: rgba(212,175,55,0.55); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; transition: color .3s; font-family: 'Cinzel', serif; }
+    .nav-links a:hover { color: var(--gold); }
+    @media (max-width: 600px) { .nav-links { display: none; } }
+    .nav-cta { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; padding: 10px 22px; border-radius: 22px; transition: all .3s; }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(212,175,55,0.4); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 100px 5% 80px;
+      background: radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.1) 0%, transparent 65%),
+                  radial-gradient(ellipse at 80% 80%, rgba(26,107,53,0.06) 0%, transparent 50%), var(--black);
+      position: relative; overflow: hidden;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 820px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); border: 1px solid rgba(212,175,55,0.35); padding: 7px 20px; border-radius: 22px;
+      margin-bottom: 30px; background: rgba(212,175,55,0.04);
+    }
+    .hero-badge::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .hero-logo { font-family: 'Cinzel', serif; font-size: clamp(3.5rem, 12vw, 8rem); font-weight: 900; color: var(--gold); letter-spacing: 8px; margin-bottom: 6px; line-height: 1; }
+    .hero-logo span { font-size: 0.42em; display: block; letter-spacing: 10px; color: rgba(212,175,55,0.55); margin-top: 4px; }
+    .hero-tagline { font-family: 'Playfair Display', serif; font-size: clamp(1.1rem, 3.5vw, 1.8rem); font-style: italic; color: #ddd; margin-bottom: 14px; line-height: 1.4; }
+    .hero-sub { font-size: 0.85rem; color: var(--muted); max-width: 560px; margin: 0 auto 40px; line-height: 1.8; }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-gold { display: inline-flex; align-items: center; gap: 9px; background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark)); color: #000; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 2px; padding: 15px 32px; border-radius: 32px; transition: all .3s; box-shadow: 0 4px 24px rgba(212,175,55,0.3); }
+    .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 8px 36px rgba(212,175,55,0.5); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 9px; border: 1.5px solid rgba(212,175,55,0.4); color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 2px; padding: 14px 28px; border-radius: 32px; transition: all .3s; }
+    .btn-outline:hover { border-color: var(--gold); background: rgba(212,175,55,0.06); transform: translateY(-2px); }
+
+    /* Floating orbs */
+    .orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orb-float 8s ease-in-out infinite; }
+    .orb-1 { width: 360px; height: 360px; background: rgba(212,175,55,0.07); top: -100px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 280px; height: 280px; background: rgba(26,107,53,0.06); bottom: -60px; right: -80px; animation-delay: -3s; }
+    @keyframes orb-float { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-20px);} }
+
+    /* SECTION LAYOUT */
+    section { padding: 80px 5%; }
+    .section-tag { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 10px; line-height: 1.2; }
+    .section-title span { color: var(--gold); font-style: italic; }
+    .gold-line { width: 60px; height: 3px; background: linear-gradient(90deg, var(--gold), transparent); border-radius: 2px; margin: 12px 0 20px; }
+    .section-desc { font-size: 0.88rem; color: var(--muted); max-width: 560px; line-height: 1.8; }
+
+    /* FEATURES */
+    #features { background: var(--dark); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 44px; }
+    .feature-card {
+      background: var(--dark2); border: 1px solid rgba(212,175,55,0.12); border-radius: 16px;
+      padding: 28px; transition: all .3s; position: relative; overflow: hidden;
+    }
+    .feature-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(212,175,55,0.03), transparent); pointer-events: none; }
+    .feature-card:hover { border-color: rgba(212,175,55,0.35); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .feature-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04)); border: 1px solid rgba(212,175,55,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--gold); margin-bottom: 18px; }
+    .feature-title { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 10px; }
+    .feature-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.8; }
+    .feature-tag { display: inline-block; margin-top: 14px; font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(212,175,55,0.5); border: 1px solid rgba(212,175,55,0.15); padding: 3px 10px; border-radius: 10px; }
+
+    /* LIVE EXAMPLE */
+    #exemple { background: linear-gradient(135deg, rgba(212,175,55,0.04), var(--black)); }
+    .exemple-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; max-width: 1000px; margin: 40px auto 0; }
+    @media (max-width: 700px) { .exemple-wrap { grid-template-columns: 1fr; } }
+    .exemple-card {
+      background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+      border: 1.5px solid rgba(212,175,55,0.3); border-radius: 20px;
+      overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .exemple-card-hdr { background: #0A0A0A; padding: 14px 20px; border-bottom: 1px solid rgba(212,175,55,0.15); display: flex; justify-content: space-between; align-items: center; }
+    .exemple-card-hdr .brand { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); letter-spacing: 3px; }
+    .exemple-card-body { padding: 22px; }
+    .exemple-card-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-style: italic; color: var(--gold); margin-bottom: 4px; }
+    .exemple-card-sub { font-size: 0.58rem; letter-spacing: 3px; text-transform: uppercase; color: #888; margin-bottom: 16px; }
+    .exemple-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .exemple-info-item { flex: 1; min-width: 100px; }
+    .exemple-info-lbl { font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; color: #666; margin-bottom: 4px; }
+    .exemple-info-val { font-size: 0.8rem; font-weight: 600; color: #fff; }
+    .exemple-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .exemple-tag { font-size: 0.62rem; padding: 4px 12px; border-radius: 14px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.2); color: var(--gold); letter-spacing: 1px; }
+    .exemple-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #000; font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; padding: 11px 22px; border-radius: 22px; transition: all .3s; }
+    .exemple-cta:hover { transform: translateY(-2px); }
+    .exemple-text { }
+    .exemple-text h3 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 14px; }
+    .exemple-features { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .exemple-features li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .exemple-features li i { color: var(--gold); margin-top: 3px; flex-shrink: 0; }
+
+    /* JY SERAI PUBLIC */
+    #jyserai-public { background: var(--dark); }
+    .jys-hero { max-width: 560px; margin: 40px auto 0; text-align: center; }
+    .jys-card-preview {
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+      border: 2px solid rgba(212,175,55,0.35); border-radius: 18px;
+      padding: 28px 24px; margin-bottom: 24px; position: relative; overflow: hidden;
+    }
+    .jys-card-preview::before { content: '"J\'y Serai !"'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'Cinzel', serif; font-size: 3rem; font-weight: 900; color: rgba(212,175,55,0.04); white-space: nowrap; pointer-events: none; }
+    .jys-avatars-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .jys-av { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78rem; font-family: 'Cinzel', serif; color: var(--gold); }
+    .jys-count { font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+    .jys-cta-text { font-size: 0.85rem; color: #ccc; line-height: 1.7; margin-bottom: 20px; }
+
+    /* PRICING / OFFRES */
+    #offres { background: var(--black); }
+    .offres-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 44px; }
+    .offre-card { background: var(--dark2); border: 1px solid rgba(212,175,55,0.15); border-radius: 18px; padding: 32px 28px; position: relative; transition: all .3s; }
+    .offre-card.popular { border-color: rgba(212,175,55,0.5); background: linear-gradient(135deg, rgba(212,175,55,0.06), var(--dark2)); }
+    .offre-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+    .offre-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #000; font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 1.5px; padding: 4px 16px; border-radius: 12px; white-space: nowrap; }
+    .offre-name { font-family: 'Cinzel', serif; font-size: 0.82rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; }
+    .offre-price { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--white); margin-bottom: 4px; }
+    .offre-price span { font-size: 0.8rem; color: var(--muted); }
+    .offre-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 22px; line-height: 1.7; }
+    .offre-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .offre-features li { font-size: 0.8rem; color: #ccc; display: flex; align-items: center; gap: 9px; }
+    .offre-features li i { color: var(--gold); font-size: 0.7rem; }
+
+    /* CONTACT CTA */
+    #contact { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(10,10,10,0)); border-top: 1px solid rgba(212,175,55,0.1); }
+    .contact-card { max-width: 620px; margin: 0 auto; text-align: center; }
+    .contact-input { width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(212,175,55,0.2); border-radius: 12px; padding: 14px 18px; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.88rem; outline: none; transition: border-color .3s; margin-bottom: 12px; }
+    .contact-input:focus { border-color: var(--gold); }
+    .contact-input::placeholder { color: rgba(255,255,255,0.25); }
+
+    /* FOOTER */
+    footer { background: var(--dark); border-top: 1px solid rgba(212,175,55,0.1); padding: 40px 5% 28px; text-align: center; }
+    .footer-brand { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--gold); letter-spacing: 4px; margin-bottom: 8px; }
+    .footer-sub { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 20px; }
+    .footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .footer-links a { font-size: 0.72rem; color: var(--muted); transition: color .3s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy { font-size: 0.65rem; color: rgba(255,255,255,0.2); }
+
+    /* NOTIFY */
+    #me-notif { position: fixed; top: 80px; right: 20px; z-index: 9999; opacity: 0; transform: translateX(110%); transition: all .4s; }
+    #me-notif.show { opacity: 1; transform: translateX(0); }
+    .me-notif-inner { display: flex; align-items: flex-start; gap: 10px; padding: 14px 18px; border-radius: 12px; background: #0f2e1a; border: 1px solid rgba(46,154,82,0.4); min-width: 260px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .me-notif-inner i { color: #2ecc71; margin-top: 2px; }
+    .me-notif-inner p { font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .me-notif-inner span { font-size: 0.72rem; color: #888; }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(24px); transition: all .7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NOTIF -->
+<div id="me-notif">
+  <div class="me-notif-inner">
+    <i class="fas fa-check-circle"></i>
+    <div><p id="me-notif-title">Succès</p><span id="me-notif-msg">–</span></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div>
+      <div class="logo-m">Mahu</div>
+      <div class="logo-e">Events</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#exemple">Exemple</a>
+    <a href="#offres">Offres</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Créer mon Event</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Plateforme Numérique d'Événements</div>
+    <div class="hero-logo">Mahu<span>Events</span></div>
+    <p class="hero-tagline">La carte de visite digitale<br>de votre événement</p>
+    <p class="hero-sub">Profil d'événement, billetterie en ligne, agenda, section J'y Serai, partage WhatsApp & Instagram — tout en un, en quelques minutes.</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-gold"><i class="fas fa-rocket"></i> Créer mon événement</a>
+      <a href="index.html" class="btn-outline"><i class="fas fa-eye"></i> Voir un exemple live</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">★ Ce que nous offrons ★</div>
+  <h2 class="section-title">Tout pour votre <span>Événement</span></h2>
+  <div class="gold-line"></div>
+  <p class="section-desc">Une seule plateforme pour créer, gérer et promouvoir votre événement de A à Z.</p>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-id-card"></i></div>
+      <div class="feature-title">Profil d'Événement</div>
+      <div class="feature-desc">Une page dédiée à votre événement avec toutes les informations essentielles, artistes, programme et galerie photos.</div>
+      <div class="feature-tag">Page Web Complète</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-ticket-alt"></i></div>
+      <div class="feature-title">Billetterie Intégrée</div>
+      <div class="feature-desc">Vente de tickets en ligne, E-ticket par e-mail avec QR code unique, gestion des places et confirmation automatique.</div>
+      <div class="feature-tag">E-Ticket QR Code</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+      <div class="feature-title">Agenda & Programme</div>
+      <div class="feature-desc">Affichez le programme détaillé de votre événement, les horaires, les intervenants et les temps forts.</div>
+      <div class="feature-tag">Timeline Visuelle</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-share-alt"></i></div>
+      <div class="feature-title">J'y Serai !</div>
+      <div class="feature-desc">Les participants créent leur carte personnalisée "J'y Serai" avec leur photo, et la partagent sur WhatsApp ou en story Instagram.</div>
+      <div class="feature-tag">Viral · Stories</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-qrcode"></i></div>
+      <div class="feature-title">Scanner d'Entrée</div>
+      <div class="feature-desc">Interface de scan QR code pour valider les tickets à l'entrée en temps réel. Fonctionne sur n'importe quel téléphone.</div>
+      <div class="feature-tag">Contrôle d'Accès</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+      <div class="feature-title">Dashboard Admin</div>
+      <div class="feature-desc">Panneau d'administration sécurisé (OTP) pour suivre les inscriptions, exporter les données et gérer l'équipe.</div>
+      <div class="feature-tag">Accès OTP Sécurisé</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXEMPLE LIVE -->
+<section id="exemple">
+  <div class="section-tag">★ Événement en cours ★</div>
+  <h2 class="section-title">Exemple <span>Live</span></h2>
+  <div class="gold-line"></div>
+  <p class="section-desc">Découvrez Mahu Events en action avec le Dîner de Gala de Fin d'Année ENSETP 2026.</p>
+
+  <div class="exemple-wrap">
+    <div class="exemple-card reveal">
+      <div class="exemple-card-hdr">
+        <span class="brand">ENSETP</span>
+        <span style="font-size:0.55rem;color:rgba(212,175,55,0.5);letter-spacing:2px;">GALA 2026</span>
+      </div>
+      <div class="exemple-card-body">
+        <div class="exemple-card-title">Dîner de Gala</div>
+        <div class="exemple-card-sub">De Fin d'Année · ENSETP 2026</div>
+        <div class="exemple-info-row">
+          <div class="exemple-info-item">
+            <div class="exemple-info-lbl">Date</div>
+            <div class="exemple-info-val">Sam. 20 Juin 2026</div>
+          </div>
+          <div class="exemple-info-item">
+            <div class="exemple-info-lbl">Lieu</div>
+            <div class="exemple-info-val">Magic Land · Dakar</div>
+          </div>
+          <div class="exemple-info-item">
+            <div class="exemple-info-lbl">Entrée</div>
+            <div class="exemple-info-val" style="color:var(--gold)">GRATUITE</div>
+          </div>
+        </div>
+        <div class="exemple-tags">
+          <span class="exemple-tag"><i class="fas fa-music"></i> ZOU NAME</span>
+          <span class="exemple-tag">MIST CASH</span>
+          <span class="exemple-tag">BLM PRO</span>
+          <span class="exemple-tag">+2 artistes</span>
+        </div>
+        <a href="index.html" class="exemple-cta">
+          <i class="fas fa-external-link-alt"></i> Voir le site
+        </a>
+      </div>
+    </div>
+
+    <div class="exemple-text reveal">
+      <h3>Ce site est propulsé par Mahu Events</h3>
+      <ul class="exemple-features">
+        <li><i class="fas fa-check"></i> Page d'événement complète avec programme, artistes, galerie</li>
+        <li><i class="fas fa-check"></i> Billetterie gratuite — E-ticket avec QR code envoyé par e-mail</li>
+        <li><i class="fas fa-check"></i> Scanner d'entrée sur téléphone (verify.html)</li>
+        <li><i class="fas fa-check"></i> Générateur de carte "J'y Serai" personnalisée avec photo</li>
+        <li><i class="fas fa-check"></i> Partage direct WhatsApp & Instagram Stories</li>
+        <li><i class="fas fa-check"></i> Dashboard admin sécurisé par code OTP</li>
+        <li><i class="fas fa-check"></i> Backend Google Apps Script + Google Sheets</li>
+        <li><i class="fas fa-check"></i> Hébergé sur <strong style="color:var(--gold)">ensetp.mahu.cards</strong></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- J'Y SERAI PUBLIC -->
+<section id="jyserai-public">
+  <div style="text-align:center;">
+    <div class="section-tag">★ Fonctionnalité Signature ★</div>
+    <h2 class="section-title" style="text-align:center;">J'y <span>Serai !</span></h2>
+    <div class="gold-line" style="margin:12px auto 20px;"></div>
+    <p class="section-desc" style="margin:0 auto 40px;">Chaque participant génère sa propre carte personnalisée avec sa photo et la partage en story — votre événement devient viral naturellement.</p>
+  </div>
+
+  <div class="jys-hero reveal">
+    <div class="jys-card-preview">
+      <div style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:4px;color:rgba(212,175,55,0.5);margin-bottom:12px;text-transform:uppercase;">VOTRE ÉVÉNEMENT · 2026</div>
+      <div class="jys-avatars-row">
+        <div class="jys-av" style="background:rgba(26,107,53,0.3);">AB</div>
+        <div class="jys-av" style="background:rgba(44,44,84,0.5);">FD</div>
+        <div class="jys-av" style="background:rgba(74,26,26,0.4);">MN</div>
+        <div class="jys-av" style="background:rgba(26,58,74,0.4);">AS</div>
+        <div class="jys-av" style="background:rgba(58,42,10,0.4);">OB</div>
+        <div class="jys-av" style="background:rgba(212,175,55,0.15);">+</div>
+      </div>
+      <div class="jys-count">✨ 47 personnes ont dit J'y Serai !</div>
+      <div style="font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);margin-bottom:6px;">J'Y SERAI !</div>
+      <div style="font-size:0.75rem;color:#aaa;">Samedi 20 Juin 2026 · Magic Land, Dakar</div>
+    </div>
+    <p class="jys-cta-text">Chaque participant crée sa carte avec sa photo, télécharge le PNG et le partage en story. Votre événement se propage naturellement sur WhatsApp et Instagram.</p>
+    <a href="index.html#jy-serai" class="btn-gold" style="width:100%;justify-content:center;">
+      <i class="fas fa-star"></i> Essayer sur l'événement ENSETP
+    </a>
+  </div>
+</section>
+
+<!-- OFFRES -->
+<section id="offres">
+  <div class="section-tag">★ Tarifs ★</div>
+  <h2 class="section-title">Nos <span>Offres</span></h2>
+  <div class="gold-line"></div>
+  <p class="section-desc">Des formules adaptées à tous les types d'événements.</p>
+
+  <div class="offres-grid">
+    <div class="offre-card reveal">
+      <div class="offre-name">Essentiel</div>
+      <div class="offre-price">Gratuit <span>/ événement</span></div>
+      <div class="offre-desc">Pour les petits événements et les associations étudiantes.</div>
+      <ul class="offre-features">
+        <li><i class="fas fa-check"></i> Page d'événement publique</li>
+        <li><i class="fas fa-check"></i> Billetterie gratuite (max 200 places)</li>
+        <li><i class="fas fa-check"></i> E-ticket par e-mail</li>
+        <li><i class="fas fa-check"></i> J'y Serai basique</li>
+        <li><i class="fas fa-check"></i> Subdomain *.mahu.cards</li>
+      </ul>
+      <a href="#contact" class="btn-outline" style="display:flex;justify-content:center;padding:12px;">Commencer</a>
+    </div>
+    <div class="offre-card popular reveal">
+      <div class="offre-badge">Le plus choisi</div>
+      <div class="offre-name">Pro</div>
+      <div class="offre-price">Sur devis <span>/ événement</span></div>
+      <div class="offre-desc">Pour les événements professionnels, galas, conférences et concerts.</div>
+      <ul class="offre-features">
+        <li><i class="fas fa-check"></i> Tout Essentiel +</li>
+        <li><i class="fas fa-check"></i> Billetterie payante (Wave, Orange Money)</li>
+        <li><i class="fas fa-check"></i> Domaine personnalisé</li>
+        <li><i class="fas fa-check"></i> Dashboard admin avancé</li>
+        <li><i class="fas fa-check"></i> Scanner d'entrée multi-agents</li>
+        <li><i class="fas fa-check"></i> Rapport & analytics</li>
+        <li><i class="fas fa-check"></i> J'y Serai avec photo + galerie</li>
+      </ul>
+      <a href="#contact" class="btn-gold" style="display:flex;justify-content:center;padding:12px;">Nous contacter</a>
+    </div>
+    <div class="offre-card reveal">
+      <div class="offre-name">Entreprise</div>
+      <div class="offre-price">Sur mesure</div>
+      <div class="offre-desc">Pour les organisations, universités et marques qui gèrent plusieurs événements.</div>
+      <ul class="offre-features">
+        <li><i class="fas fa-check"></i> Tout Pro +</li>
+        <li><i class="fas fa-check"></i> Marque blanche</li>
+        <li><i class="fas fa-check"></i> Intégration API</li>
+        <li><i class="fas fa-check"></i> Support dédié</li>
+        <li><i class="fas fa-check"></i> Multi-événements</li>
+      </ul>
+      <a href="#contact" class="btn-outline" style="display:flex;justify-content:center;padding:12px;">Discutons-en</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-card">
+    <div class="section-tag" style="text-align:center;">★ Parlons de votre projet ★</div>
+    <h2 class="section-title" style="text-align:center;">Créer mon <span>Événement</span></h2>
+    <div class="gold-line" style="margin:12px auto 24px;"></div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:32px;line-height:1.8;">Décrivez votre événement et nous vous créons une page Mahu Events en 48h. Événements scolaires, galas, concerts, conférences, mariages...</p>
+
+    <input type="text" id="c-nom" class="contact-input" placeholder="Votre prénom et nom *" />
+    <input type="email" id="c-email" class="contact-input" placeholder="Votre e-mail *" />
+    <input type="tel" id="c-tel" class="contact-input" placeholder="Téléphone / WhatsApp" />
+    <input type="text" id="c-event" class="contact-input" placeholder="Nom et type d'événement (ex : Gala de fin d'année, Concert...)" />
+    <textarea id="c-desc" class="contact-input" placeholder="Description, date prévue, nombre de participants estimé..." rows="3" style="resize:vertical;"></textarea>
+
+    <button onclick="sendContactMahu()" style="width:100%;padding:15px;border-radius:30px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.85rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 24px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <i class="fas fa-paper-plane"></i> Envoyer ma demande
+    </button>
+    <div style="margin-top:16px;font-size:0.72rem;color:var(--muted);">Ou contactez-nous directement : <a href="mailto:contact@mahu.cards" style="color:var(--gold);">contact@mahu.cards</a></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Mahu Events</div>
+  <div class="footer-sub">La plateforme numérique de vos événements · mahu.cards</div>
+  <div class="footer-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#exemple">Exemple</a>
+    <a href="#offres">Offres</a>
+    <a href="index.html">Gala ENSETP 2026</a>
+    <a href="mailto:contact@mahu.cards">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 Mahu Cards · Tous droits réservés · Conçu au Sénégal 🇸🇳</div>
+</footer>
+
+<script>
+/* REVEAL */
+new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.12})
+  .observe=((obs,els)=>{els.forEach(el=>obs.observe(el));return obs;})(
+    new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.12}),
+    document.querySelectorAll('.reveal')
+  );
+
+/* NOTIFY */
+function meNotify(title, msg){
+  document.getElementById('me-notif-title').textContent=title;
+  document.getElementById('me-notif-msg').textContent=msg;
+  const n=document.getElementById('me-notif');
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3800);
+}
+
+/* CONTACT */
+function sendContactMahu(){
+  const nom=document.getElementById('c-nom').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const event=document.getElementById('c-event').value.trim();
+  if(!nom||!email||!event){meNotify('Champs requis','Remplissez au moins votre nom, e-mail et l\'événement.');return;}
+  // Envoie via WhatsApp comme fallback simple
+  const desc=document.getElementById('c-desc').value.trim();
+  const tel=document.getElementById('c-tel').value.trim();
+  const msg=`🎉 Demande Mahu Events\n\n👤 ${nom}\n📧 ${email}${tel?'\n📱 '+tel:''}\n🎫 ${event}${desc?'\n\n📝 '+desc:''}\n\n#MahuEvents`;
+  window.open('https://api.whatsapp.com/send?phone=&text='+encodeURIComponent(msg),'_blank');
+  meNotify('Demande envoyée !','Nous vous répondrons sous 48h. Bienvenue sur Mahu Events !');
+}
+</script>
+</body>
+</html>

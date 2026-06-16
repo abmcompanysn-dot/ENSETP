@@ -80,24 +80,56 @@
   /* ── ADMIN DASHBOARD ── */
   #admin-screen{display:none;flex-direction:column;min-height:100vh;}
 
+  /* ── TOPBAR ── */
   .admin-topbar{
+    position:sticky;top:0;z-index:100;
+    background:linear-gradient(135deg,#0a0a0a 0%,#111 60%,rgba(212,175,55,0.04) 100%);
+    border-bottom:1px solid rgba(212,175,55,0.18);
+    box-shadow:0 4px 24px rgba(0,0,0,0.4);
+  }
+  .admin-topbar-main{
     display:flex;align-items:center;justify-content:space-between;
-    padding:14px 28px;background:var(--dark2);
-    border-bottom:1px solid rgba(212,175,55,0.12);position:sticky;top:0;z-index:100;
-    gap:16px;flex-wrap:wrap;
+    padding:12px 28px;gap:16px;flex-wrap:wrap;
   }
-  .admin-topbar-left{display:flex;align-items:center;gap:12px;}
-  .admin-topbar-logo{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);font-weight:700;}
-  .admin-topbar-title{font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;display:none;}
-  @media(min-width:600px){.admin-topbar-title{display:block;}}
+  .admin-topbar-left{display:flex;align-items:center;gap:14px;}
+  .admin-topbar-logo-wrap{display:flex;align-items:center;gap:10px;}
+  .admin-topbar-logo-wrap img{height:36px;width:auto;filter:drop-shadow(0 0 8px rgba(212,175,55,0.3));}
+  .admin-topbar-brand{display:flex;flex-direction:column;}
+  .admin-topbar-logo{font-family:'Cinzel',serif;font-size:1.05rem;color:var(--gold);font-weight:900;letter-spacing:3px;line-height:1;}
+  .admin-topbar-subbrand{font-size:0.55rem;color:rgba(212,175,55,0.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .admin-topbar-divider{width:1px;height:34px;background:rgba(212,175,55,0.2);margin:0 4px;}
+  .admin-topbar-event{display:flex;flex-direction:column;}
+  .admin-topbar-event-name{font-family:'Cinzel',serif;font-size:0.78rem;color:#ddd;letter-spacing:1px;}
+  .admin-topbar-event-date{font-size:0.6rem;color:var(--gold);letter-spacing:1.5px;margin-top:2px;}
+  @media(max-width:600px){.admin-topbar-event{display:none;}}
+
   .admin-topbar-right{display:flex;align-items:center;gap:10px;}
-  .topbar-user{font-size:0.72rem;color:var(--text-muted);}
+  .topbar-live-dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 8px #2ecc71;animation:pulse-dot 2s infinite;}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(1.3);}}
+  .topbar-live-label{font-size:0.62rem;color:#2ecc71;letter-spacing:1.5px;text-transform:uppercase;display:none;}
+  @media(min-width:600px){.topbar-live-label{display:block;}}
+  .topbar-user{font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .topbar-user strong{color:var(--gold-light);}
   .btn-logout{
-    padding:7px 16px;border-radius:20px;border:1px solid rgba(212,175,55,0.25);
+    padding:8px 18px;border-radius:22px;border:1px solid rgba(212,175,55,0.25);
     background:transparent;color:var(--gold);font-family:'Cinzel',serif;
-    font-size:0.7rem;cursor:pointer;transition:all .3s;letter-spacing:1px;
+    font-size:0.68rem;cursor:pointer;transition:all .3s;letter-spacing:1.5px;
+    display:flex;align-items:center;gap:6px;
   }
-  .btn-logout:hover{background:rgba(212,175,55,0.1);}
+  .btn-logout:hover{background:rgba(212,175,55,0.12);border-color:var(--gold);}
+
+  /* ── TOPBAR COUNTDOWN STRIP ── */
+  .admin-topbar-strip{
+    background:linear-gradient(90deg,rgba(212,175,55,0.08),rgba(212,175,55,0.04),rgba(212,175,55,0.08));
+    border-top:1px solid rgba(212,175,55,0.1);
+    padding:6px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .strip-item{display:flex;align-items:center;gap:6px;font-size:0.62rem;color:var(--text-muted);letter-spacing:0.5px;}
+  .strip-item strong{color:var(--gold);}
+  .strip-item i{color:rgba(212,175,55,0.5);font-size:0.7rem;}
+  .topbar-countdown{font-family:'Cinzel',serif;font-size:0.7rem;color:var(--gold);letter-spacing:1px;}
+  @media(max-width:500px){.admin-topbar-strip{display:none;}}
 
   .admin-body{padding:28px;max-width:1200px;margin:0 auto;width:100%;}
 
@@ -273,14 +305,35 @@
 <!-- ── ADMIN SCREEN ── -->
 <div id="admin-screen">
   <div class="admin-topbar">
-    <div class="admin-topbar-left">
-      <img src="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" alt="ENSETP" onerror="this.style.display='none'" style="height:32px;width:auto;" />
-      <span class="admin-topbar-logo">ENSETP</span>
-      <span class="admin-topbar-title">Panel Administrateur · Gala 2026</span>
+    <!-- Main row -->
+    <div class="admin-topbar-main">
+      <div class="admin-topbar-left">
+        <div class="admin-topbar-logo-wrap">
+          <img src="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" alt="ENSETP" onerror="this.style.display='none'" />
+          <div class="admin-topbar-brand">
+            <span class="admin-topbar-logo">ENSETP</span>
+            <span class="admin-topbar-subbrand">Mahu Events</span>
+          </div>
+        </div>
+        <div class="admin-topbar-divider"></div>
+        <div class="admin-topbar-event">
+          <span class="admin-topbar-event-name">Dîner de Gala de Fin d'Année</span>
+          <span class="admin-topbar-event-date"><i class="fas fa-calendar-alt" style="margin-right:5px;"></i>Samedi 20 Juin 2026 · Au Magic Land</span>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <div class="topbar-live-dot"></div>
+        <span class="topbar-live-label">En ligne</span>
+        <span class="topbar-user"><i class="fas fa-user-shield"></i>&nbsp; <strong id="topbar-email">Admin</strong></span>
+        <button class="btn-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Quitter</button>
+      </div>
     </div>
-    <div class="admin-topbar-right">
-      <span class="topbar-user"><i class="fas fa-user-shield"></i> <span id="topbar-email">Administrateur</span></span>
-      <button class="btn-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    <!-- Info strip -->
+    <div class="admin-topbar-strip">
+      <div class="strip-item"><i class="fas fa-clock"></i> Compte à rebours : <strong><span id="admin-countdown">–</span></strong></div>
+      <div class="strip-item"><i class="fas fa-ticket-alt"></i> Tickets : <strong id="strip-tickets">–</strong></div>
+      <div class="strip-item"><i class="fas fa-users"></i> Présences confirmées : <strong id="strip-presences">–</strong></div>
+      <div class="strip-item"><i class="fas fa-globe"></i> <a href="https://ensetp.mahu.cards" target="_blank" style="color:var(--gold);text-decoration:none;">ensetp.mahu.cards</a></div>
     </div>
   </div>
 
@@ -508,6 +561,23 @@ function switchTab(name){
   if(name==='team') loadSubAdmins();
 }
 
+/* ── COUNTDOWN ── */
+function startAdminCountdown(){
+  const eventDate=new Date('2026-06-20T19:00:00');
+  function tick(){
+    const diff=eventDate-new Date();
+    const el=document.getElementById('admin-countdown');
+    if(!el) return;
+    if(diff<=0){el.textContent='L\'événement a eu lieu !';return;}
+    const d=Math.floor(diff/86400000);
+    const h=Math.floor((diff%86400000)/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    el.textContent=`${d}j ${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  }
+  tick(); setInterval(tick,1000);
+}
+
 /* ── LOAD ADMIN ── */
 function loadAdmin(){
   const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
@@ -516,11 +586,17 @@ function loadAdmin(){
   document.getElementById('stat-couple').textContent=ords.filter(o=>o.type==='couple').length;
   document.getElementById('stat-conf').textContent=ords.filter(o=>o.confirmed).length;
   document.getElementById('stat-rev').textContent=ords.reduce((s,o)=>s+(o.total||0),0).toLocaleString('fr-FR');
+  // Update strip stats
+  const stripT=document.getElementById('strip-tickets');
+  const stripP=document.getElementById('strip-presences');
+  if(stripT) stripT.textContent=ords.length+' ticket'+(ords.length>1?'s':'');
+  if(stripP) stripP.textContent=ords.filter(o=>o.confirmed).length;
   renderOrderRows(ords);
   document.getElementById('as-url').value=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   document.getElementById('pd-key').value=localStorage.getItem('ensetp_pd_key')||'';
   const ce=localStorage.getItem('ensetp_cfg_email');
   if(ce) document.getElementById('cfg-email').value=ce;
+  startAdminCountdown();
 }
 
 /* ── ORDERS TABLE ── */

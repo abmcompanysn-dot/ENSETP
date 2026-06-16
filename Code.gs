@@ -145,7 +145,7 @@ function _initConfig(ss) {
 function _initCommandes(ss) {
   var sh = ss.getSheetByName(CFG.COMMANDES_SHEET);
   if (!sh) sh = ss.insertSheet(CFG.COMMANDES_SHEET);
-  var headers = ['ID Ticket','Prénom','Nom','E-mail','Téléphone','Type','Qté','Prix Unit.','Total','Paiement','Date','Statut','Email Envoyé'];
+  var headers = ['ID Ticket','Prénom','Nom','E-mail','Téléphone','Filière','Niveau','Type','Qté','Prix Unit.','Total','Paiement','Date','Statut','Email Envoyé'];
   sh.getRange(1, 1, 1, headers.length).setValues([headers])
     .setFontWeight('bold').setBackground('#D4AF37').setFontColor('#000000').setFontSize(10);
   sh.setFrozenRows(1);
@@ -534,6 +534,7 @@ function logToSheet(order) {
   var sh = getSheet();
   sh.appendRow([
     order.id, order.prenom, order.nom, order.email, order.tel||'',
+    order.filiere||'', order.annee||'',
     order.type.toUpperCase(), order.qty||1, order.price||0, order.total||0,
     order.payment||'', new Date(order.date||new Date()), order.status||'pending', 'Non'
   ]);

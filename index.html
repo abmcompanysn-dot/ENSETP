@@ -610,13 +610,40 @@ ok
       <div class="form-group"><label>Nom <span style="color:var(--gold)">*</span></label><input type="text" id="f-nom" placeholder="Votre nom" /></div>
       <div class="form-group full"><label>Adresse E-Mail <span style="color:var(--gold)">*</span></label><input type="email" id="f-email" placeholder="email@exemple.com" /></div>
       <div class="form-group"><label>Téléphone <span style="color:var(--gold)">*</span></label><input type="tel" id="f-tel" placeholder="+221 XX XXX XX XX" /></div>
+      <div class="form-group"><label>Filière <span style="color:var(--gold)">*</span></label>
+        <select id="f-filiere">
+          <option value="">Choisir votre filière</option>
+          <option value="Génie Civil">Génie Civil</option>
+          <option value="Génie Électrique">Génie Électrique</option>
+          <option value="Génie Mécanique">Génie Mécanique</option>
+          <option value="Génie Informatique">Génie Informatique & Réseaux</option>
+          <option value="Génie Chimique">Génie Chimique & Procédés</option>
+          <option value="Génie Environnement">Génie de l'Environnement</option>
+          <option value="Architecture">Architecture & Urbanisme</option>
+          <option value="Personnel">Personnel / Enseignant</option>
+          <option value="Invité">Invité Extérieur</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Niveau / Année</label>
+        <select id="f-annee">
+          <option value="">Niveau d'études</option>
+          <option value="L1">Licence 1 (L1)</option>
+          <option value="L2">Licence 2 (L2)</option>
+          <option value="L3">Licence 3 (L3)</option>
+          <option value="M1">Master 1 (M1)</option>
+          <option value="M2">Master 2 (M2)</option>
+          <option value="Doctorat">Doctorat</option>
+          <option value="Enseignant">Personnel Enseignant</option>
+          <option value="Invité">Invité / Autre</option>
+        </select>
+      </div>
       <div class="form-group"><label>Nombre de places</label>
         <select id="f-qty" onchange="updateTotal()">
           <option value="1">1 place</option><option value="2">2 places</option>
           <option value="3">3 places</option><option value="4">4 places</option><option value="5">5 places</option>
         </select>
       </div>
-      <div class="form-group full"><label>Type de ticket</label>
+      <div class="form-group"><label>Type de ticket</label>
         <select id="f-type" onchange="updateTotal()">
           <option value="solo" data-price="0">Solo – Gratuit (1 personne)</option>
           <option value="couple" data-price="0">Couple – Gratuit (2 personnes)</option>
@@ -788,7 +815,7 @@ ok
     <a href="#"><i class="fab fa-linkedin-in"></i></a>
   </div>
   <div class="ornament"><span>ENSETP · Former aujourd'hui, réussir demain !</span></div>
-  <div class="footer-bottom">© 2026 <span>ENSETP</span> – École Normale Supérieure d'Enseignement Technique et Professionnel · Université Cheikh Anta Diop de Dakar · #ENSETP #GalaDîner2026 #FPT</div>
+  <div class="footer-bottom">© 2026 <span>ENSETP</span> – École Normale Supérieure d'Enseignement Technique et Professionnel · Université Cheikh Anta Diop de Dakar · #ENSETP #GalaDîner2026 #FPT<br><span style="font-size:0.65rem;color:rgba(212,175,55,0.3);">Propulsé par <a href="mahu-events.html" style="color:rgba(212,175,55,0.4);text-decoration:none;">Mahu Events</a> · mahu.cards</span></div>
 </footer>
 
 <!-- FLYER LIGHTBOX -->
@@ -978,7 +1005,10 @@ async function processPayment(){
   const email=document.getElementById('f-email').value.trim();
   const tel=document.getElementById('f-tel').value.trim();
   const qty=parseInt(document.getElementById('f-qty').value)||1;
-  if(!prenom||!nom||!email||!tel){notify('error','Champs manquants','Veuillez remplir tous les champs.');return;}
+  const filiere=document.getElementById('f-filiere').value;
+  const annee=document.getElementById('f-annee').value;
+  if(!prenom||!nom||!email||!tel){notify('error','Champs manquants','Veuillez remplir tous les champs obligatoires.');return;}
+  if(!filiere){notify('error','Filière requise','Veuillez sélectionner votre filière.');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){notify('error','E-mail invalide','Vérifiez votre adresse e-mail.');return;}
 
   const btn=document.getElementById('btn-pay');
@@ -988,7 +1018,7 @@ async function processPayment(){
   const total=selPrice*qty;
   const id=`TK-ENSETP-2026-${String(orders.length+1).padStart(4,'0')}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
   const now=new Date();
-  const order={id,prenom,nom,email,tel,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'pending'};
+  const order={id,prenom,nom,email,tel,filiere,annee,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'pending'};
 
   /* --- Try Apps Script / Paydunia --- */
   const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
