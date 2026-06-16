@@ -18,7 +18,7 @@ var CFG = {
   PAYDUNIA_KEY:     '',                     // Clé API Paydunia (depuis dashboard)
   PAYDUNIA_SECRET:  '',
   PAYDUNIA_URL:     'https://paydunia.com/api/v1/payment/init',
-  CALLBACK_URL:     ''                      // URL de votre site déployé
+  CALLBACK_URL:     'https://abmcompanysn-dot.github.io/ENSETP/'
 };
 
 // ── MENU GOOGLE SHEETS ─────────────────────────────────────
@@ -486,9 +486,8 @@ function sendDailyReport() {
     + '📅 Date : ' + new Date().toLocaleString('fr-FR') + '\n\n'
     + '🎫 TICKETS\n'
     + '  Total vendus : ' + stats.total + '\n'
-    + '  Standard     : ' + stats.standard + '\n'
-    + '  VIP          : ' + stats.vip + '\n'
-    + '  Table entière: ' + stats.table + '\n\n'
+    + '  Solo         : ' + stats.solo + '\n'
+    + '  Couple       : ' + stats.couple + '\n\n'
     + '✅ PRÉSENCES\n'
     + '  Confirmées   : ' + presences + '\n\n'
     + '💰 RECETTES\n'
@@ -510,11 +509,10 @@ function testSendTicket() {
     nom:      'Diallo',
     email:    Session.getActiveUser().getEmail(),
     tel:      '+221 77 000 00 00',
-    type:     'standard',
+    type:     'solo',
     qty:      1,
     price:    1000,
     total:    1000,
-    type:     'solo',
     payment:  'wave',
     date:     new Date().toISOString(),
     status:   'paid'

@@ -1026,6 +1026,7 @@ ok
 const ADMIN_PW = 'ENSETP@2026';
 const EVENT_DATE = new Date('2026-06-20T19:00:00');
 const CONTACT_EMAIL = 'contact@mahu.cards';
+const AS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxvWRz-gnuVgZhb2JY7aRulluEV4TMI_NH_fyWLwcvS0F4ifRjvxngiUIhemDe50h1_/exec';
 
 let orders = JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
 let selType = 'solo', selPrice = 1000, selPayment = 'wave';
@@ -1130,7 +1131,7 @@ async function processPayment(){
   const order={id,prenom,nom,email,tel,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'paid'};
 
   /* --- Try Apps Script / Paydunia --- */
-  const asUrl=localStorage.getItem('ensetp_as_url')||'';
+  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   if(asUrl){
     try{
       const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'createOrder',order})});
@@ -1241,7 +1242,7 @@ function loadAdmin(){
   document.getElementById('stat-conf').textContent=ords.filter(o=>o.confirmed).length;
   document.getElementById('stat-rev').textContent=ords.reduce((s,o)=>s+(o.total||0),0).toLocaleString('fr-FR');
   renderOrderRows(ords);
-  document.getElementById('as-url').value=localStorage.getItem('ensetp_as_url')||'';
+  document.getElementById('as-url').value=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   document.getElementById('pd-key').value=localStorage.getItem('ensetp_pd_key')||'';
   const cfgEmail=localStorage.getItem('ensetp_cfg_email');
   if(cfgEmail) document.getElementById('cfg-email').value=cfgEmail;
@@ -1374,7 +1375,7 @@ function confirmPresence(){
   res.classList.add('ok');
   res.innerHTML=`<p><i class="fas fa-check-circle"></i> Présence confirmée ! Merci ${order.prenom}, à samedi 20 juin au Magic Land !</p>`;
   notify('success','Présence confirmée !','Nous avons bien enregistré votre présence.');
-  const asUrl=localStorage.getItem('ensetp_as_url');
+  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'confirmPresence',orderId:order.id,name:order.prenom+' '+order.nom,email:order.email})}).catch(()=>{});
 }
 
