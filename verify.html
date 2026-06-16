@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
   :root {
     --gold:#D4AF37; --gold-light:#F5D66A; --gold-dark:#A07820;
@@ -154,6 +155,53 @@
   }
   .btn-clear:hover{border-color:var(--red);color:var(--red);}
 
+  /* ── CAMERA SCANNER ── */
+  .btn-camera{
+    width:100%;margin-top:10px;padding:13px;border-radius:30px;border:1.5px solid rgba(212,175,55,0.35);
+    background:rgba(212,175,55,0.07);color:var(--gold);cursor:pointer;
+    font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;
+    transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-camera:hover{background:rgba(212,175,55,0.15);border-color:var(--gold);}
+  .btn-camera.active{background:rgba(231,76,60,0.12);border-color:rgba(231,76,60,0.5);color:#e74c3c;}
+  .camera-wrap{
+    display:none;margin-top:16px;position:relative;border-radius:14px;overflow:hidden;
+    background:#000;max-height:280px;
+  }
+  .camera-wrap video{width:100%;display:block;border-radius:14px;}
+  .camera-frame{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+  }
+  .camera-frame-box{
+    width:190px;height:190px;border-radius:10px;position:relative;
+    box-shadow:0 0 0 9999px rgba(0,0,0,0.55);
+  }
+  .camera-frame-box::before,.camera-frame-box::after,
+  .camera-frame-inner::before,.camera-frame-inner::after{
+    content:'';position:absolute;width:28px;height:28px;border-color:var(--gold);border-style:solid;
+  }
+  .camera-frame-box::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
+  .camera-frame-box::after{top:-2px;right:-2px;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
+  .camera-frame-inner::before{bottom:-2px;left:-2px;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
+  .camera-frame-inner::after{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
+  @keyframes scan-line{0%{top:4px;}100%{top:calc(100% - 4px);}}
+  .camera-scan-line{
+    position:absolute;left:4px;right:4px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    animation:scan-line 2s ease-in-out infinite alternate;top:50%;
+  }
+  .camera-hint{
+    position:absolute;bottom:12px;left:0;right:0;text-align:center;
+    font-size:0.68rem;color:rgba(255,255,255,0.7);letter-spacing:1px;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  }
+  .camera-detected{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(26,107,53,0.7);backdrop-filter:blur(2px);border-radius:14px;
+    font-family:'Cinzel',serif;color:#2ecc71;font-size:1rem;letter-spacing:2px;
+    display:none;
+  }
+
   /* ── NOTIFY ── */
   .notif{position:fixed;top:72px;right:20px;z-index:9999;min-width:280px;max-width:340px;pointer-events:none;opacity:0;transform:translateX(20px);transition:all .35s;}
   .notif.show{opacity:1;transform:translateX(0);}
@@ -224,6 +272,23 @@
     <button class="btn-verify" id="btn-verify" onclick="verify()">
       <i class="fas fa-search"></i> &nbsp;Vérifier le Billet
     </button>
+
+    <!-- CAMERA SCANNER -->
+    <button class="btn-camera" id="btn-camera" onclick="toggleCamera()">
+      <i class="fas fa-camera"></i> Scanner avec la caméra
+    </button>
+    <div class="camera-wrap" id="camera-wrap">
+      <video id="camera-video" autoplay playsinline muted></video>
+      <canvas id="camera-canvas" style="display:none;"></canvas>
+      <div class="camera-frame">
+        <div class="camera-frame-box">
+          <div class="camera-frame-inner"></div>
+          <div class="camera-scan-line"></div>
+        </div>
+      </div>
+      <div class="camera-hint"><i class="fas fa-qrcode"></i> &nbsp;Pointez vers le QR Code du billet</div>
+      <div class="camera-detected" id="camera-detected"><i class="fas fa-check-circle" style="font-size:2rem;"></i></div>
+    </div>
 
     <!-- RESULT -->
     <div class="result" id="result"></div>
@@ -310,7 +375,7 @@ function resultHtml(cls, icon, title, sub, order){
   const fromQr = new URLSearchParams(location.search).get('id');
   const scanNextBtn = fromQr
     ? `<div style="padding:14px 24px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
-        <button onclick="location.href='/verify'" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--gold);padding:10px 24px;border-radius:20px;font-family:Montserrat,sans-serif;font-size:0.78rem;cursor:pointer;letter-spacing:1px;">
+        <button onclick="location.href='verify.html'" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--gold);padding:10px 24px;border-radius:20px;font-family:Montserrat,sans-serif;font-size:0.78rem;cursor:pointer;letter-spacing:1px;">
           <i class="fas fa-qrcode"></i> Scanner un autre ticket
         </button>
       </div>`
@@ -406,6 +471,68 @@ function notify(type,title,msg){
   inner.className='notif-inner '+type;
   inner.querySelector('i').className=icons[type];
   el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+/* ── CAMERA SCANNER ── */
+let _camStream = null;
+let _camLoop = null;
+let _camScanning = false;
+
+async function toggleCamera(){
+  if(_camScanning){ stopCamera(); return; }
+  const btn = document.getElementById('btn-camera');
+  const wrap = document.getElementById('camera-wrap');
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:'environment', width:{ideal:1280}, height:{ideal:720} }
+    });
+    const video = document.getElementById('camera-video');
+    video.srcObject = _camStream;
+    await video.play();
+    wrap.style.display = 'block';
+    btn.innerHTML = '<i class="fas fa-times"></i> Fermer la caméra';
+    btn.classList.add('active');
+    _camScanning = true;
+    _scanFrame();
+  } catch(e){
+    notify('error','Caméra inaccessible','Autorisez l\'accès à la caméra dans les paramètres du navigateur.');
+  }
+}
+
+function _scanFrame(){
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  if(!_camScanning || !video || video.readyState < 2){ _camLoop = requestAnimationFrame(_scanFrame); return; }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts:'dontInvert' });
+  if(code && code.data){
+    let raw = code.data.trim();
+    const urlMatch = raw.match(/[?&]id=(TK-[^&\s]+)/i);
+    const ticketId = urlMatch ? urlMatch[1].toUpperCase() : (raw.toUpperCase().startsWith('TK-') ? raw.toUpperCase() : null);
+    if(ticketId){
+      const det = document.getElementById('camera-detected');
+      if(det){ det.style.display='flex'; setTimeout(()=>{ if(det) det.style.display='none'; },600); }
+      stopCamera();
+      document.getElementById('ticket-input').value = ticketId;
+      verify();
+      return;
+    }
+  }
+  _camLoop = requestAnimationFrame(_scanFrame);
+}
+
+function stopCamera(){
+  _camScanning = false;
+  if(_camLoop){ cancelAnimationFrame(_camLoop); _camLoop = null; }
+  if(_camStream){ _camStream.getTracks().forEach(t=>t.stop()); _camStream = null; }
+  const wrap = document.getElementById('camera-wrap');
+  if(wrap) wrap.style.display = 'none';
+  const btn = document.getElementById('btn-camera');
+  if(btn){ btn.innerHTML='<i class="fas fa-camera"></i> Scanner avec la caméra'; btn.classList.remove('active'); }
 }
 
 /* ── INIT ── */
