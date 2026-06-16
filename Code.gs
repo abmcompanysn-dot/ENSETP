@@ -1,48 +1,81 @@
 // ============================================================
-//  ENSETP GALA 2026 — Google Apps Script Backend
-//  Déployer comme "Application Web" (accès : Tout le monde)
-//  URL obtenue → coller dans le panel Admin du site
+//  ENSETP GALA 2026 — Google Apps Script Backend v3.0
+//  Script lié à la feuille Google Sheets via Extensions → Apps Script
+//  Déployer comme "Application Web" — Accès : Tout le monde
 // ============================================================
 
-// ── CONFIGURATION ─────────────────────────────────────────
+// ── CONFIG PAR DÉFAUT (remplacés par la feuille "Configuration") ──
 var CFG = {
   COMMANDES_SHEET:  'Commandes',
   PRESENCES_SHEET:  'Présences',
   ADMINS_SHEET:     'Sous-Admins',
+  CONFIG_SHEET:     'Configuration',
+  SHEET_ID:         '',             // Vide = feuille liée au script
 
-  // Script lié à la feuille via Extensions → Apps Script → laisser vide
-  SHEET_ID:         '',
-
-  EMAIL_FROM:       'contact@mahu.cards',   // Adresse expéditeur des tickets
-  ADMIN_EMAIL:      'contact@mahu.cards',   // Reçoit toutes les notifications
-
-  EVENT_NAME:       'Dîner de Gala de Fin d\'Année – ENSETP 2026',
+  // Ces valeurs sont lues depuis l'onglet "Configuration" en priorité
+  ADMIN_EMAIL:      'contact@mahu.cards',
+  EMAIL_FROM:       'contact@mahu.cards',
   EVENT_DATE:       'Samedi 20 Juin 2026',
   EVENT_LIEU:       'Au Magic Land',
 
-  PAYDUNIA_KEY:     '',                     // Clé API Paydunia (depuis dashboard)
+  PAYDUNIA_KEY:     '',
   PAYDUNIA_SECRET:  '',
   PAYDUNIA_URL:     'https://paydunia.com/api/v1/payment/init',
 
-  // ► WEBHOOK_URL : Paydunia envoie la confirmation de paiement ici (serveur)
-  //   → Votre serveur ou l'URL de ce script Apps Script
-  WEBHOOK_URL:      'https://ensetp.abmcy.com',
+  // URL de CE script Apps Script (webhook Paydunia → doPost)
+  APPS_SCRIPT_URL:  'https://script.google.com/macros/s/AKfycbxvWRz-gnuVgZhb2JY7aRulluEV4TMI_NH_fyWLwcvS0F4ifRjvxngiUIhemDe50h1_/exec',
 
-  // ► SITE_URL : URL où l'utilisateur est redirigé après paiement (site public)
+  // URL du site public (où l'utilisateur est redirigé après paiement)
   SITE_URL:         'https://ensetp.mahu.cards'
 };
+
+// ── LECTURE DE LA CONFIG DEPUIS LE SHEET ──────────────────
+function getSheetConfig() {
+  try {
+    var ss = CFG.SHEET_ID
+      ? SpreadsheetApp.openById(CFG.SHEET_ID)
+      : SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName(CFG.CONFIG_SHEET);
+    if (!sh) return {};
+    var data = sh.getDataRange().getValues();
+    var cfg = {};
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] && data[i][1] !== '') cfg[data[i][0]] = String(data[i][1]);
+    }
+    return cfg;
+  } catch (e) {
+    Logger.log('getSheetConfig error: ' + e.message);
+    return {};
+  }
+}
+
+// Fusionne CFG + valeurs du sheet (sheet prioritaire)
+function getCFG() {
+  var sc = getSheetConfig();
+  return {
+    ADMIN_EMAIL:      sc.ADMIN_EMAIL      || CFG.ADMIN_EMAIL,
+    EMAIL_FROM:       sc.EMAIL_FROM       || CFG.EMAIL_FROM,
+    EVENT_DATE:       sc.EVENT_DATE       || CFG.EVENT_DATE,
+    EVENT_LIEU:       sc.EVENT_LIEU       || CFG.EVENT_LIEU,
+    PAYDUNIA_KEY:     sc.PAYDUNIA_KEY     || CFG.PAYDUNIA_KEY,
+    PAYDUNIA_SECRET:  sc.PAYDUNIA_SECRET  || CFG.PAYDUNIA_SECRET,
+    PAYDUNIA_URL:     CFG.PAYDUNIA_URL,
+    APPS_SCRIPT_URL:  sc.APPS_SCRIPT_URL  || CFG.APPS_SCRIPT_URL,
+    SITE_URL:         sc.SITE_URL         || CFG.SITE_URL
+  };
+}
 
 // ── MENU GOOGLE SHEETS ─────────────────────────────────────
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🎩 Gala ENSETP 2026')
-    .addItem('⚙️  Initialiser les feuilles',        'setupSheet')
+    .addItem('⚙️  Initialiser toutes les feuilles',   'setupSheet')
     .addSeparator()
-    .addItem('📊 Rapport quotidien (e-mail)',        'sendDailyReport')
-    .addItem('⏰ Activer rappel quotidien (8h)',     'setupDailyReminder')
+    .addItem('📊 Rapport quotidien (e-mail)',          'sendDailyReport')
+    .addItem('⏰ Activer rappel quotidien à 8h',       'setupDailyReminder')
     .addSeparator()
-    .addItem('🧪 Test — Envoyer un ticket bidon',   'testSendTicket')
-    .addItem('🧹 Supprimer les triggers existants', 'clearTriggers')
+    .addItem('🧪 Test — Envoyer un ticket bidon',     'testSendTicket')
+    .addItem('🧹 Supprimer les triggers',             'clearTriggers')
     .addToUi();
 }
 
@@ -52,144 +85,208 @@ function setupSheet() {
     ? SpreadsheetApp.openById(CFG.SHEET_ID)
     : SpreadsheetApp.getActiveSpreadsheet();
 
+  _initConfig(ss);
   _initCommandes(ss);
   _initPresences(ss);
   _initAdmins(ss);
 
   SpreadsheetApp.getUi().alert(
     '✅ Initialisation terminée !\n\n' +
-    'Trois feuilles créées :\n' +
-    '• Commandes — tickets achetés\n' +
-    '• Présences — confirmations de présence\n' +
-    '• Sous-Admins — admins délégués\n\n' +
-    'Vous pouvez maintenant déployer ce script\net coller l\'URL dans le panel Admin du site.'
+    '4 feuilles créées :\n' +
+    '• Configuration — clés API et paramètres\n' +
+    '• Commandes    — tickets achetés\n' +
+    '• Présences    — confirmations\n' +
+    '• Sous-Admins  — équipe admin\n\n' +
+    '👉 Remplissez vos clés Paydunia dans l\'onglet "Configuration"\n' +
+    '   avant d\'activer les paiements en ligne.'
   );
+}
+
+function _initConfig(ss) {
+  var sh = ss.getSheetByName(CFG.CONFIG_SHEET);
+  if (!sh) sh = ss.insertSheet(CFG.CONFIG_SHEET, 0);
+
+  var headers = ['Clé', 'Valeur', 'Description'];
+  sh.getRange(1, 1, 1, 3).setValues([headers])
+    .setFontWeight('bold').setBackground('#2C2C54').setFontColor('#FFFFFF').setFontSize(10);
+  sh.setFrozenRows(1);
+
+  if (sh.getLastRow() <= 1) {
+    var rows = [
+      ['PAYDUNIA_KEY',    '',                          'Clé publique API Paydunia (dashboard.paydunia.com)'],
+      ['PAYDUNIA_SECRET', '',                          'Clé secrète Paydunia (pour valider les webhooks)'],
+      ['APPS_SCRIPT_URL', CFG.APPS_SCRIPT_URL,        'URL de ce script — Paydunia envoie les confirmations ici'],
+      ['SITE_URL',        CFG.SITE_URL,                'URL du site public (redirection utilisateur après paiement)'],
+      ['ADMIN_EMAIL',     CFG.ADMIN_EMAIL,             'E-mail recevant toutes les notifications admin'],
+      ['EMAIL_FROM',      CFG.EMAIL_FROM,              'E-mail expéditeur des tickets'],
+      ['EVENT_DATE',      CFG.EVENT_DATE,              'Date de l\'événement (affiché sur les tickets)'],
+      ['EVENT_LIEU',      CFG.EVENT_LIEU,              'Lieu de l\'événement (affiché sur les tickets)']
+    ];
+    sh.getRange(2, 1, rows.length, 3).setValues(rows);
+  }
+
+  sh.setColumnWidth(1, 180);
+  sh.setColumnWidth(2, 300);
+  sh.setColumnWidth(3, 340);
+
+  // Surligner les clés Paydunia vides en orange pour les signaler
+  var rule = SpreadsheetApp.newConditionalFormatRule()
+    .whenCellEmpty().setBackground('#3d2000').setFontColor('#ffaa00')
+    .setRanges([sh.getRange('B2:B3')]).build();
+  sh.setConditionalFormatRules([rule]);
+
+  Logger.log('Feuille Configuration prête.');
 }
 
 function _initCommandes(ss) {
   var sh = ss.getSheetByName(CFG.COMMANDES_SHEET);
   if (!sh) sh = ss.insertSheet(CFG.COMMANDES_SHEET);
-
-  // En-têtes
   var headers = ['ID Ticket','Prénom','Nom','E-mail','Téléphone','Type','Qté','Prix Unit.','Total','Paiement','Date','Statut','Email Envoyé'];
   sh.getRange(1, 1, 1, headers.length).setValues([headers])
-    .setFontWeight('bold')
-    .setBackground('#D4AF37')
-    .setFontColor('#000000')
-    .setFontSize(10);
+    .setFontWeight('bold').setBackground('#D4AF37').setFontColor('#000000').setFontSize(10);
   sh.setFrozenRows(1);
-
-  // Largeurs colonnes
-  sh.setColumnWidth(1, 200);  // ID
-  sh.setColumnWidth(4, 200);  // E-mail
-  sh.setColumnWidth(11, 160); // Date
-  sh.setColumnWidths(2, 2, 120); // Prénom / Nom
-
-  // Alternance couleur — appliquée aux 500 premières lignes
-  var rule = SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied('=MOD(ROW(),2)=0')
-    .setBackground('#1a1a1a')
-    .setRanges([sh.getRange('A2:M500')])
-    .build();
-  sh.setConditionalFormatRules([rule]);
-
+  sh.setColumnWidth(1, 200); sh.setColumnWidth(4, 200); sh.setColumnWidth(11, 160);
+  sh.setColumnWidths(2, 2, 120);
   Logger.log('Feuille Commandes prête.');
 }
 
 function _initPresences(ss) {
   var sh = ss.getSheetByName(CFG.PRESENCES_SHEET);
   if (!sh) sh = ss.insertSheet(CFG.PRESENCES_SHEET);
-
-  var headers = ['ID Ticket','Prénom','Nom','E-mail','Confirmé le','IP / Agent'];
+  var headers = ['ID Ticket','Prénom','Nom','E-mail','Confirmé le','Source'];
   sh.getRange(1, 1, 1, headers.length).setValues([headers])
-    .setFontWeight('bold')
-    .setBackground('#1A6B35')
-    .setFontColor('#FFFFFF')
-    .setFontSize(10);
+    .setFontWeight('bold').setBackground('#1A6B35').setFontColor('#FFFFFF').setFontSize(10);
   sh.setFrozenRows(1);
-  sh.setColumnWidth(1, 200);
-  sh.setColumnWidth(4, 200);
-  sh.setColumnWidth(5, 160);
-
+  sh.setColumnWidth(1, 200); sh.setColumnWidth(4, 200); sh.setColumnWidth(5, 160);
   Logger.log('Feuille Présences prête.');
 }
 
 function _initAdmins(ss) {
   var sh = ss.getSheetByName(CFG.ADMINS_SHEET);
   if (!sh) sh = ss.insertSheet(CFG.ADMINS_SHEET);
-
   var headers = ['Nom','E-mail','Rôle','Date Ajout'];
   sh.getRange(1, 1, 1, headers.length).setValues([headers])
-    .setFontWeight('bold')
-    .setBackground('#2C2C54')
-    .setFontColor('#FFFFFF')
-    .setFontSize(10);
-  sh.setFrozenRows(1);
-  sh.setColumnWidth(2, 200);
-
+    .setFontWeight('bold').setBackground('#2C2C54').setFontColor('#FFFFFF').setFontSize(10);
+  sh.setFrozenRows(1); sh.setColumnWidth(2, 200);
   Logger.log('Feuille Sous-Admins prête.');
+}
+
+// ── SÉCURITÉ — RATE LIMITING ───────────────────────────────
+function checkRateLimit(requestId) {
+  try {
+    var cache = CacheService.getScriptCache();
+    var key = 'rl_' + (requestId || 'global');
+    var count = parseInt(cache.get(key) || '0');
+    if (count >= 60) return false;  // max 60 requêtes / minute
+    cache.put(key, String(count + 1), 60);
+    return true;
+  } catch (e) {
+    return true;  // En cas d'erreur cache, on laisse passer
+  }
+}
+
+// ── SÉCURITÉ — VALIDATION SIGNATURE PAYDUNIA ──────────────
+function validatePayduniaSignature(rawBody, receivedSig) {
+  var cfg = getCFG();
+  if (!cfg.PAYDUNIA_SECRET || !receivedSig) return true;  // Pas de secret = skip
+  try {
+    var sig = Utilities.computeHmacSha256Signature(rawBody, cfg.PAYDUNIA_SECRET, Utilities.Charset.UTF_8);
+    var sigHex = sig.map(function(b){ return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+    return sigHex === receivedSig.toLowerCase().replace(/^sha256=/,'');
+  } catch (e) {
+    Logger.log('Signature validation error: ' + e.message);
+    return false;
+  }
 }
 
 // ── POINT D'ENTRÉE HTTP ────────────────────────────────────
 function doPost(e) {
   try {
-    var payload = JSON.parse(e.postData.contents);
+    // Rate limiting
+    var clientId = e.parameter ? (e.parameter.client || 'api') : 'api';
+    if (!checkRateLimit(clientId)) {
+      return _jsonOut({ error: 'Trop de requêtes. Réessayez dans une minute.', code: 429 });
+    }
+
+    var rawBody = e.postData ? e.postData.contents : '';
+    var payload = JSON.parse(rawBody);
     var action  = payload.action;
     var result  = {};
 
-    if      (action === 'createOrder')       result = handleCreateOrder(payload.order);
-    else if (action === 'payduniaWebhook')   result = handlePayduniaWebhook(payload);
-    else if (action === 'confirmPresence')   result = handleConfirmPresence(payload);
-    else if (action === 'addSubAdmin')       result = handleAddSubAdmin(payload);
-    else if (action === 'getStats')          result = getStats();
-    else                                     result = { error: 'Action inconnue: ' + action };
+    // Validation signature pour les webhooks Paydunia
+    if (action === 'payduniaWebhook') {
+      var sig = e.parameter ? e.parameter.signature : null;
+      if (!validatePayduniaSignature(rawBody, sig)) {
+        Logger.log('Signature Paydunia invalide — requête rejetée.');
+        return _jsonOut({ error: 'Signature invalide', code: 401 });
+      }
+    }
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    if      (action === 'createOrder')     result = handleCreateOrder(payload.order);
+    else if (action === 'payduniaWebhook') result = handlePayduniaWebhook(payload);
+    else if (action === 'confirmPresence') result = handleConfirmPresence(payload);
+    else if (action === 'addSubAdmin')     result = handleAddSubAdmin(payload);
+    else if (action === 'getStats')        result = getStats();
+    else                                   result = { error: 'Action inconnue: ' + action };
+
+    return _jsonOut(result);
   } catch (err) {
     Logger.log('doPost error: ' + err.message);
-    return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return _jsonOut({ error: err.message, code: 500 });
   }
 }
 
 function doGet(e) {
-  if (e.parameter && e.parameter.payment_ref) {
+  // Callback Paydunia GET (redirection utilisateur après paiement)
+  if (e.parameter && e.parameter.payment_status) {
     handlePayduniaCallback(e.parameter);
-    return HtmlService.createHtmlOutput('<p>Paiement traité. Fermez cette fenêtre.</p>');
+    var cfg = getCFG();
+    var url = cfg.SITE_URL + '?payment_status=' + e.parameter.payment_status + '&order_id=' + (e.parameter.order_id || '');
+    return HtmlService.createHtmlOutput(
+      '<html><head><meta http-equiv="refresh" content="0;url=' + url + '"></head>' +
+      '<body>Redirection en cours...</body></html>'
+    );
   }
-  return ContentService.createTextOutput(JSON.stringify({ status: 'ENSETP Gala API active', version: '2.0' }))
+  return _jsonOut({ status: 'ENSETP Gala API active', version: '3.0' });
+}
+
+function _jsonOut(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
 // ── CRÉATION DE COMMANDE ───────────────────────────────────
 function handleCreateOrder(order) {
+  var cfg = getCFG();
+
+  // 1. Enregistrement dans la feuille
   logToSheet(order);
 
-  if (CFG.PAYDUNIA_KEY) {
-    var payLink = createPayduniaPayment(order);
-    if (payLink) return { success: true, paymentUrl: payLink, orderId: order.id };
+  // 2. Si clé Paydunia configurée → créer lien de paiement
+  if (cfg.PAYDUNIA_KEY) {
+    var payLink = createPayduniaPayment(order, cfg);
+    if (payLink) {
+      Logger.log('Lien Paydunia créé: ' + payLink);
+      return { success: true, paymentUrl: payLink, orderId: order.id };
+    }
   }
 
+  // 3. Mode démo (sans Paydunia) → ticket envoyé directement
   order.status = 'paid';
   updateOrderStatus(order.id, 'paid');
-  sendTicketEmail(order);
-  sendAdminNotification(order);
-
+  sendTicketEmail(order, cfg);
+  sendAdminNotification(order, cfg);
   return { success: true, orderId: order.id, mode: 'demo' };
 }
 
 // ── CONFIRMATION DE PRÉSENCE ───────────────────────────────
 function handleConfirmPresence(payload) {
   try {
-    var ss = CFG.SHEET_ID
-      ? SpreadsheetApp.openById(CFG.SHEET_ID)
-      : SpreadsheetApp.getActiveSpreadsheet();
-
+    var cfg = getCFG();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sh = ss.getSheetByName(CFG.PRESENCES_SHEET);
     if (!sh) { _initPresences(ss); sh = ss.getSheetByName(CFG.PRESENCES_SHEET); }
 
-    // Vérifier si déjà confirmé
     var data = sh.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
       if (data[i][0] === payload.orderId) {
@@ -206,17 +303,16 @@ function handleConfirmPresence(payload) {
       'Web'
     ]);
 
-    // Notifier contact@mahu.cards
     GmailApp.sendEmail(
-      CFG.ADMIN_EMAIL,
-      '[GALA ENSETP] Présence confirmée – ' + payload.orderId,
+      cfg.ADMIN_EMAIL,
+      '[GALA ENSETP] ✅ Présence confirmée – ' + payload.orderId,
       'Nouvelle confirmation de présence :\n\n'
         + 'Ticket : ' + payload.orderId + '\n'
-        + 'Nom    : ' + (payload.name || '–') + '\n'
+        + 'Nom    : ' + (payload.name  || '–') + '\n'
         + 'E-mail : ' + (payload.email || '–') + '\n'
-        + 'Le    : ' + new Date().toLocaleString('fr-FR')
+        + 'Le     : ' + new Date().toLocaleString('fr-FR') + '\n\n'
+        + '—\nMahu Events · mahu.cards'
     );
-
     return { success: true, message: 'Présence enregistrée.' };
   } catch (err) {
     Logger.log('handleConfirmPresence error: ' + err.message);
@@ -227,40 +323,39 @@ function handleConfirmPresence(payload) {
 // ── SOUS-ADMIN ─────────────────────────────────────────────
 function handleAddSubAdmin(payload) {
   try {
-    var ss = CFG.SHEET_ID
-      ? SpreadsheetApp.openById(CFG.SHEET_ID)
-      : SpreadsheetApp.getActiveSpreadsheet();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sh = ss.getSheetByName(CFG.ADMINS_SHEET);
     if (!sh) { _initAdmins(ss); sh = ss.getSheetByName(CFG.ADMINS_SHEET); }
-    sh.appendRow([payload.name || '', payload.email || '', payload.role || 'readonly', new Date()]);
+    sh.appendRow([payload.name||'', payload.email||'', payload.role||'readonly', new Date()]);
     return { success: true };
-  } catch (err) {
-    return { error: err.message };
-  }
+  } catch (err) { return { error: err.message }; }
 }
 
 // ── PAYDUNIA ───────────────────────────────────────────────
-function createPayduniaPayment(order) {
+function createPayduniaPayment(order, cfg) {
   try {
-    var payload = {
-      merchant_key:   CFG.PAYDUNIA_KEY,
+    var body = {
+      merchant_key:   cfg.PAYDUNIA_KEY,
       amount:         order.total,
       currency:       'XOF',
       order_id:       order.id,
       customer_name:  order.prenom + ' ' + order.nom,
       customer_email: order.email,
-      customer_phone: order.tel,
+      customer_phone: order.tel || '',
       description:    'Ticket Gala ENSETP 2026 – ' + order.type.toUpperCase(),
-      callback_url:   CFG.WEBHOOK_URL + '?order_id=' + order.id,
-      return_url:     CFG.SITE_URL + '?payment_status=success&order_id=' + order.id,
-      cancel_url:     CFG.SITE_URL + '?payment_status=cancel&order_id=' + order.id
+      // Webhook → Apps Script reçoit la confirmation (doPost)
+      callback_url:   cfg.APPS_SCRIPT_URL,
+      // Redirections utilisateur → site public
+      return_url:     cfg.SITE_URL + '?payment_status=success&order_id=' + order.id,
+      cancel_url:     cfg.SITE_URL + '?payment_status=cancel&order_id='  + order.id
     };
     var resp = UrlFetchApp.fetch(CFG.PAYDUNIA_URL, {
       method: 'post', contentType: 'application/json',
-      payload: JSON.stringify(payload), muteHttpExceptions: true
+      payload: JSON.stringify(body), muteHttpExceptions: true
     });
     var data = JSON.parse(resp.getContentText());
-    return data.payment_url || data.url || null;
+    Logger.log('Paydunia response: ' + JSON.stringify(data));
+    return data.payment_url || data.url || data.checkout_url || null;
   } catch (e) {
     Logger.log('Paydunia error: ' + e.message);
     return null;
@@ -268,23 +363,34 @@ function createPayduniaPayment(order) {
 }
 
 function handlePayduniaWebhook(data) {
-  var orderId = data.order_id || data.transaction_ref;
-  var status  = data.status;
-  if (status === 'SUCCESS' || status === 'success') {
+  var cfg = getCFG();
+  var orderId = data.order_id || data.transaction_ref || data.reference;
+  var status  = String(data.status || data.payment_status || '').toLowerCase();
+  Logger.log('Webhook Paydunia reçu — order: ' + orderId + ' status: ' + status);
+
+  if (status === 'success' || status === 'successful' || status === 'completed') {
     updateOrderStatus(orderId, 'paid');
     var order = getOrderById(orderId);
-    if (order) { sendTicketEmail(order); sendAdminNotification(order); }
-    return { success: true };
+    if (order) {
+      sendTicketEmail(order, cfg);
+      sendAdminNotification(order, cfg);
+      Logger.log('✅ Ticket envoyé après confirmation Paydunia: ' + orderId);
+    } else {
+      Logger.log('⚠️ Commande introuvable pour: ' + orderId);
+    }
+    return { success: true, orderId: orderId };
   }
   return { success: false, reason: 'Statut non confirmé: ' + status };
 }
 
 function handlePayduniaCallback(params) {
   var orderId = params.order_id;
-  if (params.payment_status === 'success') {
+  var status  = String(params.payment_status || '').toLowerCase();
+  if (status === 'success') {
     updateOrderStatus(orderId, 'paid');
     var order = getOrderById(orderId);
-    if (order) { sendTicketEmail(order); sendAdminNotification(order); }
+    var cfg = getCFG();
+    if (order) { sendTicketEmail(order, cfg); sendAdminNotification(order, cfg); }
   }
 }
 
@@ -294,54 +400,38 @@ function getSheet() {
     ? SpreadsheetApp.openById(CFG.SHEET_ID)
     : SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(CFG.COMMANDES_SHEET);
-  if (!sh) {
-    _initCommandes(ss);
-    sh = ss.getSheetByName(CFG.COMMANDES_SHEET);
-  }
+  if (!sh) { _initCommandes(ss); sh = ss.getSheetByName(CFG.COMMANDES_SHEET); }
   return sh;
 }
 
 function logToSheet(order) {
   var sh = getSheet();
   sh.appendRow([
-    order.id,
-    order.prenom,
-    order.nom,
-    order.email,
-    order.tel || '',
-    order.type.toUpperCase(),
-    order.qty  || 1,
-    order.price || 0,
-    order.total || 0,
-    order.payment || '',
-    new Date(order.date || new Date()),
-    order.status || 'pending',
-    'Non'
+    order.id, order.prenom, order.nom, order.email, order.tel||'',
+    order.type.toUpperCase(), order.qty||1, order.price||0, order.total||0,
+    order.payment||'', new Date(order.date||new Date()), order.status||'pending', 'Non'
   ]);
 }
 
 function updateOrderStatus(orderId, status) {
-  var sh   = getSheet();
-  var data = sh.getDataRange().getValues();
+  var sh = getSheet(), data = sh.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === orderId) {
-      sh.getRange(i + 1, 12).setValue(status === 'paid' ? 'PAYÉ' : status);
-      if (status === 'paid') sh.getRange(i + 1, 13).setValue('Oui');
+      sh.getRange(i+1, 12).setValue(status==='paid'?'PAYÉ':status);
+      if (status==='paid') sh.getRange(i+1, 13).setValue('Oui');
       return;
     }
   }
 }
 
 function getOrderById(orderId) {
-  var sh   = getSheet();
-  var data = sh.getDataRange().getValues();
+  var sh = getSheet(), data = sh.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === orderId) {
       return {
-        id: data[i][0], prenom: data[i][1], nom: data[i][2],
-        email: data[i][3], tel: data[i][4], type: data[i][5],
-        qty: data[i][6], price: data[i][7], total: data[i][8],
-        payment: data[i][9], date: data[i][10], status: data[i][11]
+        id:data[i][0], prenom:data[i][1], nom:data[i][2], email:data[i][3],
+        tel:data[i][4], type:data[i][5], qty:data[i][6], price:data[i][7],
+        total:data[i][8], payment:data[i][9], date:data[i][10], status:data[i][11]
       };
     }
   }
@@ -349,51 +439,59 @@ function getOrderById(orderId) {
 }
 
 function getStats() {
-  var sh   = getSheet();
-  var data = sh.getDataRange().getValues();
-  var total = 0, std = 0, vip = 0, table = 0, recettes = 0;
-  for (var i = 1; i < data.length; i++) {
+  var sh = getSheet(), data = sh.getDataRange().getValues();
+  var total=0, solo=0, couple=0, recettes=0;
+  for (var i=1; i<data.length; i++) {
     total++;
     var t = String(data[i][5]).toLowerCase();
-    if (t === 'solo')   std++;
-    else if (t === 'couple') vip++;
-    recettes += Number(data[i][8]) || 0;
+    if (t==='solo') solo++; else if (t==='couple') couple++;
+    recettes += Number(data[i][8])||0;
   }
-  return { total: total, solo: std, couple: vip, recettes: recettes };
+  return { total:total, solo:solo, couple:couple, recettes:recettes };
 }
 
 // ── EMAILS ─────────────────────────────────────────────────
-function sendTicketEmail(order) {
+function sendTicketEmail(order, cfg) {
+  cfg = cfg || getCFG();
   var name  = order.prenom + ' ' + order.nom;
-  var total = Number(order.total).toLocaleString() + ' FCFA';
+  var total = Number(order.total).toLocaleString('fr-FR') + ' FCFA';
   var type  = String(order.type).toUpperCase();
-  var body  = buildEmailBody(name, type, total, order.id, buildTicketHtml(order));
-
-  GmailApp.sendEmail(
-    order.email,
-    '🎉 Votre Ticket – Dîner de Gala ENSETP 2026 [' + order.id + ']',
-    stripHtml(body),
-    { name: 'Gala ENSETP 2026', htmlBody: body, replyTo: CFG.ADMIN_EMAIL }
-  );
-  Logger.log('Ticket envoyé à ' + order.email);
+  var body  = buildEmailBody(name, type, total, order.id, buildTicketHtml(order, cfg), cfg);
+  try {
+    GmailApp.sendEmail(order.email,
+      '🎉 Votre Ticket – Dîner de Gala ENSETP 2026 [' + order.id + ']',
+      stripHtml(body),
+      { name: 'Gala ENSETP 2026', htmlBody: body, replyTo: cfg.ADMIN_EMAIL }
+    );
+    Logger.log('✅ Ticket envoyé à ' + order.email);
+  } catch (e) {
+    Logger.log('❌ Erreur envoi email ticket: ' + e.message);
+  }
 }
 
-function sendAdminNotification(order) {
-  var body = 'Nouvelle commande reçue :\n\n'
-    + 'ID      : ' + order.id + '\n'
-    + 'Nom     : ' + order.prenom + ' ' + order.nom + '\n'
-    + 'E-mail  : ' + order.email + '\n'
-    + 'Tél.    : ' + (order.tel || '–') + '\n'
-    + 'Type    : ' + order.type.toUpperCase() + '\n'
-    + 'Qté     : ' + (order.qty || 1) + '\n'
-    + 'Total   : ' + Number(order.total).toLocaleString() + ' FCFA\n'
-    + 'Paiement: ' + (order.payment || '–') + '\n'
-    + 'Date    : ' + new Date(order.date).toLocaleString('fr-FR');
-  GmailApp.sendEmail(CFG.ADMIN_EMAIL, '[GALA ENSETP] Nouvelle commande – ' + order.id, body);
+function sendAdminNotification(order, cfg) {
+  cfg = cfg || getCFG();
+  var body = '🎫 Nouvelle commande — Gala ENSETP 2026\n\n'
+    + 'ID       : ' + order.id + '\n'
+    + 'Nom      : ' + order.prenom + ' ' + order.nom + '\n'
+    + 'E-mail   : ' + order.email + '\n'
+    + 'Tél.     : ' + (order.tel||'–') + '\n'
+    + 'Type     : ' + order.type.toUpperCase() + '\n'
+    + 'Qté      : ' + (order.qty||1) + '\n'
+    + 'Total    : ' + Number(order.total).toLocaleString('fr-FR') + ' FCFA\n'
+    + 'Paiement : ' + (order.payment||'–') + '\n'
+    + 'Date     : ' + new Date(order.date).toLocaleString('fr-FR') + '\n\n'
+    + '—\nMahu Events · mahu.cards';
+  try {
+    GmailApp.sendEmail(cfg.ADMIN_EMAIL, '[GALA ENSETP] Nouvelle commande – ' + order.id, body);
+  } catch (e) {
+    Logger.log('❌ Erreur notification admin: ' + e.message);
+  }
 }
 
-// ── TICKET HTML (e-mail) ───────────────────────────────────
-function buildTicketHtml(order) {
+// ── TICKET HTML (pour e-mail) ──────────────────────────────
+function buildTicketHtml(order, cfg) {
+  cfg = cfg || getCFG();
   return '<div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:2px solid #D4AF37;border-radius:14px;overflow:hidden;font-family:Arial,sans-serif;max-width:460px;">'
     + '<div style="background:#0A0A0A;padding:16px 22px;border-bottom:1px solid rgba(212,175,55,0.3);display:flex;justify-content:space-between;align-items:center;">'
     +   '<span style="font-size:1.1rem;font-weight:bold;color:#D4AF37;letter-spacing:3px;">ENSETP</span>'
@@ -402,32 +500,27 @@ function buildTicketHtml(order) {
     + '<div style="padding:20px 22px;">'
     +   '<div style="font-size:1.8rem;font-style:italic;color:#D4AF37;margin-bottom:4px;">Gala</div>'
     +   '<div style="font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:#aaa;margin-bottom:16px;">De Fin d\'Année · ENSETP 2026</div>'
-    +   '<table width="100%" style="color:#fff;">'
-    +     '<tr>'
-    +       '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Titulaire</div><div style="font-size:0.9rem;font-weight:600">' + order.prenom + ' ' + order.nom + '</div></td>'
-    +       '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Type</div><div><span style="background:linear-gradient(135deg,#D4AF37,#A07820);color:#000;font-size:0.6rem;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:18px;">' + order.type.toUpperCase() + '</span></div></td>'
-    +     '</tr>'
-    +     '<tr>'
-    +       '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">E-mail</div><div style="font-size:0.78rem;color:#ccc">' + order.email + '</div></td>'
-    +       '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Montant</div><div style="color:#D4AF37;font-weight:bold">' + Number(order.total).toLocaleString() + ' FCFA</div></td>'
-    +     '</tr>'
+    +   '<table width="100%" style="color:#fff;border-collapse:collapse;">'
+    +     '<tr><td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Titulaire</div><div style="font-size:0.9rem;font-weight:600">' + order.prenom + ' ' + order.nom + '</div></td>'
+    +         '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Type</div><div><span style="background:linear-gradient(135deg,#D4AF37,#A07820);color:#000;font-size:0.6rem;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:18px;">' + order.type.toUpperCase() + '</span></div></td></tr>'
+    +     '<tr><td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">E-mail</div><div style="font-size:0.78rem;color:#ccc">' + order.email + '</div></td>'
+    +         '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Montant</div><div style="color:#D4AF37;font-weight:bold">' + Number(order.total).toLocaleString('fr-FR') + ' FCFA</div></td></tr>'
     +   '</table>'
     +   '<hr style="border:none;border-top:1px dashed rgba(212,175,55,0.3);margin:16px 0;" />'
-    +   '<table width="100%" style="color:#fff;">'
-    +     '<tr>'
-    +       '<td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Date</div><div style="font-weight:600">' + CFG.EVENT_DATE + '</div></td>'
-    +       '<td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Lieu</div><div style="font-weight:600">' + CFG.EVENT_LIEU + '</div></td>'
-    +     '</tr>'
+    +   '<table width="100%" style="color:#fff;border-collapse:collapse;">'
+    +     '<tr><td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Date</div><div style="font-weight:600">' + cfg.EVENT_DATE + '</div></td>'
+    +         '<td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Lieu</div><div style="font-weight:600">' + cfg.EVENT_LIEU + '</div></td></tr>'
     +   '</table>'
     + '</div>'
     + '<div style="background:rgba(212,175,55,0.06);padding:12px 22px;border-top:1px dashed rgba(212,175,55,0.3);">'
     +   '<div style="font-family:monospace;font-size:0.72rem;color:#D4AF37;letter-spacing:2px;">' + order.id + '</div>'
-    +   '<div style="font-size:0.6rem;color:#888;margin-top:3px;">Émis le ' + new Date(order.date || new Date()).toLocaleDateString('fr-FR') + '</div>'
+    +   '<div style="font-size:0.6rem;color:#888;margin-top:3px;">Émis le ' + new Date(order.date||new Date()).toLocaleDateString('fr-FR') + '</div>'
     + '</div>'
     + '</div>';
 }
 
-function buildEmailBody(name, type, total, id, ticketHtml) {
+function buildEmailBody(name, type, total, id, ticketHtml, cfg) {
+  cfg = cfg || getCFG();
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
     + '<body style="background:#0A0A0A;margin:0;padding:30px;font-family:Arial,sans-serif;">'
     + '<div style="max-width:560px;margin:0 auto;">'
@@ -437,19 +530,16 @@ function buildEmailBody(name, type, total, id, ticketHtml) {
     +   '</div>'
     +   '<div style="background:#1A1A1A;border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin-bottom:24px;">'
     +     '<h2 style="color:#D4AF37;font-size:1.2rem;margin:0 0 14px">Bonjour ' + name + ' ! 🎉</h2>'
-    +     '<p style="color:#ccc;font-size:0.9rem;line-height:1.7;margin:0 0 20px">Votre ticket pour le <strong style="color:#F5D66A">Dîner de Gala de Fin d\'Année ENSETP 2026</strong> a bien été reçu.</p>'
+    +     '<p style="color:#ccc;font-size:0.9rem;line-height:1.7;margin:0 0 20px">Votre ticket pour le <strong style="color:#F5D66A">Dîner de Gala de Fin d\'Année ENSETP 2026</strong> a bien été reçu et votre paiement est confirmé.</p>'
     +     '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;">'
     +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Type de ticket</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;font-weight:600;border-left:2px solid #D4AF37">' + type + '</td></tr>'
     +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Montant payé</td><td style="padding:8px 14px;background:#1A1A1A;color:#D4AF37;font-weight:bold;border-left:2px solid #D4AF37">' + total + '</td></tr>'
-    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Date</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + CFG.EVENT_DATE + '</td></tr>'
-    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Lieu</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + CFG.EVENT_LIEU + '</td></tr>'
+    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Date</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + cfg.EVENT_DATE + '</td></tr>'
+    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Lieu</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + cfg.EVENT_LIEU + '</td></tr>'
     +     '</table>'
     +     '<p style="color:#888;font-size:0.8rem;margin:0">Référence : <strong style="color:#D4AF37">' + id + '</strong></p>'
     +   '</div>'
-    +   '<div style="margin-bottom:24px;">'
-    +     '<h3 style="color:#D4AF37;font-size:0.88rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Votre E-Ticket</h3>'
-    +     ticketHtml
-    +   '</div>'
+    +   '<div style="margin-bottom:24px;"><h3 style="color:#D4AF37;font-size:0.88rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Votre E-Ticket</h3>' + ticketHtml + '</div>'
     +   '<div style="background:#1A1A1A;border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:22px;margin-bottom:24px;">'
     +     '<h3 style="color:#D4AF37;font-size:0.82rem;letter-spacing:2px;margin:0 0 12px">Artistes Invités</h3>'
     +     '<p style="color:#ccc;font-size:0.85rem;line-height:1.7;margin:0">ZOU NAME &bull; MIST CASH &bull; BLM PRO &bull; ME MAN &bull; NIKO<br>'
@@ -461,76 +551,58 @@ function buildEmailBody(name, type, total, id, ticketHtml) {
     +     '<span style="color:#D4AF37">ENSETP · Former aujourd\'hui, réussir demain !</span><br>'
     +     '<span style="color:#555;font-size:0.68rem;">Créé avec Mahu Events · mahu.cards</span>'
     +   '</p>'
-    + '</div>'
-    + '</body></html>';
+    + '</div></body></html>';
 }
 
 function stripHtml(html) {
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 }
 
 // ── RAPPORT QUOTIDIEN ─────────────────────────────────────
 function setupDailyReminder() {
   clearTriggers();
-  ScriptApp.newTrigger('sendDailyReport')
-    .timeBased().atHour(8).everyDays(1).create();
+  ScriptApp.newTrigger('sendDailyReport').timeBased().atHour(8).everyDays(1).create();
   SpreadsheetApp.getUi().alert('✅ Rappel quotidien activé (tous les jours à 8h).');
 }
 
 function clearTriggers() {
-  ScriptApp.getProjectTriggers().forEach(function(t) {
-    if (t.getHandlerFunction() === 'sendDailyReport') ScriptApp.deleteTrigger(t);
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction()==='sendDailyReport') ScriptApp.deleteTrigger(t);
   });
 }
 
 function sendDailyReport() {
+  var cfg   = getCFG();
   var stats = getStats();
-
-  // Compter les présences
-  var ss = CFG.SHEET_ID
-    ? SpreadsheetApp.openById(CFG.SHEET_ID)
-    : SpreadsheetApp.getActiveSpreadsheet();
-  var ps = ss.getSheetByName(CFG.PRESENCES_SHEET);
-  var presences = ps ? Math.max(0, ps.getLastRow() - 1) : 0;
-
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var ps    = ss.getSheetByName(CFG.PRESENCES_SHEET);
+  var presences = ps ? Math.max(0, ps.getLastRow()-1) : 0;
   var body = '📊 Rapport quotidien — Gala ENSETP 2026\n\n'
-    + '📅 Date : ' + new Date().toLocaleString('fr-FR') + '\n\n'
-    + '🎫 TICKETS\n'
-    + '  Total vendus : ' + stats.total + '\n'
-    + '  Solo         : ' + stats.solo + '\n'
-    + '  Couple       : ' + stats.couple + '\n\n'
-    + '✅ PRÉSENCES\n'
-    + '  Confirmées   : ' + presences + '\n\n'
-    + '💰 RECETTES\n'
-    + '  Total        : ' + stats.recettes.toLocaleString() + ' FCFA\n\n'
-    + '—\nEnvoyé par Mahu Events · mahu.cards';
-
-  GmailApp.sendEmail(
-    CFG.ADMIN_EMAIL,
-    '[GALA ENSETP] Rapport du ' + new Date().toLocaleDateString('fr-FR'),
-    body
-  );
+    + '📅 ' + new Date().toLocaleString('fr-FR') + '\n\n'
+    + '🎫 TICKETS\n  Total : ' + stats.total + '\n  Solo  : ' + stats.solo + '\n  Couple: ' + stats.couple + '\n\n'
+    + '✅ PRÉSENCES\n  Confirmées : ' + presences + '\n\n'
+    + '💰 RECETTES\n  Total : ' + stats.recettes.toLocaleString('fr-FR') + ' FCFA\n\n'
+    + '—\nMahu Events · mahu.cards';
+  GmailApp.sendEmail(cfg.ADMIN_EMAIL, '[GALA ENSETP] Rapport du ' + new Date().toLocaleDateString('fr-FR'), body);
 }
 
 // ── TEST ───────────────────────────────────────────────────
 function testSendTicket() {
+  var cfg = getCFG();
   var testOrder = {
-    id:       'TK-ENSETP-2026-TEST-ABCDE',
-    prenom:   'Cheikh',
-    nom:      'Diallo',
-    email:    Session.getActiveUser().getEmail(),
-    tel:      '+221 77 000 00 00',
-    type:     'solo',
-    qty:      1,
-    price:    1000,
-    total:    1000,
-    payment:  'wave',
-    date:     new Date().toISOString(),
-    status:   'paid'
+    id:'TK-ENSETP-2026-TEST-00001', prenom:'Cheikh', nom:'Diallo',
+    email: Session.getActiveUser().getEmail(),
+    tel:'+221 77 000 00 00', type:'solo', qty:1, price:1000, total:1000,
+    payment:'wave', date:new Date().toISOString(), status:'paid'
   };
   logToSheet(testOrder);
-  sendTicketEmail(testOrder);
-  sendAdminNotification(testOrder);
-  Logger.log('✅ Test ticket envoyé à ' + testOrder.email + ' et copie à ' + CFG.ADMIN_EMAIL);
-  SpreadsheetApp.getUi().alert('✅ Test envoyé !\nVérifiez votre boîte mail (' + testOrder.email + ') et contact@mahu.cards.');
+  sendTicketEmail(testOrder, cfg);
+  sendAdminNotification(testOrder, cfg);
+  Logger.log('✅ Test envoyé à ' + testOrder.email + ' + ' + cfg.ADMIN_EMAIL);
+  SpreadsheetApp.getUi().alert(
+    '✅ Test envoyé !\n\n' +
+    '• Ticket → ' + testOrder.email + '\n' +
+    '• Notification admin → ' + cfg.ADMIN_EMAIL + '\n\n' +
+    'Vérifiez vos boîtes mail.'
+  );
 }
