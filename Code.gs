@@ -53,15 +53,17 @@ function getSheetConfig() {
 function getCFG() {
   var sc = getSheetConfig();
   return {
-    ADMIN_EMAIL:      sc.ADMIN_EMAIL      || CFG.ADMIN_EMAIL,
-    EMAIL_FROM:       sc.EMAIL_FROM       || CFG.EMAIL_FROM,
-    EVENT_DATE:       sc.EVENT_DATE       || CFG.EVENT_DATE,
-    EVENT_LIEU:       sc.EVENT_LIEU       || CFG.EVENT_LIEU,
-    PAYDUNIA_KEY:     sc.PAYDUNIA_KEY     || CFG.PAYDUNIA_KEY,
-    PAYDUNIA_SECRET:  sc.PAYDUNIA_SECRET  || CFG.PAYDUNIA_SECRET,
-    PAYDUNIA_URL:     CFG.PAYDUNIA_URL,
-    APPS_SCRIPT_URL:  sc.APPS_SCRIPT_URL  || CFG.APPS_SCRIPT_URL,
-    SITE_URL:         sc.SITE_URL         || CFG.SITE_URL
+    ADMIN_EMAIL:          sc.ADMIN_EMAIL          || CFG.ADMIN_EMAIL,
+    EMAIL_FROM:           sc.EMAIL_FROM           || CFG.EMAIL_FROM,
+    EVENT_DATE:           sc.EVENT_DATE           || CFG.EVENT_DATE,
+    EVENT_LIEU:           sc.EVENT_LIEU           || CFG.EVENT_LIEU,
+    PAYDUNIA_KEY:         sc.PAYDUNIA_KEY         || CFG.PAYDUNIA_KEY,
+    PAYDUNIA_SECRET:      sc.PAYDUNIA_SECRET      || CFG.PAYDUNIA_SECRET,
+    PAYDUNIA_MASTER_KEY:  sc.PAYDUNIA_MASTER_KEY  || '',
+    PAYDUNIA_TOKEN:       sc.PAYDUNIA_TOKEN        || '',
+    PAYDUNIA_URL:         CFG.PAYDUNIA_URL,
+    APPS_SCRIPT_URL:      sc.APPS_SCRIPT_URL      || CFG.APPS_SCRIPT_URL,
+    SITE_URL:             sc.SITE_URL             || CFG.SITE_URL
   };
 }
 
@@ -113,14 +115,16 @@ function _initConfig(ss) {
 
   if (sh.getLastRow() <= 1) {
     var rows = [
-      ['PAYDUNIA_KEY',    '',                          'Clé publique API Paydunia (dashboard.paydunia.com)'],
-      ['PAYDUNIA_SECRET', '',                          'Clé secrète Paydunia (pour valider les webhooks)'],
-      ['APPS_SCRIPT_URL', CFG.APPS_SCRIPT_URL,        'URL de ce script — Paydunia envoie les confirmations ici'],
-      ['SITE_URL',        CFG.SITE_URL,                'URL du site public (redirection utilisateur après paiement)'],
-      ['ADMIN_EMAIL',     CFG.ADMIN_EMAIL,             'E-mail recevant toutes les notifications admin'],
-      ['EMAIL_FROM',      CFG.EMAIL_FROM,              'E-mail expéditeur des tickets'],
-      ['EVENT_DATE',      CFG.EVENT_DATE,              'Date de l\'événement (affiché sur les tickets)'],
-      ['EVENT_LIEU',      CFG.EVENT_LIEU,              'Lieu de l\'événement (affiché sur les tickets)']
+      ['PAYDUNIA_KEY',        '',                      '🔑 Clé publique API Paydunia (dashboard.paydunia.com)'],
+      ['PAYDUNIA_SECRET',     '',                      '🔒 Clé secrète Paydunia (validation signature webhook)'],
+      ['PAYDUNIA_MASTER_KEY', '',                      '👑 Clé Master Paydunia (gestion du compte marchand)'],
+      ['PAYDUNIA_TOKEN',      '',                      '🎫 Token d\'accès Paydunia (OAuth / Bearer token)'],
+      ['APPS_SCRIPT_URL',     CFG.APPS_SCRIPT_URL,    '🔗 URL de ce script — Paydunia envoie les confirmations ici'],
+      ['SITE_URL',            CFG.SITE_URL,            '🌐 URL du site public (redirection après paiement)'],
+      ['ADMIN_EMAIL',         CFG.ADMIN_EMAIL,         '📧 E-mail recevant toutes les notifications admin'],
+      ['EMAIL_FROM',          CFG.EMAIL_FROM,          '📤 E-mail expéditeur des tickets'],
+      ['EVENT_DATE',          CFG.EVENT_DATE,          '📅 Date de l\'événement (affiché sur les tickets)'],
+      ['EVENT_LIEU',          CFG.EVENT_LIEU,          '📍 Lieu de l\'événement (affiché sur les tickets)']
     ];
     sh.getRange(2, 1, rows.length, 3).setValues(rows);
   }
@@ -129,10 +133,10 @@ function _initConfig(ss) {
   sh.setColumnWidth(2, 300);
   sh.setColumnWidth(3, 340);
 
-  // Surligner les clés Paydunia vides en orange pour les signaler
+  // Surligner les 4 clés Paydunia vides en orange
   var rule = SpreadsheetApp.newConditionalFormatRule()
     .whenCellEmpty().setBackground('#3d2000').setFontColor('#ffaa00')
-    .setRanges([sh.getRange('B2:B3')]).build();
+    .setRanges([sh.getRange('B2:B5')]).build();
   sh.setConditionalFormatRules([rule]);
 
   Logger.log('Feuille Configuration prête.');
@@ -227,6 +231,8 @@ function doPost(e) {
     else if (action === 'confirmPresence') result = handleConfirmPresence(payload);
     else if (action === 'addSubAdmin')     result = handleAddSubAdmin(payload);
     else if (action === 'getStats')        result = getStats();
+    else if (action === 'sendOTP')         result = handleSendOTP(payload);
+    else if (action === 'verifyOTP')       result = handleVerifyOTP(payload);
     else                                   result = { error: 'Action inconnue: ' + action };
 
     return _jsonOut(result);
@@ -605,4 +611,96 @@ function testSendTicket() {
     '• Notification admin → ' + cfg.ADMIN_EMAIL + '\n\n' +
     'Vérifiez vos boîtes mail.'
   );
+}
+
+// ── AUTHENTIFICATION ADMIN PAR OTP ────────────────────────
+function handleSendOTP(payload) {
+  try {
+    var cfg   = getCFG();
+    var email = String(payload.email || '').toLowerCase().trim();
+    if (!email) return { error: 'Email requis.' };
+
+    // Emails autorisés : admin principal + sous-admins du sheet
+    var authorized = [cfg.ADMIN_EMAIL.toLowerCase()];
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sh = ss.getSheetByName(CFG.ADMINS_SHEET);
+      if (sh) {
+        var data = sh.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (data[i][1]) authorized.push(String(data[i][1]).toLowerCase().trim());
+        }
+      }
+    } catch(e) { Logger.log('Sous-admins non lus: ' + e.message); }
+
+    if (authorized.indexOf(email) === -1) {
+      Logger.log('OTP refusé — email non autorisé: ' + email);
+      return { error: 'Cet e-mail n\'est pas autorisé à accéder au panneau d\'administration.' };
+    }
+
+    // Rate limiting : max 3 OTP par email par heure
+    var cache  = CacheService.getScriptCache();
+    var rlKey  = 'otp_rl_' + email.replace(/[^a-z0-9]/g, '_');
+    var rlCount = parseInt(cache.get(rlKey) || '0');
+    if (rlCount >= 3) return { error: 'Trop de tentatives. Attendez 1 heure avant de réessayer.' };
+    cache.put(rlKey, String(rlCount + 1), 3600);
+
+    // Génération du code OTP à 6 chiffres
+    var otp    = String(Math.floor(100000 + Math.random() * 900000));
+    var otpKey = 'otp_' + email.replace(/[^a-z0-9]/g, '_');
+    cache.put(otpKey, otp, 300); // expire en 5 minutes
+
+    // Envoi de l'e-mail
+    var html = '<!DOCTYPE html><html><body style="background:#0A0A0A;margin:0;padding:30px;font-family:Arial,sans-serif;">'
+      + '<div style="max-width:420px;margin:0 auto;background:#1A1A1A;border:1px solid rgba(212,175,55,0.25);border-radius:16px;padding:36px;text-align:center;">'
+      + '<div style="font-size:1.2rem;font-weight:bold;color:#D4AF37;letter-spacing:4px;margin-bottom:6px;">ENSETP</div>'
+      + '<div style="font-size:0.7rem;color:#888;letter-spacing:1px;margin-bottom:28px;">GALA DE FIN D\'ANNÉE 2026 · ADMIN</div>'
+      + '<div style="font-size:0.85rem;color:#ccc;margin-bottom:22px;line-height:1.6;">Votre code de connexion à l\'interface d\'administration :</div>'
+      + '<div style="font-size:2.6rem;font-weight:bold;color:#D4AF37;letter-spacing:14px;'
+      +   'background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.3);'
+      +   'border-radius:12px;padding:22px 16px;margin-bottom:24px;">' + otp + '</div>'
+      + '<div style="font-size:0.75rem;color:#888;line-height:1.8;">'
+      +   'Ce code expire dans <strong style="color:#F5D66A">5 minutes</strong>.<br>'
+      +   'Si vous n\'avez pas demandé ce code, ignorez cet e-mail.'
+      + '</div>'
+      + '<div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(212,175,55,0.1);font-size:0.65rem;color:#555;">Mahu Events · mahu.cards</div>'
+      + '</div></body></html>';
+
+    GmailApp.sendEmail(email,
+      '[Gala ENSETP 2026] Code de connexion admin : ' + otp,
+      'Votre code de connexion admin est : ' + otp + '\n\nCe code expire dans 5 minutes.\nSi vous n\'avez pas demandé ce code, ignorez cet e-mail.\n\n—\nMahu Events · mahu.cards',
+      { name: 'Gala ENSETP 2026', htmlBody: html, replyTo: cfg.ADMIN_EMAIL }
+    );
+
+    Logger.log('✅ OTP envoyé à ' + email);
+    return { success: true, message: 'Code envoyé à ' + email };
+  } catch (err) {
+    Logger.log('handleSendOTP error: ' + err.message);
+    return { error: 'Erreur lors de l\'envoi: ' + err.message };
+  }
+}
+
+function handleVerifyOTP(payload) {
+  try {
+    var email = String(payload.email || '').toLowerCase().trim();
+    var code  = String(payload.code  || '').trim();
+    if (!email || !code) return { error: 'Email et code requis.' };
+
+    var cache  = CacheService.getScriptCache();
+    var otpKey = 'otp_' + email.replace(/[^a-z0-9]/g, '_');
+    var stored = cache.get(otpKey);
+
+    if (!stored) return { error: 'Code expiré. Demandez un nouveau code.' };
+    if (stored !== code) {
+      Logger.log('OTP invalide pour ' + email + ' — reçu: ' + code);
+      return { error: 'Code incorrect. Vérifiez le code reçu par e-mail.' };
+    }
+
+    cache.remove(otpKey); // code à usage unique
+    Logger.log('✅ Connexion admin via OTP: ' + email);
+    return { success: true, email: email };
+  } catch (err) {
+    Logger.log('handleVerifyOTP error: ' + err.message);
+    return { error: err.message };
+  }
 }

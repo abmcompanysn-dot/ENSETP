@@ -224,14 +224,49 @@
     <div class="login-title">Espace Admin</div>
     <div class="login-sub">Dîner de Gala · ENSETP 2026</div>
     <div class="login-badge">Accès Sécurisé</div>
-    <div class="login-error" id="login-error"><i class="fas fa-exclamation-circle"></i> Mot de passe incorrect.</div>
-    <div class="login-field">
-      <i class="fas fa-lock"></i>
-      <input type="password" id="admin-pw" placeholder="Mot de passe administrateur"
-        onkeypress="if(event.key==='Enter')doLogin()" autocomplete="current-password" />
+    <div class="login-error" id="login-error" style="display:none"><i class="fas fa-exclamation-circle"></i> <span id="login-error-msg"></span></div>
+
+    <!-- Étape 1 : Email -->
+    <div id="step-email">
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">
+        Entrez votre e-mail admin pour recevoir un code de connexion.
+      </div>
+      <div class="login-field">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="admin-email" placeholder="votre@email.com"
+          onkeypress="if(event.key==='Enter')sendOTP()" autocomplete="email" />
+      </div>
+      <button class="btn-login" id="btn-send-otp" onclick="sendOTP()">
+        <i class="fas fa-paper-plane"></i> &nbsp;Recevoir le code
+      </button>
     </div>
-    <button class="btn-login" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> &nbsp;Accéder</button>
-    <div class="login-back"><a href="index.html"><i class="fas fa-arrow-left"></i> Retour au site</a></div>
+
+    <!-- Étape 2 : Code OTP -->
+    <div id="step-otp" style="display:none">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px;line-height:1.7;text-align:left;">
+        Un code à 6 chiffres a été envoyé à<br>
+        <strong id="email-display" style="color:var(--gold)"></strong>
+      </div>
+      <div class="login-field">
+        <i class="fas fa-key"></i>
+        <input type="text" id="admin-otp" placeholder="123456" maxlength="6"
+          style="text-align:center;letter-spacing:10px;font-size:1.3rem;font-weight:700;"
+          onkeypress="if(event.key==='Enter')verifyOTP()" autocomplete="one-time-code" />
+      </div>
+      <button class="btn-login" id="btn-verify-otp" onclick="verifyOTP()">
+        <i class="fas fa-sign-in-alt"></i> &nbsp;Accéder
+      </button>
+      <div style="margin-top:16px;font-size:0.74rem;color:var(--text-muted);display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="#" onclick="sendOTP(true);return false;" style="color:var(--gold);text-decoration:none;">
+          <i class="fas fa-redo" style="font-size:0.7rem;"></i> Renvoyer le code
+        </a>
+        <a href="#" onclick="resetLogin();return false;" style="color:var(--text-muted);text-decoration:none;">
+          <i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Changer d'e-mail
+        </a>
+      </div>
+    </div>
+
+    <div class="login-back" style="margin-top:24px;"><a href="index.html"><i class="fas fa-arrow-left"></i> Retour au site</a></div>
   </div>
 </div>
 
@@ -244,7 +279,7 @@
       <span class="admin-topbar-title">Panel Administrateur · Gala 2026</span>
     </div>
     <div class="admin-topbar-right">
-      <span class="topbar-user"><i class="fas fa-user-shield"></i> Administrateur</span>
+      <span class="topbar-user"><i class="fas fa-user-shield"></i> <span id="topbar-email">Administrateur</span></span>
       <button class="btn-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
     </div>
   </div>
@@ -362,34 +397,107 @@
 </div>
 
 <script>
-const ADMIN_PW = 'ENSETP@2026';
 const AS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxvWRz-gnuVgZhb2JY7aRulluEV4TMI_NH_fyWLwcvS0F4ifRjvxngiUIhemDe50h1_/exec';
 
 let orders = JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-let currentCommentArtist = null;
+let adminEmail = '';
 
-/* ── AUTH ── */
-function doLogin(){
-  const pw = document.getElementById('admin-pw').value;
-  const err = document.getElementById('login-error');
-  if(pw === ADMIN_PW){
-    err.style.display='none';
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('admin-screen').style.display='flex';
-    loadAdmin();
-  } else {
-    err.style.display='block';
-    document.getElementById('admin-pw').value='';
-    document.getElementById('admin-pw').focus();
+/* ── HELPERS LOGIN ── */
+function _loginError(msg){
+  const e=document.getElementById('login-error');
+  document.getElementById('login-error-msg').textContent=msg;
+  e.style.display='block';
+}
+function _loginErrorClear(){ document.getElementById('login-error').style.display='none'; }
+function _btnLoading(id,text){ const b=document.getElementById(id); b.disabled=true; b.innerHTML='<i class="fas fa-spinner fa-spin"></i> '+text; }
+function _btnReset(id,icon,text){ const b=document.getElementById(id); b.disabled=false; b.innerHTML='<i class="fas fa-'+icon+'"></i> &nbsp;'+text; }
+
+/* ── ÉTAPE 1 : Envoyer OTP ── */
+async function sendOTP(resend){
+  _loginErrorClear();
+  const emailInput = document.getElementById('admin-email');
+  const email = resend ? adminEmail : emailInput.value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    _loginError('Entrez une adresse e-mail valide.'); return;
+  }
+  adminEmail = email;
+  _btnLoading('btn-send-otp','Envoi en cours...');
+
+  const asUrl = localStorage.getItem('ensetp_as_url') || AS_URL_DEFAULT;
+  try {
+    const r = await fetch(asUrl, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'sendOTP', email})
+    });
+    const data = await r.json();
+    if(data.success){
+      document.getElementById('step-email').style.display='none';
+      document.getElementById('step-otp').style.display='block';
+      document.getElementById('email-display').textContent=email;
+      document.getElementById('admin-otp').value='';
+      document.getElementById('admin-otp').focus();
+    } else {
+      _loginError(data.error || 'E-mail non autorisé.');
+      _btnReset('btn-send-otp','paper-plane','Recevoir le code');
+    }
+  } catch(e){
+    _loginError('Connexion Apps Script impossible. Vérifiez l\'URL dans Config.');
+    _btnReset('btn-send-otp','paper-plane','Recevoir le code');
   }
 }
+
+/* ── ÉTAPE 2 : Vérifier OTP ── */
+async function verifyOTP(){
+  _loginErrorClear();
+  const code = document.getElementById('admin-otp').value.trim();
+  if(!code || !/^\d{6}$/.test(code)){
+    _loginError('Entrez le code à 6 chiffres reçu par e-mail.'); return;
+  }
+  _btnLoading('btn-verify-otp','Vérification...');
+
+  const asUrl = localStorage.getItem('ensetp_as_url') || AS_URL_DEFAULT;
+  try {
+    const r = await fetch(asUrl, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'verifyOTP', email:adminEmail, code})
+    });
+    const data = await r.json();
+    if(data.success){
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('admin-screen').style.display='flex';
+      document.getElementById('topbar-email').textContent=adminEmail;
+      loadAdmin();
+    } else {
+      _loginError(data.error || 'Code incorrect ou expiré.');
+      document.getElementById('admin-otp').value='';
+      document.getElementById('admin-otp').focus();
+      _btnReset('btn-verify-otp','sign-in-alt','Accéder');
+    }
+  } catch(e){
+    _loginError('Connexion Apps Script impossible.');
+    _btnReset('btn-verify-otp','sign-in-alt','Accéder');
+  }
+}
+
+/* ── Retour à l'étape email ── */
+function resetLogin(){
+  _loginErrorClear();
+  document.getElementById('step-otp').style.display='none';
+  document.getElementById('step-email').style.display='block';
+  document.getElementById('admin-email').value='';
+  document.getElementById('admin-otp').value='';
+  _btnReset('btn-send-otp','paper-plane','Recevoir le code');
+  adminEmail='';
+  document.getElementById('admin-email').focus();
+}
+
+/* ── Déconnexion ── */
 function doLogout(){
   if(!confirm('Se déconnecter ?')) return;
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
-  document.getElementById('admin-pw').value='';
+  resetLogin();
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
 
 /* ── TABS ── */
 function switchTab(name){
