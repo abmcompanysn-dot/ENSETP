@@ -907,7 +907,7 @@ async function processPayment(){
   const total=selPrice*qty;
   const id=`TK-ENSETP-2026-${String(orders.length+1).padStart(4,'0')}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
   const now=new Date();
-  const order={id,prenom,nom,email,tel,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'paid'};
+  const order={id,prenom,nom,email,tel,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'pending'};
 
   /* --- Try Apps Script / Paydunia --- */
   const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;

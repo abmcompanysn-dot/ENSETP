@@ -268,7 +268,8 @@ function _jsonOut(obj) {
 function handleCreateOrder(order) {
   var cfg = getCFG();
 
-  // 1. Enregistrement dans la feuille
+  // 1. Enregistrement dans la feuille (toujours pending jusqu'à confirmation Paydunia)
+  order.status = 'pending';
   logToSheet(order);
 
   // 2. Si clé Paydunia configurée → créer lien de paiement
@@ -278,9 +279,10 @@ function handleCreateOrder(order) {
       Logger.log('Lien Paydunia créé: ' + payLink);
       return { success: true, paymentUrl: payLink, orderId: order.id };
     }
+    Logger.log('⚠️ Paydunia configuré mais aucun lien retourné — bascule mode démo');
   }
 
-  // 3. Mode démo (sans Paydunia) → ticket envoyé directement
+  // 3. Mode démo (sans Paydunia ou si Paydunia échoue) → ticket envoyé directement
   order.status = 'paid';
   updateOrderStatus(order.id, 'paid');
   sendTicketEmail(order, cfg);
@@ -343,6 +345,10 @@ function handleAddSubAdmin(payload) {
 // ── PAYDUNIA ───────────────────────────────────────────────
 function createPayduniaPayment(order, cfg) {
   try {
+    var headers = { 'Content-Type': 'application/json' };
+    // Authentification Bearer si TOKEN disponible
+    if (cfg.PAYDUNIA_TOKEN) headers['Authorization'] = 'Bearer ' + cfg.PAYDUNIA_TOKEN;
+
     var body = {
       merchant_key:   cfg.PAYDUNIA_KEY,
       amount:         order.total,
@@ -352,19 +358,19 @@ function createPayduniaPayment(order, cfg) {
       customer_email: order.email,
       customer_phone: order.tel || '',
       description:    'Ticket Gala ENSETP 2026 – ' + order.type.toUpperCase(),
-      // Webhook → Apps Script reçoit la confirmation (doPost)
       callback_url:   cfg.APPS_SCRIPT_URL,
-      // Redirections utilisateur → site public
       return_url:     cfg.SITE_URL + '?payment_status=success&order_id=' + order.id,
       cancel_url:     cfg.SITE_URL + '?payment_status=cancel&order_id='  + order.id
     };
-    var resp = UrlFetchApp.fetch(CFG.PAYDUNIA_URL, {
+    if (cfg.PAYDUNIA_MASTER_KEY) body.master_key = cfg.PAYDUNIA_MASTER_KEY;
+
+    var resp = UrlFetchApp.fetch(cfg.PAYDUNIA_URL, {
       method: 'post', contentType: 'application/json',
-      payload: JSON.stringify(body), muteHttpExceptions: true
+      headers: headers, payload: JSON.stringify(body), muteHttpExceptions: true
     });
     var data = JSON.parse(resp.getContentText());
-    Logger.log('Paydunia response: ' + JSON.stringify(data));
-    return data.payment_url || data.url || data.checkout_url || null;
+    Logger.log('Paydunia response (' + resp.getResponseCode() + '): ' + JSON.stringify(data));
+    return data.payment_url || data.url || data.checkout_url || data.redirect_url || null;
   } catch (e) {
     Logger.log('Paydunia error: ' + e.message);
     return null;
