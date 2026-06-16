@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vérification Billet · Gala ENSETP 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  :root {
+    --gold:#D4AF37; --gold-light:#F5D66A; --gold-dark:#A07820;
+    --black:#0A0A0A; --dark:#111; --dark2:#1A1A1A;
+    --green:#1A6B35; --green-light:#2ecc71;
+    --red:#e74c3c; --text-muted:#888; --white:#FFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--black);color:var(--white);
+    font-family:'Montserrat',sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar{
+    background:rgba(10,10,10,0.97);border-bottom:1px solid rgba(212,175,55,0.18);
+    padding:0 5%;height:58px;display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
+  }
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .topbar-logo{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);letter-spacing:3px;}
+  .topbar-title{font-size:0.65rem;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;padding-left:12px;border-left:1px solid rgba(212,175,55,0.2);}
+  .topbar-back{color:var(--text-muted);font-size:0.72rem;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .3s;}
+  .topbar-back:hover{color:var(--gold);}
+
+  /* ── MAIN ── */
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 20px 60px;}
+
+  /* ── SCAN CARD ── */
+  .scan-card{
+    background:var(--dark2);border:1px solid rgba(212,175,55,0.2);border-radius:20px;
+    padding:40px 36px;max-width:480px;width:100%;text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,0.5);
+  }
+  .scan-icon{
+    width:72px;height:72px;border-radius:50%;
+    background:rgba(212,175,55,0.1);border:2px solid rgba(212,175,55,0.3);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 20px;font-size:1.8rem;color:var(--gold);
+  }
+  .scan-title{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+  .scan-sub{font-size:0.75rem;color:var(--text-muted);margin-bottom:28px;letter-spacing:1px;}
+
+  .input-wrap{position:relative;margin-bottom:14px;}
+  .input-wrap i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
+  .ticket-input{
+    width:100%;background:rgba(255,255,255,0.04);
+    border:1px solid rgba(212,175,55,0.22);border-radius:12px;
+    padding:15px 16px 15px 44px;color:var(--white);
+    font-family:'Montserrat',sans-serif;font-size:0.9rem;outline:none;
+    text-transform:uppercase;letter-spacing:1px;transition:border-color .3s;
+  }
+  .ticket-input:focus{border-color:var(--gold);background:rgba(212,175,55,0.04);}
+  .ticket-input::placeholder{text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.22);}
+
+  .btn-verify{
+    width:100%;padding:15px;border-radius:30px;border:none;cursor:pointer;
+    font-family:'Cinzel',serif;font-size:0.88rem;font-weight:700;letter-spacing:2px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--black);
+    transition:all .3s;margin-top:4px;
+  }
+  .btn-verify:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,175,55,0.35);}
+  .btn-verify:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  /* ── RESULT ── */
+  .result{display:none;margin-top:28px;border-radius:16px;overflow:hidden;}
+  .result.show{display:block;}
+
+  .result-header{
+    padding:22px 24px;display:flex;align-items:center;gap:14px;
+  }
+  .result-header.valid{background:rgba(26,107,53,0.18);border:1px solid rgba(46,204,113,0.35);}
+  .result-header.warned{background:rgba(180,100,0,0.15);border:1px solid rgba(212,175,55,0.4);}
+  .result-header.invalid{background:rgba(200,30,30,0.12);border:1px solid rgba(231,76,60,0.35);}
+  .result-header.valid,.result-header.warned,.result-header.invalid{border-radius:16px 16px 0 0;}
+
+  .result-icon-wrap{
+    width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:1.3rem;flex-shrink:0;
+  }
+  .valid .result-icon-wrap{background:rgba(46,204,113,0.15);color:var(--green-light);}
+  .warned .result-icon-wrap{background:rgba(212,175,55,0.15);color:var(--gold);}
+  .invalid .result-icon-wrap{background:rgba(231,76,60,0.12);color:var(--red);}
+
+  .result-status-title{font-family:'Cinzel',serif;font-size:0.95rem;font-weight:700;}
+  .valid .result-status-title{color:var(--green-light);}
+  .warned .result-status-title{color:var(--gold-light);}
+  .invalid .result-status-title{color:var(--red);}
+  .result-status-sub{font-size:0.72rem;color:var(--text-muted);margin-top:2px;}
+
+  .result-body{
+    background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+    border-top:none;border-radius:0 0 16px 16px;padding:20px 24px;
+  }
+  .result-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);
+    font-size:0.82rem;
+  }
+  .result-row:last-child{border-bottom:none;padding-bottom:0;}
+  .result-label{color:var(--text-muted);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;}
+  .result-value{color:var(--white);font-weight:600;text-align:right;}
+  .badge-type{
+    display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+    color:var(--black);font-size:0.6rem;font-weight:700;letter-spacing:2px;
+    padding:3px 12px;border-radius:20px;text-transform:uppercase;
+  }
+
+  /* ── COUNTER ── */
+  .counter-bar{
+    max-width:480px;width:100%;
+    display:flex;gap:12px;margin-bottom:24px;
+  }
+  .counter{
+    flex:1;background:var(--dark2);border:1px solid rgba(212,175,55,0.15);
+    border-radius:14px;padding:18px 16px;text-align:center;
+  }
+  .counter-num{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);line-height:1;}
+  .counter-lbl{font-size:0.58rem;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+
+  /* ── HISTORY ── */
+  .history-wrap{max-width:480px;width:100%;margin-top:28px;}
+  .history-title{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+  .history-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;}
+  .history-item{
+    background:var(--dark2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;
+    padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    font-size:0.78rem;
+  }
+  .history-item.ok{border-left:3px solid var(--green-light);}
+  .history-item.warn{border-left:3px solid var(--gold);}
+  .history-item.err{border-left:3px solid var(--red);}
+  .history-name{font-weight:600;color:var(--white);}
+  .history-id{font-size:0.64rem;color:var(--text-muted);font-family:monospace;margin-top:2px;}
+  .history-badge{font-size:0.58rem;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+  .badge-ok{background:rgba(46,204,113,0.15);color:var(--green-light);}
+  .badge-warn{background:rgba(212,175,55,0.15);color:var(--gold);}
+  .badge-err{background:rgba(231,76,60,0.12);color:var(--red);}
+
+  .btn-clear{
+    display:block;width:100%;margin-top:14px;padding:10px;border-radius:8px;
+    background:transparent;border:1px solid rgba(231,76,60,0.25);color:rgba(231,76,60,0.6);
+    font-family:'Montserrat',sans-serif;font-size:0.72rem;cursor:pointer;transition:all .3s;
+  }
+  .btn-clear:hover{border-color:var(--red);color:var(--red);}
+
+  /* ── NOTIFY ── */
+  .notif{position:fixed;top:72px;right:20px;z-index:9999;min-width:280px;max-width:340px;pointer-events:none;opacity:0;transform:translateX(20px);transition:all .35s;}
+  .notif.show{opacity:1;transform:translateX(0);}
+  .notif-inner{background:var(--dark2);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+  .notif-inner.success{border-left:4px solid var(--green-light);}
+  .notif-inner.error{border-left:4px solid var(--red);}
+  .notif-inner.warning{border-left:4px solid var(--gold);}
+  .notif-inner i{font-size:1.2rem;}
+  .notif-inner.success i{color:var(--green-light);}
+  .notif-inner.error i{color:var(--red);}
+  .notif-inner.warning i{color:var(--gold);}
+  .notif-text p{font-size:0.78rem;font-weight:600;color:var(--white);margin-bottom:2px;}
+  .notif-text span{font-size:0.7rem;color:var(--text-muted);}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" alt="ENSETP" onerror="this.style.display='none'" style="height:28px;width:auto;" />
+    <span class="topbar-logo">ENSETP</span>
+    <span class="topbar-title">Contrôle Entrée · Gala 2026</span>
+  </div>
+  <a href="index.html" class="topbar-back"><i class="fas fa-arrow-left"></i> Site</a>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notification">
+  <div class="notif-inner success" id="notif-inner">
+    <i class="fas fa-check-circle"></i>
+    <div class="notif-text"><p id="notif-title">OK</p><span id="notif-msg">–</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- COMPTEURS -->
+  <div class="counter-bar">
+    <div class="counter">
+      <div class="counter-num" id="cnt-valid">0</div>
+      <div class="counter-lbl">Validés</div>
+    </div>
+    <div class="counter">
+      <div class="counter-num" id="cnt-already" style="color:var(--gold-light)">0</div>
+      <div class="counter-lbl">Re-scans</div>
+    </div>
+    <div class="counter">
+      <div class="counter-num" id="cnt-invalid" style="color:var(--red)">0</div>
+      <div class="counter-lbl">Invalides</div>
+    </div>
+  </div>
+
+  <!-- SCAN CARD -->
+  <div class="scan-card">
+    <div class="scan-icon"><i class="fas fa-ticket-alt"></i></div>
+    <div class="scan-title">Vérification Billet</div>
+    <div class="scan-sub">Dîner de Gala ENSETP · 20 Juin 2026</div>
+
+    <div class="input-wrap">
+      <i class="fas fa-hashtag"></i>
+      <input type="text" id="ticket-input" class="ticket-input"
+        placeholder="Ex: TK-ENSETP-2026-0001-XXXXX"
+        onkeypress="if(event.key==='Enter')verify()"
+        autocomplete="off" autocorrect="off" spellcheck="false" />
+    </div>
+    <button class="btn-verify" id="btn-verify" onclick="verify()">
+      <i class="fas fa-search"></i> &nbsp;Vérifier le Billet
+    </button>
+
+    <!-- RESULT -->
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div class="history-wrap" id="history-section" style="display:none">
+    <div class="history-title"><i class="fas fa-history"></i> &nbsp;Derniers scans</div>
+    <div class="history-list" id="history-list"></div>
+    <button class="btn-clear" onclick="clearHistory()"><i class="fas fa-trash"></i> Effacer l'historique</button>
+  </div>
+
+</div>
+
+<script>
+const AS_URL = 'https://script.google.com/macros/s/AKfycby18WcAD27h5r6Tv3uGHfFKTYo6EOd_iYCE42iuw5XA64JH5Amhul0Nuz1WO1mb9-op/exec';
+
+let counts = { valid:0, already:0, invalid:0 };
+let history = JSON.parse(sessionStorage.getItem('verify_history')||'[]');
+
+/* ── VÉRIFICATION ── */
+async function verify(){
+  const input = document.getElementById('ticket-input');
+  const id = input.value.trim().toUpperCase();
+  if(!id){ notify('error','Champ vide','Entrez un ID de billet.'); return; }
+
+  const btn = document.getElementById('btn-verify');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> &nbsp;Vérification...';
+  document.getElementById('result').className = 'result';
+  document.getElementById('result').innerHTML = '';
+
+  try {
+    const r = await fetch(AS_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'verifyTicket', ticketId: id })
+    });
+    const data = await r.json();
+    showResult(data, id);
+  } catch(e) {
+    // Mode hors-ligne : vérification dans localStorage
+    offlineVerify(id);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> &nbsp;Vérifier le Billet';
+    setTimeout(()=>{ input.value=''; input.focus(); }, 2200);
+  }
+}
+
+/* ── RÉSULTAT ── */
+function showResult(data, id){
+  const el = document.getElementById('result');
+  el.classList.add('show');
+
+  if(data.valid && !data.alreadyScanned){
+    counts.valid++;
+    updateCounters();
+    addHistory('ok', data.order);
+    notify('success','Billet Valide !', data.order.nom + ' · ' + data.order.type);
+    el.innerHTML = resultHtml('valid',
+      'fas fa-check-circle', 'Billet Valide',
+      'Accès autorisé — Bienvenue !', data.order
+    );
+  } else if(data.valid && data.alreadyScanned){
+    counts.already++;
+    updateCounters();
+    addHistory('warn', data.order);
+    notify('warning','Déjà scanné !', data.order.nom + ' — billet utilisé');
+    el.innerHTML = resultHtml('warned',
+      'fas fa-exclamation-triangle', 'Billet Déjà Utilisé',
+      'Ce billet a déjà été scanné à l\'entrée.', data.order
+    );
+  } else {
+    counts.invalid++;
+    updateCounters();
+    addHistory('err', { id: id, nom:'–', type:'–', qty:1 }, data.error);
+    notify('error','Billet Invalide', data.error || 'Ticket non reconnu.');
+    el.innerHTML = invalidHtml(data.error || 'Ticket invalide ou introuvable.', id);
+  }
+  renderHistory();
+}
+
+function resultHtml(cls, icon, title, sub, order){
+  return `<div class="result-header ${cls}">
+    <div class="result-icon-wrap"><i class="${icon}"></i></div>
+    <div><div class="result-status-title">${title}</div><div class="result-status-sub">${sub}</div></div>
+  </div>
+  <div class="result-body">
+    <div class="result-row"><span class="result-label">Titulaire</span><span class="result-value">${order.nom}</span></div>
+    <div class="result-row"><span class="result-label">Type</span><span class="result-value"><span class="badge-type">${order.type}</span></span></div>
+    <div class="result-row"><span class="result-label">Personnes</span><span class="result-value">${order.qty||1}</span></div>
+    <div class="result-row"><span class="result-label">Référence</span><span class="result-value" style="font-family:monospace;font-size:0.66rem;color:var(--gold)">${order.id}</span></div>
+  </div>`;
+}
+
+function invalidHtml(msg, id){
+  return `<div class="result-header invalid">
+    <div class="result-icon-wrap"><i class="fas fa-times-circle"></i></div>
+    <div><div class="result-status-title">Billet Non Valide</div><div class="result-status-sub">${msg}</div></div>
+  </div>
+  <div class="result-body">
+    <div class="result-row"><span class="result-label">ID saisi</span><span class="result-value" style="font-family:monospace;font-size:0.72rem;color:var(--red)">${id}</span></div>
+    <div class="result-row" style="justify-content:center;color:var(--text-muted);font-size:0.76rem;">Vérifiez l'ID et réessayez.</div>
+  </div>`;
+}
+
+/* ── MODE HORS-LIGNE (localStorage) ── */
+function offlineVerify(id){
+  const orders = JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
+  const order = orders.find(o=>o.id===id);
+  if(!order){
+    showResult({ valid:false, error:'Ticket introuvable (mode hors-ligne).' }, id);
+    return;
+  }
+  const paid = String(order.status).toLowerCase();
+  if(paid !== 'paid' && paid !== 'payé'){
+    showResult({ valid:false, error:'Ticket non payé.' }, id);
+    return;
+  }
+  const alreadyScanned = !!sessionStorage.getItem('scanned_'+id);
+  if(!alreadyScanned) sessionStorage.setItem('scanned_'+id,'1');
+  showResult({
+    valid: true,
+    alreadyScanned,
+    order: { id:order.id, nom:order.prenom+' '+order.nom, type:order.type.toUpperCase(), qty:order.qty||1, email:order.email }
+  }, id);
+}
+
+/* ── COMPTEURS ── */
+function updateCounters(){
+  document.getElementById('cnt-valid').textContent = counts.valid;
+  document.getElementById('cnt-already').textContent = counts.already;
+  document.getElementById('cnt-invalid').textContent = counts.invalid;
+}
+
+/* ── HISTORIQUE ── */
+function addHistory(type, order, err){
+  history.unshift({ type, id:order.id, nom:order.nom, ticket_type:order.type, err:err||null, time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) });
+  if(history.length > 50) history.pop();
+  sessionStorage.setItem('verify_history', JSON.stringify(history));
+}
+
+function renderHistory(){
+  if(!history.length){ document.getElementById('history-section').style.display='none'; return; }
+  document.getElementById('history-section').style.display='block';
+  const labels = { ok:'✓ VALIDE', warn:'⚠ RE-SCAN', err:'✗ INVALIDE' };
+  const badgeCls = { ok:'badge-ok', warn:'badge-warn', err:'badge-err' };
+  document.getElementById('history-list').innerHTML = history.map(h=>`
+    <div class="history-item ${h.type}">
+      <div>
+        <div class="history-name">${h.nom||h.id}</div>
+        <div class="history-id">${h.id} · ${h.time}${h.err?' · '+h.err:''}</div>
+      </div>
+      <span class="history-badge ${badgeCls[h.type]}">${labels[h.type]}</span>
+    </div>`).join('');
+}
+
+function clearHistory(){
+  if(!confirm('Effacer tout l\'historique de session ?')) return;
+  history = []; sessionStorage.removeItem('verify_history');
+  counts = { valid:0, already:0, invalid:0 }; updateCounters();
+  document.getElementById('history-section').style.display='none';
+  notify('info','Effacé','Historique supprimé.');
+}
+
+/* ── NOTIFY ── */
+function notify(type,title,msg){
+  const el=document.getElementById('notification'),inner=document.getElementById('notif-inner');
+  const icons={success:'fas fa-check-circle',error:'fas fa-times-circle',warning:'fas fa-exclamation-triangle',info:'fas fa-info-circle'};
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-msg').textContent=msg;
+  inner.className='notif-inner '+type;
+  inner.querySelector('i').className=icons[type];
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+/* ── INIT ── */
+renderHistory(); updateCounters();
+document.getElementById('ticket-input').focus();
+
+// Pré-remplir si ticket ID dans l'URL (?id=TK-...)
+const urlId = new URLSearchParams(location.search).get('id');
+if(urlId){ document.getElementById('ticket-input').value=urlId; verify(); }
+</script>
+</body>
+</html>

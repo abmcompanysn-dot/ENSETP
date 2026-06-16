@@ -233,6 +233,7 @@ function doPost(e) {
     else if (action === 'getStats')        result = getStats();
     else if (action === 'sendOTP')         result = handleSendOTP(payload);
     else if (action === 'verifyOTP')       result = handleVerifyOTP(payload);
+    else if (action === 'verifyTicket')    result = handleVerifyTicket(payload);
     else                                   result = { error: 'Action inconnue: ' + action };
 
     return _jsonOut(result);
@@ -611,6 +612,48 @@ function testSendTicket() {
     '• Notification admin → ' + cfg.ADMIN_EMAIL + '\n\n' +
     'Vérifiez vos boîtes mail.'
   );
+}
+
+// ── VÉRIFICATION BILLET À L'ENTRÉE ────────────────────────
+function handleVerifyTicket(payload) {
+  try {
+    var ticketId = String(payload.ticketId || '').trim().toUpperCase();
+    if (!ticketId) return { valid: false, error: 'ID ticket requis.' };
+
+    var order = getOrderById(ticketId);
+    if (!order) return { valid: false, error: 'Ticket introuvable. Vérifiez l\'ID.' };
+
+    var paid = String(order.status).toLowerCase();
+    if (paid !== 'payé' && paid !== 'paid') {
+      return {
+        valid: false,
+        error: 'Ticket non payé.',
+        order: { id: order.id, nom: order.prenom + ' ' + order.nom, type: order.type }
+      };
+    }
+
+    // Vérifier si déjà scanné à l'entrée (cache 24h)
+    var cache = CacheService.getScriptCache();
+    var scanKey = 'scan_' + ticketId;
+    var alreadyScanned = cache.get(scanKey);
+    if (!alreadyScanned) cache.put(scanKey, '1', 86400);
+
+    Logger.log((alreadyScanned ? '⚠️ Re-scan' : '✅ Scan') + ' billet: ' + ticketId);
+    return {
+      valid: true,
+      alreadyScanned: !!alreadyScanned,
+      order: {
+        id: order.id,
+        nom: order.prenom + ' ' + order.nom,
+        type: String(order.type).toUpperCase(),
+        qty: order.qty || 1,
+        email: order.email
+      }
+    };
+  } catch (err) {
+    Logger.log('handleVerifyTicket error: ' + err.message);
+    return { valid: false, error: err.message };
+  }
 }
 
 // ── AUTHENTIFICATION ADMIN PAR OTP ────────────────────────
