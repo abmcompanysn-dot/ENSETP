@@ -523,6 +523,7 @@ async function verifyOTP(){
     });
     const data = await r.json();
     if(data.success){
+      localStorage.setItem('ensetp_admin_session', JSON.stringify({email:adminEmail, t:Date.now()}));
       document.getElementById('login-screen').style.display='none';
       document.getElementById('admin-screen').style.display='flex';
       document.getElementById('topbar-email').textContent=adminEmail;
@@ -554,6 +555,7 @@ function resetLogin(){
 /* ── Déconnexion ── */
 function doLogout(){
   if(!confirm('Se déconnecter ?')) return;
+  localStorage.removeItem('ensetp_admin_session');
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   resetLogin();
@@ -737,6 +739,24 @@ function notify(type,title,msg){
   ico.className={success:'fas fa-check-circle',error:'fas fa-exclamation-circle',info:'fas fa-info-circle'}[type];
   el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),4200);
 }
+
+/* ── AUTO-LOGIN : restaure la session après refresh ── */
+(function(){
+  try {
+    const raw = localStorage.getItem('ensetp_admin_session');
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(!s.email || !s.t) return;
+    if(Date.now() - s.t > 86400000) { // expire après 24h
+      localStorage.removeItem('ensetp_admin_session'); return;
+    }
+    adminEmail = s.email;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='flex';
+    document.getElementById('topbar-email').textContent=s.email;
+    loadAdmin();
+  } catch(e){ localStorage.removeItem('ensetp_admin_session'); }
+})();
 </script>
 </body>
 </html>
