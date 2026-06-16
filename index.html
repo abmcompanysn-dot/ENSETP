@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dîner de Gala de Fin d'Année – ENSETP 2026</title>
+  <!-- Open Graph / WhatsApp / Instagram prévisualisation -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ensetp.mahu.cards" />
+  <meta property="og:title" content="🎩 Dîner de Gala de Fin d'Année ENSETP 2026" />
+  <meta property="og:description" content="Samedi 20 Juin 2026 · Au Magic Land, Dakar · Entrée GRATUITE · ZOU NAME · MIST CASH · BLM PRO · ME MAN · NIKO — Réservez votre place maintenant !" />
+  <meta property="og:image" content="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:site_name" content="Mahu Events · ENSETP 2026" />
+  <meta property="og:locale" content="fr_SN" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dîner de Gala ENSETP 2026 – Entrée GRATUITE" />
+  <meta name="twitter:description" content="Samedi 20 Juin 2026 · Magic Land, Dakar · Places limitées · Réservez maintenant !" />
+  <meta name="twitter:image" content="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -791,7 +805,7 @@ ok
         <i class="fab fa-instagram" style="font-size:1rem;"></i> Instagram
       </button>
     </div>
-    <div style="text-align:center;font-size:0.62rem;color:var(--text-muted);margin-top:10px;">Téléchargez la carte · Partagez-la en story ou status !</div>
+    <div style="text-align:center;font-size:0.62rem;color:var(--text-muted);margin-top:10px;line-height:1.7;">Sur mobile : la carte s'envoie directement avec l'image 📲<br>Sur PC : l'image est téléchargée, puis joignez-la manuellement</div>
   </div>
 </section>
 
@@ -815,7 +829,20 @@ ok
     <a href="#"><i class="fab fa-linkedin-in"></i></a>
   </div>
   <div class="ornament"><span>ENSETP · Former aujourd'hui, réussir demain !</span></div>
-  <div class="footer-bottom">© 2026 <span>ENSETP</span> – École Normale Supérieure d'Enseignement Technique et Professionnel · Université Cheikh Anta Diop de Dakar · #ENSETP #GalaDîner2026 #FPT<br><span style="font-size:0.65rem;color:rgba(212,175,55,0.3);">Propulsé par <a href="mahu-events.html" style="color:rgba(212,175,55,0.4);text-decoration:none;">Mahu Events</a> · mahu.cards</span></div>
+  <div class="footer-bottom">© 2026 <span>ENSETP</span> – École Normale Supérieure d'Enseignement Technique et Professionnel · Université Cheikh Anta Diop de Dakar · #ENSETP #GalaDîner2026 #FPT</div>
+  <!-- Mahu Events brand -->
+  <div style="margin-top:28px;padding-top:22px;border-top:1px solid rgba(212,175,55,0.1);text-align:center;">
+    <div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(212,175,55,0.35);margin-bottom:8px;">Pour vos événements</div>
+    <a href="mahu-events.html" style="font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;color:var(--gold);letter-spacing:3px;text-decoration:none;display:inline-block;margin-bottom:4px;transition:color .3s;" onmouseover="this.style.color='var(--gold-light)'" onmouseout="this.style.color='var(--gold)'">Mahu Events</a>
+    <div style="font-size:0.62rem;color:rgba(212,175,55,0.38);letter-spacing:1.5px;margin-bottom:10px;">L'excellence du digital en Afrique</div>
+    <a href="mailto:contact@mahu.cards" style="font-size:0.7rem;color:rgba(212,175,55,0.45);letter-spacing:1px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(212,175,55,0.45)'">
+      <i class="fas fa-envelope"></i> contact@mahu.cards
+    </a>
+    &nbsp;·&nbsp;
+    <a href="mahu-events.html" style="font-size:0.7rem;color:rgba(212,175,55,0.45);letter-spacing:1px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(212,175,55,0.45)'">
+      <i class="fas fa-globe"></i> mahu.cards
+    </a>
+  </div>
 </footer>
 
 <!-- FLYER LIGHTBOX -->
@@ -1504,28 +1531,57 @@ function downloadJysCard() {
   notify('success', 'Carte téléchargée !', 'Partagez-la en story WhatsApp ou Instagram !');
 }
 
-function shareJysWhatsApp() {
+/* Partage J'y Serai avec image attachée (Web Share API files sur mobile) */
+async function shareJysWithFile(target) {
   const name = (document.getElementById('jys-nom').value||'').trim();
-  const msg = (name?`🎉 ${name} sera au Dîner de Gala ENSETP 2026 !\n\n`:`🎉 Je serai au Dîner de Gala ENSETP 2026 !\n\n`)
-    +'📅 Samedi 20 Juin 2026 · 19h\n📍 Au Magic Land, Dakar\n🎟️ Entrée GRATUITE — places limitées !\n\n👉 https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026';
-  if (_jysCardReady) {
-    notify('info','Astuce','Téléchargez d\'abord la carte, puis envoyez-la en photo sur WhatsApp !');
-    setTimeout(()=>window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank'),900);
+  if (!_jysCardReady) {
+    if (!name) { notify('error','Prénom requis','Entrez votre prénom et cliquez "Générer ma carte" d\'abord.'); return; }
+    generateJysCard(false);
+    await new Promise(r=>setTimeout(r,200));
+  }
+  const canvas = document.getElementById('jys-canvas');
+  const fname = 'JySerai_ENSETP2026'+(name?'_'+name.replace(/\s+/g,'_'):'')+'.png';
+  const msg = (name?name+' sera':'Je serai')+' au Dîner de Gala ENSETP 2026 ! 🎉\n📅 Samedi 20 Juin 2026 · Au Magic Land, Dakar\n🎟️ Entrée GRATUITE → https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #MagicLand';
+
+  // Web Share API avec fichier image (fonctionne sur Android Chrome + iOS Safari)
+  if (typeof navigator.canShare === 'function') {
+    canvas.toBlob(async function(blob) {
+      const file = new File([blob], fname, { type:'image/png' });
+      if (navigator.canShare({ files:[file] })) {
+        try {
+          await navigator.share({ files:[file], title:"J'y Serai au Gala ENSETP 2026 !", text:msg });
+          return;
+        } catch(e) { if(e.name==='AbortError') return; }
+      }
+      _jysFallback(blob, fname, msg, target);
+    }, 'image/png');
   } else {
-    window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+    // Desktop ou navigateur non supporté : télécharger + ouvrir WhatsApp
+    if (_jysCardReady) downloadJysCard();
+    if (target==='wa') {
+      if (_jysCardReady) notify('info','Image téléchargée !','Ouvrez WhatsApp → icône 📎 → galerie → sélectionnez votre carte !');
+      setTimeout(()=>window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank'), _jysCardReady?700:0);
+    } else {
+      notify('info','Pour Instagram','Carte téléchargée ! Instagram → Créer story → sélectionnez la photo dans votre galerie.');
+    }
   }
 }
 
-function shareJysInstagram() {
-  // Instagram ne permet pas l'ouverture directe — on génère + télécharge la carte
-  const name = (document.getElementById('jys-nom').value||'').trim();
-  if (!name) { notify('error','Prénom requis','Entrez votre prénom pour générer la carte.'); return; }
-  generateJysCard(true);
-  setTimeout(()=>{
-    downloadJysCard();
-    notify('info','Pour Instagram','Carte enregistrée ! Ouvrez Instagram → Créer story → sélectionnez la photo depuis votre galerie.');
-  }, 300);
+function _jysFallback(blob, fname, msg, target) {
+  // Télécharger l'image puis guider l'utilisateur
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.download=fname; a.href=url; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  if (target==='wa') {
+    notify('info','Image téléchargée !','Ouvrez WhatsApp → icône pièce jointe 📎 → galerie → choisissez votre carte J\'y Serai !');
+    setTimeout(()=>window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank'),1200);
+  } else {
+    notify('info','Pour Instagram','Photo enregistrée ! Instagram → Créer une story → galerie → sélectionnez la carte J\'y Serai !');
+  }
 }
+
+function shareJysWhatsApp() { shareJysWithFile('wa'); }
+function shareJysInstagram() { shareJysWithFile('ig'); }
 
 function _saveJysEntry(name) {
   const entries = JSON.parse(localStorage.getItem('jys_entries')||'[]');
