@@ -308,22 +308,22 @@ function handleCreateOrder(order) {
   order.status = 'pending';
   logToSheet(order);
 
-  // 2. Si clé Paydunia configurée → créer lien de paiement
-  if (cfg.PAYDUNIA_KEY) {
+  // 2. Si clé Paydunia configurée ET montant > 0 → créer lien de paiement
+  if (cfg.PAYDUNIA_KEY && Number(order.total) > 0) {
     var payLink = createPayduniaPayment(order, cfg);
     if (payLink) {
       Logger.log('Lien Paydunia créé: ' + payLink);
       return { success: true, paymentUrl: payLink, orderId: order.id };
     }
-    Logger.log('⚠️ Paydunia configuré mais aucun lien retourné — bascule mode démo');
+    Logger.log('⚠️ Paydunia configuré mais aucun lien retourné — bascule envoi direct');
   }
 
-  // 3. Mode démo (sans Paydunia ou si Paydunia échoue) → ticket envoyé directement
+  // 3. Ticket gratuit ou pas de Paydunia → ticket envoyé directement
   order.status = 'paid';
   updateOrderStatus(order.id, 'paid');
   sendTicketEmail(order, cfg);
   sendAdminNotification(order, cfg);
-  return { success: true, orderId: order.id, mode: 'demo' };
+  return { success: true, orderId: order.id, mode: 'gratuit' };
 }
 
 // ── CONFIRMATION DE PRÉSENCE ───────────────────────────────
@@ -580,7 +580,7 @@ function getStats() {
 function sendTicketEmail(order, cfg) {
   cfg = cfg || getCFG();
   var name  = order.prenom + ' ' + order.nom;
-  var total = Number(order.total).toLocaleString('fr-FR') + ' FCFA';
+  var total = (order.total && Number(order.total) > 0) ? Number(order.total).toLocaleString('fr-FR') + ' FCFA' : 'GRATUIT';
   var type  = String(order.type).toUpperCase();
   var body  = buildEmailBody(name, type, total, order.id, buildTicketHtml(order, cfg), cfg);
   try {
@@ -620,7 +620,7 @@ function buildTicketHtml(order, cfg) {
   cfg = cfg || getCFG();
   var fullName = order.prenom + ' ' + order.nom;
   var typeUpper = String(order.type).toUpperCase();
-  var montant = Number(order.total).toLocaleString('fr-FR') + ' FCFA';
+  var montant = (order.total && Number(order.total) > 0) ? Number(order.total).toLocaleString('fr-FR') + ' FCFA' : 'GRATUIT';
   var emis = new Date(order.date || new Date()).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
 
   // QR code image via Google Charts API (fonctionne dans tous les clients email)
@@ -707,10 +707,10 @@ function buildEmailBody(name, type, total, id, ticketHtml, cfg) {
     +   '</div>'
     +   '<div style="background:#1A1A1A;border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin-bottom:24px;">'
     +     '<h2 style="color:#D4AF37;font-size:1.2rem;margin:0 0 14px">Bonjour ' + name + ' ! 🎉</h2>'
-    +     '<p style="color:#ccc;font-size:0.9rem;line-height:1.7;margin:0 0 20px">Votre ticket pour le <strong style="color:#F5D66A">Dîner de Gala de Fin d\'Année ENSETP 2026</strong> a bien été reçu et votre paiement est confirmé.</p>'
+    +     '<p style="color:#ccc;font-size:0.9rem;line-height:1.7;margin:0 0 20px">Votre inscription au <strong style="color:#F5D66A">Dîner de Gala de Fin d\'Année ENSETP 2026</strong> a bien été enregistrée. Votre place est réservée !</p>'
     +     '<table style="width:100%;border-collapse:collapse;margin-bottom:24px;">'
     +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Type de ticket</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;font-weight:600;border-left:2px solid #D4AF37">' + type + '</td></tr>'
-    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Montant payé</td><td style="padding:8px 14px;background:#1A1A1A;color:#D4AF37;font-weight:bold;border-left:2px solid #D4AF37">' + total + '</td></tr>'
+    +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Ticket</td><td style="padding:8px 14px;background:#1A1A1A;color:#D4AF37;font-weight:bold;border-left:2px solid #D4AF37">' + total + '</td></tr>'
     +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Date</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + cfg.EVENT_DATE + '</td></tr>'
     +       '<tr><td style="padding:8px 14px;background:#222;color:#888;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;">Lieu</td><td style="padding:8px 14px;background:#1A1A1A;color:#fff;border-left:2px solid #D4AF37">' + cfg.EVENT_LIEU + '</td></tr>'
     +     '</table>'

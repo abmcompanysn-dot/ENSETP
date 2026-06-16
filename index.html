@@ -569,10 +569,10 @@ ok
     <p class="section-desc" style="margin-top:14px">Sécurisez votre place dès maintenant. Places limitées – 500 tickets disponibles.</p>
   </div>
   <div class="ticket-types" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:680px;">
-    <div class="ticket-card reveal" onclick="selectTicket('solo',1000)">
+    <div class="ticket-card reveal" onclick="selectTicket('solo',0)">
       <div class="ticket-type-lbl">Solo</div>
-      <div class="ticket-price">1 000</div>
-      <div class="ticket-currency">FCFA · 1 personne</div>
+      <div class="ticket-price" style="font-size:2rem;">GRATUIT</div>
+      <div class="ticket-currency">1 personne</div>
       <ul class="ticket-features">
         <li><i class="fas fa-check"></i>Accès à la soirée Gala</li>
         <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
@@ -581,11 +581,11 @@ ok
       </ul>
       <button class="btn-ticket-outline">Choisir</button>
     </div>
-    <div class="ticket-card popular reveal" onclick="selectTicket('couple',2000)">
+    <div class="ticket-card popular reveal" onclick="selectTicket('couple',0)">
       <div class="popular-badge">Recommandé</div>
       <div class="ticket-type-lbl">Couple</div>
-      <div class="ticket-price">2 000</div>
-      <div class="ticket-currency">FCFA · 2 personnes</div>
+      <div class="ticket-price" style="font-size:2rem;">GRATUIT</div>
+      <div class="ticket-currency">2 personnes</div>
       <ul class="ticket-features">
         <li><i class="fas fa-heart"></i>2 places ensemble</li>
         <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
@@ -598,38 +598,32 @@ ok
   </div>
 
   <div class="purchase-form-wrap" id="purchase-form">
-    <div class="form-title">Informations d'Achat</div>
-    <div class="form-subtitle">Remplissez vos informations pour recevoir votre ticket par e-mail</div>
+    <div class="form-title">Réservation de Place</div>
+    <div class="form-subtitle">Remplissez vos informations pour recevoir votre E-Ticket gratuit par e-mail</div>
     <div class="form-grid">
-      <div class="form-group"><label>Prénom</label><input type="text" id="f-prenom" placeholder="Votre prénom" /></div>
-      <div class="form-group"><label>Nom</label><input type="text" id="f-nom" placeholder="Votre nom" /></div>
-      <div class="form-group full"><label>Adresse E-Mail</label><input type="email" id="f-email" placeholder="email@exemple.com" /></div>
-      <div class="form-group"><label>Téléphone</label><input type="tel" id="f-tel" placeholder="+221 XX XXX XX XX" /></div>
-      <div class="form-group"><label>Nombre de tickets</label>
+      <div class="form-group"><label>Prénom <span style="color:var(--gold)">*</span></label><input type="text" id="f-prenom" placeholder="Votre prénom" /></div>
+      <div class="form-group"><label>Nom <span style="color:var(--gold)">*</span></label><input type="text" id="f-nom" placeholder="Votre nom" /></div>
+      <div class="form-group full"><label>Adresse E-Mail <span style="color:var(--gold)">*</span></label><input type="email" id="f-email" placeholder="email@exemple.com" /></div>
+      <div class="form-group"><label>Téléphone <span style="color:var(--gold)">*</span></label><input type="tel" id="f-tel" placeholder="+221 XX XXX XX XX" /></div>
+      <div class="form-group"><label>Nombre de places</label>
         <select id="f-qty" onchange="updateTotal()">
-          <option value="1">1</option><option value="2">2</option>
-          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="1">1 place</option><option value="2">2 places</option>
+          <option value="3">3 places</option><option value="4">4 places</option><option value="5">5 places</option>
         </select>
       </div>
       <div class="form-group full"><label>Type de ticket</label>
         <select id="f-type" onchange="updateTotal()">
-          <option value="solo" data-price="1000">Solo – 1 000 FCFA (1 personne)</option>
-          <option value="couple" data-price="2000">Couple – 2 000 FCFA (2 personnes)</option>
+          <option value="solo" data-price="0">Solo – Gratuit (1 personne)</option>
+          <option value="couple" data-price="0">Couple – Gratuit (2 personnes)</option>
         </select>
       </div>
     </div>
     <div class="form-total">
-      <span class="form-total-label">Total à payer</span>
-      <span class="form-total-amount" id="form-total">15 000 FCFA</span>
+      <span class="form-total-label">Ticket</span>
+      <span class="form-total-amount" id="form-total" style="color:var(--gold)">GRATUIT</span>
     </div>
-    <div style="margin-bottom:10px;font-size:0.72rem;color:var(--text-muted);text-align:center;letter-spacing:1px;text-transform:uppercase;">Mode de Paiement</div>
-    <div class="pay-methods-row">
-      <button class="pay-method selected" id="pm-wave" onclick="selectPayment('wave')"><i class="fas fa-mobile-alt"></i> Wave</button>
-      <button class="pay-method" id="pm-om" onclick="selectPayment('orange')"><i class="fas fa-mobile-alt"></i> Orange Money</button>
-      <button class="pay-method" id="pm-card" onclick="selectPayment('card')"><i class="fas fa-credit-card"></i> Carte bancaire</button>
-    </div>
-    <button class="btn-pay" id="btn-pay" onclick="processPayment()"><i class="fas fa-lock"></i>&nbsp; Payer &amp; Recevoir mon Ticket</button>
-    <div class="secure-note"><i class="fas fa-shield-alt"></i> Paiement sécurisé – Paydunia</div>
+    <button class="btn-pay" id="btn-pay" onclick="processPayment()"><i class="fas fa-envelope"></i>&nbsp; M'inscrire &amp; Recevoir mon Ticket</button>
+    <div class="secure-note"><i class="fas fa-shield-alt"></i> Places limitées – E-Ticket envoyé par e-mail instantanément</div>
   </div>
 </section>
 
@@ -874,15 +868,16 @@ function selectTicket(type,price){
   const f=document.getElementById('purchase-form');
   f.classList.add('active');
   setTimeout(()=>f.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  notify('info','Ticket sélectionné',`Type ${type.toUpperCase()} — ${price.toLocaleString('fr-FR')} FCFA`);
+  notify('info','Ticket sélectionné',`Type ${type.toUpperCase()} — ${price===0?'Gratuit':price.toLocaleString('fr-FR')+' FCFA'}`);
 }
 
 function updateTotal(){
   const sel=document.getElementById('f-type');
-  const price=parseInt(sel.options[sel.selectedIndex].dataset.price);
+  const price=parseInt(sel.options[sel.selectedIndex].dataset.price)||0;
   const qty=parseInt(document.getElementById('f-qty').value)||1;
   selPrice=price; selType=sel.value;
-  document.getElementById('form-total').textContent=(price*qty).toLocaleString('fr-FR')+' FCFA';
+  const el=document.getElementById('form-total');
+  el.textContent=price===0?'GRATUIT':(price*qty).toLocaleString('fr-FR')+' FCFA';
 }
 
 /* ===== PAYMENT ===== */
@@ -928,7 +923,7 @@ async function processPayment(){
       if(data.error){
         btn.disabled=false;
         btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket';
-        notify('err','Erreur paiement',data.error);
+        notify('error','Erreur paiement',data.error);
         return;
       }
       // Apps Script ok mais pas de lien PayDunya (mode démo — clés non encore configurées)
@@ -949,7 +944,7 @@ function saveOrder(o){orders.push(o);localStorage.setItem('ensetp_orders',JSON.s
 function showTicket(o){
   const fullName = [o.prenom, o.nom].filter(Boolean).join(' ') || '–';
   const typeLabel = o.type ? o.type.toUpperCase() : '–';
-  const montant = o.total ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : '–';
+  const montant = (o.total && o.total > 0) ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : 'GRATUIT';
   const emis = o.date ? new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '–';
 
   document.getElementById('tk-nom').textContent = fullName;
@@ -1203,7 +1198,7 @@ function _showLocalTicket(id){
 
   if(payStatus==='cancel'){
     history.replaceState({},document.title,location.pathname);
-    notify('err','Paiement annulé','Le paiement a été annulé. Vous pouvez réessayer.');
+    notify('error','Paiement annulé','Le paiement a été annulé. Vous pouvez réessayer.');
   }
 
   if(p.get('type')) selectTicket(p.get('type'),parseInt(p.get('price')||1000));
