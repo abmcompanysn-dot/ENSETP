@@ -373,8 +373,8 @@
         </div>
         <div class="table-scroll">
           <table>
-            <thead><tr><th>ID</th><th>Prénom</th><th>Nom</th><th>E-mail</th><th>Tél.</th><th>Type</th><th>Total</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
-            <tbody id="admin-tbody"><tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:50px 20px;">Aucune commande.</td></tr></tbody>
+            <thead><tr><th>ID</th><th>Prénom</th><th>Nom</th><th>E-mail</th><th>Tél.</th><th>Filière</th><th>Niveau</th><th>Type</th><th>Total</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
+            <tbody id="admin-tbody"><tr><td colspan="12" style="text-align:center;color:var(--text-muted);padding:50px 20px;">Aucune commande.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -602,12 +602,14 @@ function loadAdmin(){
 /* ── ORDERS TABLE ── */
 function renderOrderRows(ords){
   const tb=document.getElementById('admin-tbody');
-  if(!ords.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:50px 20px">Aucune commande.</td></tr>';return;}
+  if(!ords.length){tb.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--text-muted);padding:50px 20px">Aucune commande.</td></tr>';return;}
   tb.innerHTML=ords.map(o=>`<tr>
     <td style="color:var(--gold);font-size:0.66rem;font-family:Cinzel,serif">${o.id}</td>
     <td>${o.prenom||'–'}</td><td>${o.nom||'–'}</td>
     <td style="font-size:0.78rem">${o.email||'–'}</td>
     <td>${o.tel||'–'}</td>
+    <td style="font-size:0.75rem;color:#ccc">${o.filiere||'–'}</td>
+    <td style="font-size:0.75rem;color:var(--text-muted)">${o.annee||'–'}</td>
     <td><span style="text-transform:uppercase;font-weight:700;font-size:0.72rem">${o.type}</span></td>
     <td style="color:var(--gold-light);font-weight:600">${(o.total||0).toLocaleString('fr-FR')} F</td>
     <td style="font-size:0.7rem;color:var(--text-muted)">${new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</td>
@@ -618,7 +620,7 @@ function renderOrderRows(ords){
 function filterOrders(q){
   const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
   const s=q.toLowerCase();
-  renderOrderRows(s?ords.filter(o=>(o.prenom+o.nom+o.email+o.id+o.type).toLowerCase().includes(s)):ords);
+  renderOrderRows(s?ords.filter(o=>(o.prenom+o.nom+o.email+o.id+o.type+(o.filiere||'')+(o.annee||'')).toLowerCase().includes(s)):ords);
 }
 function clearOrders(){
   if(!confirm('Supprimer TOUTES les commandes ? Cette action est irréversible.'))return;
@@ -633,8 +635,8 @@ function regenTicket(id){
 function exportCSV(){
   const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
   if(!ords.length){notify('error','Aucune donnée','Pas de commandes à exporter.');return;}
-  const h='ID,Prénom,Nom,Email,Téléphone,Type,Total,Paiement,Date,Statut\n';
-  const rows=ords.map(o=>[o.id,o.prenom,o.nom,o.email,o.tel||'',o.type,o.total||0,o.payment||'',o.date,o.status].join(',')).join('\n');
+  const h='ID,Prénom,Nom,Email,Téléphone,Filière,Niveau,Type,Total,Paiement,Date,Statut\n';
+  const rows=ords.map(o=>[o.id,o.prenom,o.nom,o.email,o.tel||'',o.filiere||'',o.annee||'',o.type,o.total||0,o.payment||'',o.date,o.status].join(',')).join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([h+rows],{type:'text/csv;charset=utf-8;'}));
   a.download='tickets_gala_ensetp_2026.csv'; a.click();
 }
