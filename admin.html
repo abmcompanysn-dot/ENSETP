@@ -348,19 +348,26 @@
 
     <!-- DASHBOARD -->
     <div class="admin-tab-content active" id="tab-dashboard">
-      <div class="admin-banner">
-        <div>
-          <h2>Tableau de Bord</h2>
-          <p>Dîner de Gala de Fin d'Année ENSETP 2026 · Samedi 20 Juin 2026 · Au Magic Land</p>
-        </div>
-        <div class="admin-banner-icon"><i class="fas fa-chart-line"></i></div>
-      </div>
       <div class="admin-stats">
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-ticket-alt"></i></div><div class="admin-stat-num" id="stat-total">0</div><div class="admin-stat-lbl">Tickets Vendus</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-ticket-alt"></i></div><div class="admin-stat-num" id="stat-total">0</div><div class="admin-stat-lbl">Inscrits</div></div>
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user"></i></div><div class="admin-stat-num" id="stat-solo">0</div><div class="admin-stat-lbl">Solo</div></div>
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-heart"></i></div><div class="admin-stat-num" id="stat-couple">0</div><div class="admin-stat-lbl">Couple</div></div>
         <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-user-check"></i></div><div class="admin-stat-num" id="stat-conf">0</div><div class="admin-stat-lbl">Présences</div></div>
-        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-coins"></i></div><div class="admin-stat-num" id="stat-rev">0</div><div class="admin-stat-lbl">FCFA Perçus</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fas fa-coins"></i></div><div class="admin-stat-num" id="stat-rev">0</div><div class="admin-stat-lbl">FCFA</div></div>
+      </div>
+
+      <!-- Liste compacte des dernières inscriptions -->
+      <div class="admin-table-wrap" style="margin-top:20px;">
+        <div class="admin-table-hdr" style="padding:12px 18px;">
+          <h3 style="font-size:0.74rem;"><i class="fas fa-clock"></i> Dernières Inscriptions</h3>
+          <button class="admin-btn admin-btn-outline" onclick="switchTab('orders')" style="padding:6px 14px;font-size:0.65rem;letter-spacing:1px;">Voir tout <i class="fas fa-arrow-right"></i></button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nom</th><th>Filière</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead>
+            <tbody id="dash-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px 20px;">Aucune inscription.</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -592,11 +599,27 @@ function loadAdmin(){
   if(stripT) stripT.textContent=ords.length+' ticket'+(ords.length>1?'s':'');
   if(stripP) stripP.textContent=ords.filter(o=>o.confirmed).length;
   renderOrderRows(ords);
+  renderDashboardOrders(ords);
   document.getElementById('as-url').value=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   document.getElementById('pd-key').value=localStorage.getItem('ensetp_pd_key')||'';
   const ce=localStorage.getItem('ensetp_cfg_email');
   if(ce) document.getElementById('cfg-email').value=ce;
   startAdminCountdown();
+}
+
+/* ── DASHBOARD COMPACT LIST ── */
+function renderDashboardOrders(ords){
+  const tb=document.getElementById('dash-tbody');
+  if(!tb) return;
+  const recent=[...ords].reverse().slice(0,15);
+  if(!recent.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px 20px">Aucune inscription.</td></tr>';return;}
+  tb.innerHTML=recent.map(o=>`<tr>
+    <td style="font-weight:600;font-size:0.8rem;">${o.prenom||''} ${o.nom||''}</td>
+    <td style="font-size:0.72rem;color:var(--text-muted)">${o.filiere||'–'}${o.annee?' · <span style="color:#888">'+o.annee+'</span>':''}</td>
+    <td><span style="text-transform:uppercase;font-weight:700;font-size:0.68rem;color:var(--gold)">${o.type}</span></td>
+    <td style="font-size:0.68rem;color:var(--text-muted)">${new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+    <td><span class="${o.status==='paid'?'status-paid':'status-pending'}" style="font-size:0.58rem;">${o.status==='paid'?'✓ OK':'⏳'}</span></td>
+  </tr>`).join('');
 }
 
 /* ── ORDERS TABLE ── */
