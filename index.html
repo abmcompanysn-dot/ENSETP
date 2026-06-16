@@ -597,6 +597,11 @@ ok
     </div>
   </div>
 
+  <!-- Compteur de places -->
+  <div style="text-align:center;margin:0 auto 22px;max-width:420px;padding:12px 22px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.18);border-radius:28px;">
+    <span style="font-size:0.85rem;font-weight:600;color:var(--gold);"><i class="fas fa-fire" style="color:#ff6b35;margin-right:7px;"></i><strong id="places-count">183</strong> places restantes sur 200</span>
+  </div>
+
   <div class="purchase-form-wrap" id="purchase-form">
     <div class="form-title">Réservation de Place</div>
     <div class="form-subtitle">Remplissez vos informations pour recevoir votre E-Ticket gratuit par e-mail</div>
@@ -702,40 +707,64 @@ ok
   </div>
 </section>
 
-<!-- J'Y SERAI — SECTION PARTAGE -->
+<!-- J'Y SERAI — GÉNÉRATEUR DE CARTE PERSONNALISÉE -->
 <section id="jy-serai" style="background:linear-gradient(135deg,rgba(212,175,55,0.06),rgba(10,10,10,0));border-top:1px solid rgba(212,175,55,0.12);padding:60px 5%;">
-  <div class="section-header reveal" style="margin-bottom:32px;">
+  <div class="section-header reveal" style="margin-bottom:28px;">
     <div class="section-tag">★ Faites passer le mot ★</div>
     <h2 class="section-title">J'y <span>Serai !</span></h2>
     <div class="gold-line"></div>
-    <p class="section-desc" style="margin-top:14px">Invitez vos amis et partagez l'événement sur vos réseaux.</p>
+    <p class="section-desc" style="margin-top:14px">Créez votre carte personnalisée — ajoutez votre photo et partagez sur WhatsApp ou Instagram !</p>
   </div>
-  <div style="max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
-    <!-- Carte aperçu événement -->
-    <div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1.5px solid rgba(212,175,55,0.3);border-radius:18px;padding:28px 28px 22px;text-align:center;">
-      <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">ENSETP · Université Cheikh Anta Diop</div>
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;font-style:italic;color:var(--gold);line-height:1.1;margin-bottom:4px;">Dîner de Gala</div>
-      <div style="font-size:0.62rem;letter-spacing:3px;color:#aaa;text-transform:uppercase;margin-bottom:18px;">De Fin d'Année · ENSETP 2026</div>
-      <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:18px;">
-        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-weight:700;color:#fff;font-size:0.85rem;">Samedi 20 Juin 2026</div></div>
-        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Lieu</div><div style="font-weight:700;color:#fff;font-size:0.85rem;">Au Magic Land · Dakar</div></div>
-        <div style="text-align:center;"><div style="font-size:0.5rem;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Entrée</div><div style="font-weight:700;color:var(--gold);font-size:0.85rem;">GRATUITE</div></div>
-      </div>
-      <div style="font-size:0.7rem;color:var(--text-muted);font-style:italic;">ZOU NAME · MIST CASH · BLM PRO · ME MAN · NIKO</div>
+
+  <!-- Galerie des participants -->
+  <div id="jys-gallery-wrap" style="text-align:center;margin-bottom:32px;">
+    <div id="jys-avatars" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;min-height:52px;"></div>
+    <div id="jys-count-lbl" style="font-size:0.7rem;color:var(--text-muted);letter-spacing:1px;font-style:italic;"></div>
+  </div>
+
+  <div style="max-width:480px;margin:0 auto;">
+    <!-- Inputs nom + photo -->
+    <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px;">
+      <input type="text" id="jys-nom" placeholder="Votre prénom et nom" oninput="liveJysCard()"
+        style="background:#1a1a1a;border:1.5px solid rgba(212,175,55,0.28);color:#fff;padding:13px 16px;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:0.92rem;outline:none;transition:border-color .3s;"
+        onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(212,175,55,0.28)'" />
+      <label id="jys-photo-lbl" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:10px;border:1.5px dashed rgba(212,175,55,0.3);cursor:pointer;color:var(--gold);font-size:0.8rem;letter-spacing:1px;font-family:'Cinzel',serif;transition:all .3s;background:rgba(212,175,55,0.03);"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(212,175,55,0.07)'"
+        onmouseout="this.style.borderColor='rgba(212,175,55,0.3)';this.style.background='rgba(212,175,55,0.03)'">
+        <i class="fas fa-camera"></i>
+        <span id="jys-photo-txt">Ajouter ma photo (optionnel)</span>
+        <input type="file" id="jys-photo-input" accept="image/*" style="display:none" onchange="onJysPhoto(event)" />
+      </label>
     </div>
-    <!-- Boutons de partage -->
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <button onclick="shareEventWhatsApp()" style="flex:1;min-width:140px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:#25D366;color:#fff;font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-        <i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> WhatsApp
+
+    <!-- Canvas preview -->
+    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 40px rgba(212,175,55,0.18);">
+      <canvas id="jys-canvas" width="1080" height="1080" style="width:100%;display:block;border-radius:16px;"></canvas>
+    </div>
+
+    <!-- Bouton Générer -->
+    <button onclick="generateJysCard(true)" style="width:100%;margin-bottom:10px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 20px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(212,175,55,0.3)'">
+      <i class="fas fa-magic"></i> Générer ma carte J'y Serai
+    </button>
+
+    <!-- Télécharger + Partager -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <button onclick="downloadJysCard()" id="btn-jys-dl" style="flex:1;min-width:120px;padding:13px;border-radius:25px;cursor:pointer;background:transparent;border:1.5px solid rgba(212,175,55,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;opacity:0.55;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.4)'">
+        <i class="fas fa-download"></i> Télécharger
       </button>
-      <button onclick="copyEventLink()" style="flex:1;min-width:140px;padding:14px;border-radius:28px;cursor:pointer;background:transparent;border:1.5px solid rgba(212,175,55,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.4)'">
-        <i class="fas fa-link"></i> Copier le lien
-      </button>
-      <button onclick="shareEventNative()" id="btn-native-share" style="flex:1;min-width:140px;padding:14px;border-radius:28px;cursor:pointer;background:rgba(212,175,55,0.08);border:1.5px solid rgba(212,175,55,0.2);color:var(--gold-light);font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:none;align-items:center;justify-content:center;gap:10px;transition:all .3s;">
+      <button onclick="shareEventNative()" id="btn-native-share" style="flex:1;min-width:120px;padding:13px;border-radius:25px;cursor:pointer;background:rgba(212,175,55,0.08);border:1.5px solid rgba(212,175,55,0.2);color:var(--gold-light);font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;display:none;align-items:center;justify-content:center;gap:8px;transition:all .3s;">
         <i class="fas fa-share-alt"></i> Partager
       </button>
     </div>
-    <div style="text-align:center;font-size:0.62rem;color:var(--text-muted);margin-top:4px;">Invitez vos proches — l'entrée est gratuite !</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="shareJysWhatsApp()" style="flex:1;min-width:140px;padding:13px;border-radius:25px;border:none;cursor:pointer;background:#25D366;color:#fff;font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fab fa-whatsapp" style="font-size:1rem;"></i> WhatsApp
+      </button>
+      <button onclick="shareJysInstagram()" style="flex:1;min-width:140px;padding:13px;border-radius:25px;border:none;cursor:pointer;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fab fa-instagram" style="font-size:1rem;"></i> Instagram
+      </button>
+    </div>
+    <div style="text-align:center;font-size:0.62rem;color:var(--text-muted);margin-top:10px;">Téléchargez la carte · Partagez-la en story ou status !</div>
   </div>
 </section>
 
@@ -923,8 +952,13 @@ function selectTicket(type,price){
 function updateTotal(){
   const sel=document.getElementById('f-type');
   const price=parseInt(sel.options[sel.selectedIndex].dataset.price)||0;
-  const qty=parseInt(document.getElementById('f-qty').value)||1;
   selPrice=price; selType=sel.value;
+  // Auto-sync qty selon type
+  const qtyEl=document.getElementById('f-qty');
+  if(selType==='solo'){qtyEl.value='1';qtyEl.disabled=true;}
+  else if(selType==='couple'){qtyEl.value='2';qtyEl.disabled=true;}
+  else{qtyEl.disabled=false;}
+  const qty=parseInt(qtyEl.value)||1;
   const el=document.getElementById('form-total');
   el.textContent=price===0?'GRATUIT':(price*qty).toLocaleString('fr-FR')+' FCFA';
 }
@@ -1279,31 +1313,229 @@ function copyInviteLink(){
     });
 }
 
-/* ===== PARTAGE ÉVÉNEMENT ===== */
-function shareEventWhatsApp(){
-  const msg = `🎉 Dîner de Gala de Fin d'Année ENSETP 2026 !\n\n📅 Samedi 20 Juin 2026 à 19h\n📍 Au Magic Land, Dakar\n🎟️ Entrée GRATUITE — places limitées !\n\nArtistes : ZOU NAME · MIST CASH · BLM PRO · ME MAN · NIKO\n\n👉 Réserve ta place ici : https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #FPT #MagicLand`;
-  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+/* ===== J'Y SERAI — CARTE PERSONNALISÉE ===== */
+let _jysPhoto = null;
+let _jysCardReady = false;
+
+function onJysPhoto(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      _jysPhoto = img;
+      document.getElementById('jys-photo-txt').textContent = '📸 Photo ajoutée !';
+      document.getElementById('jys-photo-lbl').style.borderColor = 'var(--gold)';
+      liveJysCard();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
-function copyEventLink(){
-  const text = 'https://ensetp.mahu.cards';
-  navigator.clipboard.writeText(text).then(()=>notify('success','Lien copié !','Partagez ensetp.mahu.cards avec vos amis.'))
-    .catch(()=>{
-      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      notify('success','Lien copié !','Partagez ensetp.mahu.cards avec vos amis.');
-    });
+function liveJysCard() {
+  const name = (document.getElementById('jys-nom').value || '').trim();
+  drawJysCard(name || 'Votre Nom', _jysPhoto);
+}
+
+function generateJysCard(save) {
+  const name = (document.getElementById('jys-nom').value || '').trim();
+  if (!name) {
+    notify('error', 'Prénom requis', 'Entrez votre prénom avant de générer la carte.');
+    document.getElementById('jys-nom').focus(); return;
+  }
+  drawJysCard(name, _jysPhoto);
+  _jysCardReady = true;
+  const dlBtn = document.getElementById('btn-jys-dl');
+  if (dlBtn) { dlBtn.style.opacity = '1'; dlBtn.style.pointerEvents = 'auto'; }
+  if (save) _saveJysEntry(name);
+}
+
+function drawJysCard(name, photoImg) {
+  const canvas = document.getElementById('jys-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+  canvas.width = W; canvas.height = H;
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#080808'); bg.addColorStop(0.5, '#111'); bg.addColorStop(1, '#0d0d0d');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // Radial glow
+  const glow = ctx.createRadialGradient(W/2, 190, 0, W/2, 190, 500);
+  glow.addColorStop(0, 'rgba(212,175,55,0.13)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  // Borders
+  ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 10;
+  _jysRoundRect(ctx, 28, 28, W-56, H-56, 22); ctx.stroke();
+  ctx.strokeStyle = 'rgba(212,175,55,0.28)'; ctx.lineWidth = 2;
+  _jysRoundRect(ctx, 46, 46, W-92, H-92, 16); ctx.stroke();
+
+  // Corner ornaments
+  [[66,66,0],[W-66,66,90],[W-66,H-66,180],[66,H-66,270]].forEach(([x,y,a])=>_jysCorner(ctx,x,y,44,a));
+
+  // Header: ENSETP
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#D4AF37';
+  ctx.font = 'bold 72px "Cinzel",Georgia,serif';
+  ctx.fillText('ENSETP', W/2, 150);
+  ctx.fillStyle = 'rgba(212,175,55,0.55)';
+  ctx.font = '500 28px "Montserrat",Arial,sans-serif';
+  ctx.fillText("DÎNER DE GALA DE FIN D'ANNÉE 2026", W/2, 196);
+  // Gold separator
+  ctx.fillStyle = '#D4AF37'; ctx.fillRect(W/2-115, 218, 230, 3);
+  ctx.fillStyle = 'rgba(212,175,55,0.3)'; ctx.fillRect(W/2-65, 226, 130, 1);
+
+  // Photo circle (cx, cy, cr)
+  const cx = W/2, cy = 492, cr = 202;
+  // Outer glow
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, cr+24, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(212,175,55,0.15)'; ctx.lineWidth = 10; ctx.stroke();
+  // Gold ring
+  ctx.beginPath(); ctx.arc(cx, cy, cr+10, 0, Math.PI*2);
+  ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 6; ctx.stroke();
+  // Photo clip
+  ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.clip();
+  if (photoImg && photoImg.naturalWidth) {
+    const sc = Math.max((cr*2)/photoImg.naturalWidth, (cr*2)/photoImg.naturalHeight);
+    const sw = photoImg.naturalWidth*sc, sh = photoImg.naturalHeight*sc;
+    ctx.drawImage(photoImg, cx-sw/2, cy-sh/2, sw, sh);
+  } else {
+    // Placeholder gradient
+    const ig = ctx.createRadialGradient(cx, cy-40, 0, cx, cy, cr);
+    ig.addColorStop(0, '#282828'); ig.addColorStop(1, '#101010');
+    ctx.fillStyle = ig; ctx.fillRect(cx-cr, cy-cr, cr*2, cr*2);
+    // Silhouette
+    ctx.fillStyle = 'rgba(212,175,55,0.22)';
+    ctx.beginPath(); ctx.arc(cx, cy-55, 88, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy+148, 145, Math.PI, 0); ctx.fill();
+    // Initials
+    const ini = name.split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase();
+    ctx.fillStyle = 'rgba(212,175,55,0.85)';
+    ctx.font = 'bold 112px "Cinzel",Georgia,serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(ini, cx, cy+18);
+  }
+  ctx.restore();
+
+  // "J'Y SERAI !"
+  ctx.textAlign = 'center';
+  const grad = ctx.createLinearGradient(W/2-280, 0, W/2+280, 0);
+  grad.addColorStop(0, '#F5D66A'); grad.addColorStop(0.5, '#D4AF37'); grad.addColorStop(1, '#A07820');
+  ctx.fillStyle = grad;
+  ctx.font = 'bold 106px "Cinzel",Georgia,serif';
+  ctx.fillText("J'Y SERAI !", W/2, 792);
+
+  // Name
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 58px "Montserrat",Arial,sans-serif';
+  ctx.fillText(name, W/2, 870);
+  // Separator
+  ctx.fillStyle = 'rgba(212,175,55,0.4)'; ctx.fillRect(W/2-90, 888, 180, 2);
+
+  // Date & lieu
+  ctx.fillStyle = '#aaaaaa';
+  ctx.font = '35px "Montserrat",Arial,sans-serif';
+  ctx.fillText('Samedi 20 Juin 2026  ·  Au Magic Land, Dakar', W/2, 936);
+
+  // Branding
+  ctx.fillStyle = 'rgba(212,175,55,0.42)';
+  ctx.font = '27px "Montserrat",Arial,sans-serif';
+  ctx.fillText('ensetp.mahu.cards  ·  #ENSETP  #GalaDîner2026', W/2, 1006);
+}
+
+function _jysRoundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+function _jysCorner(ctx,x,y,size,angle){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(angle*Math.PI/180);
+  ctx.strokeStyle='#D4AF37'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(0,size); ctx.lineTo(0,0); ctx.lineTo(size,0); ctx.stroke();
+  ctx.restore();
+}
+
+function downloadJysCard() {
+  if (!_jysCardReady) { generateJysCard(false); if (!_jysCardReady) return; }
+  const canvas = document.getElementById('jys-canvas');
+  const nm = ((document.getElementById('jys-nom').value||'Gala').trim()).replace(/\s+/g,'_');
+  const a = document.createElement('a');
+  a.download = 'JySerai_ENSETP2026_' + nm + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  notify('success', 'Carte téléchargée !', 'Partagez-la en story WhatsApp ou Instagram !');
+}
+
+function shareJysWhatsApp() {
+  const name = (document.getElementById('jys-nom').value||'').trim();
+  const msg = (name?`🎉 ${name} sera au Dîner de Gala ENSETP 2026 !\n\n`:`🎉 Je serai au Dîner de Gala ENSETP 2026 !\n\n`)
+    +'📅 Samedi 20 Juin 2026 · 19h\n📍 Au Magic Land, Dakar\n🎟️ Entrée GRATUITE — places limitées !\n\n👉 https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026';
+  if (_jysCardReady) {
+    notify('info','Astuce','Téléchargez d\'abord la carte, puis envoyez-la en photo sur WhatsApp !');
+    setTimeout(()=>window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank'),900);
+  } else {
+    window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+  }
+}
+
+function shareJysInstagram() {
+  // Instagram ne permet pas l'ouverture directe — on génère + télécharge la carte
+  const name = (document.getElementById('jys-nom').value||'').trim();
+  if (!name) { notify('error','Prénom requis','Entrez votre prénom pour générer la carte.'); return; }
+  generateJysCard(true);
+  setTimeout(()=>{
+    downloadJysCard();
+    notify('info','Pour Instagram','Carte enregistrée ! Ouvrez Instagram → Créer story → sélectionnez la photo depuis votre galerie.');
+  }, 300);
+}
+
+function _saveJysEntry(name) {
+  const entries = JSON.parse(localStorage.getItem('jys_entries')||'[]');
+  entries.unshift({ name, ts: Date.now() });
+  localStorage.setItem('jys_entries', JSON.stringify(entries.slice(0,100)));
+  _renderJysGallery();
+  notify('success', "Carte créée !", "Téléchargez-la et partagez-la avec vos amis !");
+}
+
+function _renderJysGallery() {
+  const entries = JSON.parse(localStorage.getItem('jys_entries')||'[]');
+  const registered = (orders||[]).map(o=>({name:o.prenom+' '+o.nom}));
+  const all = [...entries, ...registered.filter(r=>!entries.find(e=>e.name===r.name))];
+  const container = document.getElementById('jys-avatars');
+  const countEl = document.getElementById('jys-count-lbl');
+  if (!container) return;
+  const shown = all.slice(0, 12);
+  container.innerHTML = shown.map(e=>{
+    const ini=(e.name||'?').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase();
+    const colors=['#1a6b35','#2c2c54','#4a1a1a','#1a3a4a','#3a2a0a'];
+    const c=colors[ini.charCodeAt(0)%colors.length];
+    return `<div title="${e.name}" style="width:46px;height:46px;border-radius:50%;background:${c};border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:var(--gold);flex-shrink:0;font-family:'Cinzel',serif;">${ini}</div>`;
+  }).join('')+(all.length>12?`<div style="width:46px;height:46px;border-radius:50%;background:rgba(212,175,55,0.1);border:2px solid rgba(212,175,55,0.3);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--gold);flex-shrink:0;">+${all.length-12}</div>`:'');
+  if (countEl) {
+    if (all.length===0) countEl.textContent="Soyez le premier à dire J'y Serai !";
+    else countEl.textContent=all.length+' personne'+(all.length>1?'s ont dit':'  a dit')+' J\'y Serai !';
+  }
 }
 
 function shareEventNative(){
   if(navigator.share){
-    navigator.share({ title:'Dîner de Gala ENSETP 2026', text:'🎉 Places gratuites pour le Gala ENSETP 2026 — Samedi 20 Juin au Magic Land !', url:'https://ensetp.mahu.cards' }).catch(()=>{});
+    navigator.share({title:'Dîner de Gala ENSETP 2026',text:'🎉 Places gratuites pour le Gala ENSETP 2026 — Samedi 20 Juin au Magic Land !',url:'https://ensetp.mahu.cards'}).catch(()=>{});
   }
 }
 
 /* ===== INIT ===== */
-// Afficher bouton "Partager" natif si disponible (mobile)
 if(navigator.share) document.querySelectorAll('#btn-native-share').forEach(b=>{b.style.display='flex';});
 initLikes();
+_renderJysGallery();
+liveJysCard(); // affiche la carte vide au chargement
 
 /* ===== REVEAL OBSERVER ===== */
 const revObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.1});
