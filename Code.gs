@@ -9,16 +9,29 @@ var CFG = {
   COMMANDES_SHEET:  'Commandes',
   PRESENCES_SHEET:  'Présences',
   ADMINS_SHEET:     'Sous-Admins',
-  SHEET_ID:         '',                     // Laisser vide = feuille liée au script
-  EMAIL_FROM:       'gala@ensetp.edu.sn',   // Adresse expéditeur (alias Gmail)
+
+  // ► ID du Google Sheet (trouvez-le dans l'URL de votre feuille) :
+  //   https://docs.google.com/spreadsheets/d/ ►ID_ICI◄ /edit
+  //   Laisser vide = feuille liée au script (créée automatiquement)
+  SHEET_ID:         '',
+
+  EMAIL_FROM:       'contact@mahu.cards',   // Adresse expéditeur des tickets
   ADMIN_EMAIL:      'contact@mahu.cards',   // Reçoit toutes les notifications
+
   EVENT_NAME:       'Dîner de Gala de Fin d\'Année – ENSETP 2026',
   EVENT_DATE:       'Samedi 20 Juin 2026',
   EVENT_LIEU:       'Au Magic Land',
+
   PAYDUNIA_KEY:     '',                     // Clé API Paydunia (depuis dashboard)
   PAYDUNIA_SECRET:  '',
   PAYDUNIA_URL:     'https://paydunia.com/api/v1/payment/init',
-  CALLBACK_URL:     'https://abmcompanysn-dot.github.io/ENSETP/'
+
+  // ► WEBHOOK_URL : Paydunia envoie la confirmation de paiement ici (serveur)
+  //   → Votre serveur ou l'URL de ce script Apps Script
+  WEBHOOK_URL:      'https://ensetp.abmcy.com',
+
+  // ► SITE_URL : URL où l'utilisateur est redirigé après paiement (site public)
+  SITE_URL:         'https://ensetp.mahu.cards'
 };
 
 // ── MENU GOOGLE SHEETS ─────────────────────────────────────
@@ -240,9 +253,9 @@ function createPayduniaPayment(order) {
       customer_email: order.email,
       customer_phone: order.tel,
       description:    'Ticket Gala ENSETP 2026 – ' + order.type.toUpperCase(),
-      callback_url:   CFG.CALLBACK_URL + '?order_id=' + order.id,
-      return_url:     CFG.CALLBACK_URL + '?payment_status=success&order_id=' + order.id,
-      cancel_url:     CFG.CALLBACK_URL + '?payment_status=cancel&order_id=' + order.id
+      callback_url:   CFG.WEBHOOK_URL + '?order_id=' + order.id,
+      return_url:     CFG.SITE_URL + '?payment_status=success&order_id=' + order.id,
+      cancel_url:     CFG.SITE_URL + '?payment_status=cancel&order_id=' + order.id
     };
     var resp = UrlFetchApp.fetch(CFG.PAYDUNIA_URL, {
       method: 'post', contentType: 'application/json',
