@@ -903,6 +903,9 @@ ok
       </div>
       <div class="modal-actions">
         <button class="btn-print" onclick="printTicket()"><i class="fas fa-print"></i> Imprimer</button>
+        <button onclick="downloadTicketImage()" style="flex:1;padding:12px 18px;border-radius:25px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="fas fa-download"></i> Enregistrer en JPEG
+        </button>
         <button class="btn-close-modal" style="border:1.5px solid var(--gold)!important;background:transparent;color:var(--gold)" onclick="closeTicketModal()">Fermer</button>
       </div>
       <!-- PARTAGE TICKET -->
@@ -1368,6 +1371,151 @@ function copyInviteLink(){
       const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
       notify('success','Copié !','Message d\'invitation copié.');
     });
+}
+
+/* ===== TÉLÉCHARGEMENT TICKET EN IMAGE ===== */
+function downloadTicketImage() {
+  const o = _currentShareOrder;
+  if (!o) { notify('error','Aucun ticket','Aucun ticket actif à télécharger.'); return; }
+
+  const W = 900, H = 1160;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+
+  // Récupérer l'image QR déjà générée dans le modal (data URL)
+  const qrEl = document.getElementById('qr-code');
+  const qrImgEl = qrEl ? qrEl.querySelector('img') : null;
+  const qrSrc = qrImgEl ? qrImgEl.src : null;
+
+  function finish(qrImg) {
+    _drawTicketCanvas(ctx, o, W, H, qrImg);
+    const nm = ((o.prenom||'')+'_'+(o.nom||'')).replace(/\s+/g,'_');
+    const a = document.createElement('a');
+    a.download = 'Ticket_GalaENSETP2026_'+nm+'.jpg';
+    a.href = cv.toDataURL('image/jpeg', 0.93);
+    a.click();
+    notify('success','Ticket enregistré !','Retrouvez votre ticket dans la galerie de votre téléphone !');
+  }
+
+  if (qrSrc && qrSrc.startsWith('data:')) {
+    const qi = new Image(); qi.onload = ()=>finish(qi); qi.src = qrSrc;
+  } else {
+    finish(null);
+  }
+}
+
+function _drawTicketCanvas(ctx, o, W, H, qrImg) {
+  const fullName = ((o.prenom||'')+' '+(o.nom||'')).trim().toUpperCase();
+  const typeText = String(o.type||'SOLO').toUpperCase();
+  const montant = (o.total && Number(o.total)>0) ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : 'GRATUIT';
+  const emis = new Date(o.date||new Date()).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Fond
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#080808'); bg.addColorStop(0.6,'#0d0d0d'); bg.addColorStop(1,'#111');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  const glow=ctx.createRadialGradient(W/2,0,0,W/2,0,420);
+  glow.addColorStop(0,'rgba(212,175,55,0.1)'); glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+
+  // Bordures
+  ctx.strokeStyle='#D4AF37'; ctx.lineWidth=7;
+  _jysRoundRect(ctx,20,20,W-40,H-40,20); ctx.stroke();
+  ctx.strokeStyle='rgba(212,175,55,0.22)'; ctx.lineWidth=2;
+  _jysRoundRect(ctx,34,34,W-68,H-68,14); ctx.stroke();
+  [[54,54,0],[W-54,54,90],[W-54,H-54,180],[54,H-54,270]].forEach(([x,y,a])=>_jysCorner(ctx,x,y,36,a));
+
+  // Header bar
+  ctx.fillStyle='#0A0A0A'; ctx.fillRect(20,20,W-40,80);
+  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(20,100); ctx.lineTo(W-20,100); ctx.stroke();
+  ctx.fillStyle='#D4AF37'; ctx.font='bold 40px "Cinzel",Georgia,serif'; ctx.textAlign='left';
+  ctx.fillText('ENSETP',54,73);
+  ctx.fillStyle='rgba(212,175,55,0.45)'; ctx.font='500 18px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
+  ctx.fillText("DÎNER DE GALA · 2026",W-54,73);
+
+  // Titre
+  ctx.fillStyle='#D4AF37'; ctx.font='italic 68px "Playfair Display",Georgia,serif'; ctx.textAlign='left';
+  ctx.fillText('Gala',54,188);
+  ctx.fillStyle='rgba(212,175,55,0.4)'; ctx.font='500 17px "Montserrat",Arial,sans-serif';
+  ctx.fillText("DE FIN D'ANNÉE · ENSETP 2026",54,214);
+
+  // Separator
+  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1; ctx.setLineDash([7,5]);
+  ctx.beginPath(); ctx.moveTo(54,240); ctx.lineTo(W-54,240); ctx.stroke(); ctx.setLineDash([]);
+
+  // Titulaire
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('TITULAIRE',54,276);
+  ctx.fillStyle='#fff';
+  const nSize = ctx.measureText(fullName).width > W-310 ? 28 : 38;
+  ctx.font='bold '+nSize+'px "Montserrat",Arial,sans-serif';
+  ctx.fillText(fullName,54,320);
+
+  // Badge type
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('TYPE',W-54,276);
+  const bg2=ctx.createLinearGradient(W-200,0,W-54,0);
+  bg2.addColorStop(0,'#F5D66A'); bg2.addColorStop(0.5,'#D4AF37'); bg2.addColorStop(1,'#A07820');
+  ctx.fillStyle=bg2; _jysRoundRect(ctx,W-200,286,146,44,22); ctx.fill();
+  ctx.fillStyle='#000'; ctx.font='bold 18px "Cinzel",Georgia,serif'; ctx.textAlign='center';
+  ctx.fillText(typeText,W-127,314);
+
+  // Email + montant
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('E-MAIL',54,360);
+  ctx.fillStyle='#bbb'; ctx.font='20px "Montserrat",Arial,sans-serif';
+  ctx.fillText(o.email||'–',54,386);
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('MONTANT',W-54,360);
+  ctx.fillStyle='#D4AF37'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
+  ctx.fillText(montant,W-54,386);
+
+  // Separator
+  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1; ctx.setLineDash([7,5]);
+  ctx.beginPath(); ctx.moveTo(54,414); ctx.lineTo(W-54,414); ctx.stroke(); ctx.setLineDash([]);
+
+  // Date + Lieu
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('DATE',54,450);
+  ctx.fillStyle='#fff'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
+  ctx.fillText('Samedi 20 Juin 2026',54,480);
+  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('LIEU',W-54,450);
+  ctx.fillStyle='#fff'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
+  ctx.fillText('Au Magic Land · Dakar',W-54,480);
+
+  // Ligne perforée
+  ctx.strokeStyle='rgba(212,175,55,0.28)'; ctx.lineWidth=2; ctx.setLineDash([10,7]);
+  ctx.beginPath(); ctx.moveTo(54,524); ctx.lineTo(W-54,524); ctx.stroke(); ctx.setLineDash([]);
+  [[20,524],[W-20,524]].forEach(([x,y])=>{ctx.fillStyle='#0d0d0d';ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.fill();});
+
+  // QR code
+  const qrSize=162, qrX=W-54-qrSize, qrY=556;
+  ctx.fillStyle='#fff'; _jysRoundRect(ctx,qrX-6,qrY-6,qrSize+12,qrSize+12,8); ctx.fill();
+  if(qrImg){ ctx.drawImage(qrImg,qrX,qrY,qrSize,qrSize); }
+  else {
+    ctx.fillStyle='#ccc'; ctx.font='14px monospace'; ctx.textAlign='center';
+    ctx.fillText('QR CODE',qrX+qrSize/2,qrY+qrSize/2);
+  }
+  ctx.fillStyle='rgba(212,175,55,0.38)'; ctx.font='14px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('Scannez pour valider',W-54,qrY+qrSize+22);
+
+  // ID + meta
+  ctx.fillStyle='rgba(212,175,55,0.35)'; ctx.font='13px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('ID TICKET',54,572);
+  ctx.fillStyle='#D4AF37'; ctx.font='bold 15px "Courier New",monospace';
+  ctx.fillText(o.id||'–',54,594);
+  ctx.fillStyle='#444'; ctx.font='14px "Montserrat",Arial,sans-serif';
+  ctx.fillText('Émis le '+emis,54,618);
+  ctx.fillText('Présentez ce ticket à l\'entrée',54,638);
+
+  // Branding bas
+  ctx.strokeStyle='rgba(212,175,55,0.1)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(54,H-58); ctx.lineTo(W-54,H-58); ctx.stroke();
+  ctx.fillStyle='rgba(212,175,55,0.28)'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='center';
+  ctx.fillText('ensetp.mahu.cards  ·  Mahu Events  ·  #ENSETP  #GalaDîner2026',W/2,H-36);
 }
 
 /* ===== J'Y SERAI — CARTE PERSONNALISÉE ===== */
