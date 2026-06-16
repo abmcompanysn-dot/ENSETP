@@ -258,7 +258,7 @@ async function verify(){
 
   try {
     const r = await fetch(AS_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({ action:'verifyTicket', ticketId: id })
     });
     const data = await r.json();
@@ -307,16 +307,24 @@ function showResult(data, id){
 }
 
 function resultHtml(cls, icon, title, sub, order){
+  const fromQr = new URLSearchParams(location.search).get('id');
+  const scanNextBtn = fromQr
+    ? `<div style="padding:14px 24px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
+        <button onclick="location.href='/verify'" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--gold);padding:10px 24px;border-radius:20px;font-family:Montserrat,sans-serif;font-size:0.78rem;cursor:pointer;letter-spacing:1px;">
+          <i class="fas fa-qrcode"></i> Scanner un autre ticket
+        </button>
+      </div>`
+    : '';
   return `<div class="result-header ${cls}">
     <div class="result-icon-wrap"><i class="${icon}"></i></div>
     <div><div class="result-status-title">${title}</div><div class="result-status-sub">${sub}</div></div>
   </div>
   <div class="result-body">
-    <div class="result-row"><span class="result-label">Titulaire</span><span class="result-value">${order.nom}</span></div>
+    <div class="result-row"><span class="result-label">Titulaire</span><span class="result-value" style="font-size:1rem;font-weight:700;">${order.nom}</span></div>
     <div class="result-row"><span class="result-label">Type</span><span class="result-value"><span class="badge-type">${order.type}</span></span></div>
     <div class="result-row"><span class="result-label">Personnes</span><span class="result-value">${order.qty||1}</span></div>
     <div class="result-row"><span class="result-label">Référence</span><span class="result-value" style="font-family:monospace;font-size:0.66rem;color:var(--gold)">${order.id}</span></div>
-  </div>`;
+  </div>${scanNextBtn}`;
 }
 
 function invalidHtml(msg, id){
@@ -402,11 +410,21 @@ function notify(type,title,msg){
 
 /* ── INIT ── */
 renderHistory(); updateCounters();
-document.getElementById('ticket-input').focus();
 
-// Pré-remplir si ticket ID dans l'URL (?id=TK-...)
+// Pré-remplir depuis URL (?id=TK-...) — déclenché par le scan du QR code
 const urlId = new URLSearchParams(location.search).get('id');
-if(urlId){ document.getElementById('ticket-input').value=urlId; verify(); }
+if(urlId){
+  // Mode scan QR : adapter l'UI pour mobile
+  const scanCard = document.querySelector('.scan-card');
+  const scanBanner = document.createElement('div');
+  scanBanner.style.cssText = 'background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:0.74rem;color:var(--gold);display:flex;align-items:center;gap:10px;text-align:left;';
+  scanBanner.innerHTML = '<i class="fas fa-qrcode" style="font-size:1rem;flex-shrink:0;"></i><span>QR Code scanné — vérification automatique en cours...</span>';
+  scanCard.insertBefore(scanBanner, scanCard.querySelector('.input-wrap'));
+  document.getElementById('ticket-input').value = urlId;
+  verify();
+} else {
+  document.getElementById('ticket-input').focus();
+}
 </script>
 </body>
 </html>

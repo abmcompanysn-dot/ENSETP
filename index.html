@@ -957,7 +957,7 @@ function showTicket(o){
   const qr = document.getElementById('qr-code');
   qr.innerHTML = '';
   try {
-    new QRCode(qr, {text:`ENSETP|${o.id}|${fullName}|${typeLabel}`, width:88, height:88, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.H});
+    new QRCode(qr, {text:`https://ensetp.mahu.cards/verify?id=${o.id}`, width:88, height:88, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.H});
     // Convertit le canvas en <img> pour que printTicket() le capture correctement via outerHTML
     setTimeout(()=>{
       const canvas = qr.querySelector('canvas');

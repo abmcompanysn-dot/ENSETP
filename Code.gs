@@ -623,8 +623,9 @@ function buildTicketHtml(order, cfg) {
   var montant = (order.total && Number(order.total) > 0) ? Number(order.total).toLocaleString('fr-FR') + ' FCFA' : 'GRATUIT';
   var emis = new Date(order.date || new Date()).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
 
-  // QR code image via Google Charts API (fonctionne dans tous les clients email)
-  var qrData = encodeURIComponent('ENSETP|' + order.id + '|' + fullName + '|' + typeUpper);
+  // QR code = URL vers la page de vérification (téléphone scanne → ouvre verify directement)
+  var verifyUrl = cfg.SITE_URL + '/verify?id=' + order.id;
+  var qrData = encodeURIComponent(verifyUrl);
   var qrUrl  = 'https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=' + qrData + '&choe=UTF-8&chld=M|2';
 
   return '<div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:2px solid #D4AF37;border-radius:14px;overflow:hidden;font-family:Arial,sans-serif;max-width:480px;">'
