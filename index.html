@@ -219,6 +219,7 @@ ok
     .tk-qr { background:white; padding:5px; border-radius:6px; }
     .tk-id { font-family:'Cinzel',serif; font-size:0.72rem; color:var(--gold); letter-spacing:2px; }
     .tk-meta { font-size:0.62rem; color:var(--text-muted); margin-top:4px; }
+    #tk-nom { font-size:1.08rem; font-weight:700; color:#fff; letter-spacing:0.5px; }
     .modal-actions { display:flex; gap:12px; margin-top:18px; }
     .modal-actions button { flex:1; padding:13px; border-radius:30px; border:none; cursor:pointer; font-family:'Cinzel',serif; font-size:0.76rem; font-weight:700; letter-spacing:2px; transition:all .3s; }
     .btn-print { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:var(--black); }
@@ -917,11 +918,25 @@ async function processPayment(){
     try{
       const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createOrder',order})});
       const data=await r.json();
-      if(data.paymentUrl){saveOrder(order);window.location.href=data.paymentUrl;return;}
+      if(data.paymentUrl){
+        saveOrder(order);
+        btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Redirection PayDunya...';
+        notify('info','Redirection en cours','Vous allez être redirigé vers PayDunya pour finaliser votre paiement sécurisé.');
+        setTimeout(()=>{window.location.href=data.paymentUrl;},500);
+        return;
+      }
+      if(data.error){
+        btn.disabled=false;
+        btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket';
+        notify('err','Erreur paiement',data.error);
+        return;
+      }
+      // Apps Script ok mais pas de lien PayDunya (mode démo — clés non encore configurées)
+      if(data.orderId){ saveOrder(order); showTicket(order); btn.disabled=false; btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket'; return; }
     }catch(e){console.warn('Apps Script non disponible – mode démo.');}
   }
 
-  /* --- Demo mode --- */
+  /* --- Demo mode (Apps Script inaccessible) --- */
   saveOrder(order);
   showTicket(order);
   btn.disabled=false;
@@ -932,16 +947,38 @@ function saveOrder(o){orders.push(o);localStorage.setItem('ensetp_orders',JSON.s
 
 /* ===== SHOW TICKET ===== */
 function showTicket(o){
-  document.getElementById('tk-nom').textContent=`${o.prenom} ${o.nom}`;
-  document.getElementById('tk-email').textContent=o.email;
-  document.getElementById('tk-type').textContent=o.type.toUpperCase();
-  document.getElementById('tk-prix').textContent=o.total.toLocaleString('fr-FR')+' FCFA';
-  document.getElementById('tk-id').textContent=o.id;
-  document.getElementById('tk-date').textContent='Émis le '+new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  const qr=document.getElementById('qr-code'); qr.innerHTML='';
-  new QRCode(qr,{text:`ENSETP|${o.id}|${o.prenom} ${o.nom}|${o.type}`,width:88,height:88,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  const fullName = [o.prenom, o.nom].filter(Boolean).join(' ') || '–';
+  const typeLabel = o.type ? o.type.toUpperCase() : '–';
+  const montant = o.total ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : '–';
+  const emis = o.date ? new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '–';
+
+  document.getElementById('tk-nom').textContent = fullName;
+  document.getElementById('tk-email').textContent = o.email || '–';
+  document.getElementById('tk-type').textContent = typeLabel;
+  document.getElementById('tk-prix').textContent = montant;
+  document.getElementById('tk-id').textContent = o.id;
+  document.getElementById('tk-date').textContent = 'Émis le ' + emis;
+
+  const qr = document.getElementById('qr-code');
+  qr.innerHTML = '';
+  try {
+    new QRCode(qr, {text:`ENSETP|${o.id}|${fullName}|${typeLabel}`, width:88, height:88, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.H});
+    // Convertit le canvas en <img> pour que printTicket() le capture correctement via outerHTML
+    setTimeout(()=>{
+      const canvas = qr.querySelector('canvas');
+      if(canvas){
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.width = 88; img.height = 88;
+        img.style.cssText = 'display:block;border-radius:3px;';
+        qr.innerHTML = '';
+        qr.appendChild(img);
+      }
+    }, 150);
+  } catch(e){ console.warn('QRCode error:', e); }
+
   document.getElementById('ticket-modal').classList.add('active');
-  notify('success','Ticket généré !',`Ticket ${o.id} prêt. Vérifiez votre e-mail.`);
+  notify('success', 'Ticket généré !', `Bienvenue ${fullName} — vérifiez votre e-mail.`);
 }
 
 /* ===== PRINT ===== */
@@ -1130,11 +1167,45 @@ function _showLocalTicket(id){
 /* ===== PAYDUNIA CALLBACK ===== */
 (()=>{
   const p=new URLSearchParams(location.search);
-  if(p.get('payment_status')==='success'){
-    const oid=p.get('order_id');
+  const payStatus=p.get('payment_status');
+  const oid=p.get('order_id');
+
+  if(payStatus==='success' && oid){
+    history.replaceState({},document.title,location.pathname); // nettoyer l'URL
     const o=orders.find(x=>x.id===oid);
-    if(o){o.status='paid';localStorage.setItem('ensetp_orders',JSON.stringify(orders));showTicket(o);}
+    if(o){
+      o.status='paid';
+      localStorage.setItem('ensetp_orders',JSON.stringify(orders));
+      showTicket(o);
+    } else {
+      // Ordre introuvable en localStorage (autre device ou storage effacé) → vérifier Apps Script
+      notify('info','Vérification...','Récupération de votre ticket en cours.');
+      const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
+      fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'verifyTicket',ticketId:oid})})
+        .then(r=>r.json())
+        .then(d=>{
+          if(d.valid && d.order){
+            const srv=d.order;
+            const parts=String(srv.nom||'').split(' ');
+            const prenom=parts[0]||'';
+            const nom=parts.slice(1).join(' ')||'';
+            const fake={id:oid,prenom,nom,email:srv.email||'',type:String(srv.type||'solo').toLowerCase(),qty:srv.qty||1,price:0,total:0,payment:'',date:new Date().toISOString(),status:'paid'};
+            orders.push(fake);
+            localStorage.setItem('ensetp_orders',JSON.stringify(orders));
+            showTicket(fake);
+          } else {
+            notify('info','Paiement reçu','Votre paiement est en cours de confirmation. Consultez votre e-mail pour votre ticket.');
+          }
+        })
+        .catch(()=>notify('info','Paiement reçu','Consultez votre e-mail pour recevoir votre ticket.'));
+    }
   }
+
+  if(payStatus==='cancel'){
+    history.replaceState({},document.title,location.pathname);
+    notify('err','Paiement annulé','Le paiement a été annulé. Vous pouvez réessayer.');
+  }
+
   if(p.get('type')) selectTicket(p.get('type'),parseInt(p.get('price')||1000));
 })();
 

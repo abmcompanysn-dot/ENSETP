@@ -213,17 +213,33 @@ function doPost(e) {
     }
 
     var rawBody = e.postData ? e.postData.contents : '';
-    var payload = JSON.parse(rawBody);
-    var action  = payload.action;
-    var result  = {};
+    var contentType = e.postData ? (e.postData.type || '') : '';
+    var payload = {};
 
-    // PayDunya webhook : pas de champ 'action' — structure { data: { invoice, custom_data } }
-    // ou ancienne structure { order_id, status, ... }
+    // PayDunya IPN peut envoyer en JSON ou en application/x-www-form-urlencoded
+    // avec une structure clé "data[token]", "data[status]", etc.
+    if (contentType.indexOf('application/json') !== -1 || rawBody.trim().startsWith('{')) {
+      try { payload = JSON.parse(rawBody); } catch(pe) { payload = e.parameter || {}; }
+    } else {
+      // URL-encoded : e.parameter contient les paires clé=valeur décodées
+      // Convertit data[token], data[invoice][total_amount] → { data: { token, invoice: { total_amount } } }
+      payload = _parseIpnParams(e.parameter || {});
+      // Si pas de paramètres URL mais corps brut, essayer JSON quand même
+      if (!payload.data && rawBody) {
+        try { payload = JSON.parse(rawBody); } catch(pe2) {}
+      }
+    }
+
+    var action = payload.action;
+    var result = {};
+
+    // PayDunya IPN : pas de champ 'action', structure { data: { token, status, ... } }
     var isPaydunyaWebhook = !action && (
-      (payload.data && payload.data.invoice) ||
+      (payload.data && (payload.data.token || payload.data.invoice || payload.data.status)) ||
       payload.order_id || payload.transaction_ref || payload.reference
     );
     if (isPaydunyaWebhook) {
+      Logger.log('IPN PayDunya reçu: ' + JSON.stringify(payload));
       return _jsonOut(handlePayduniaWebhook(payload));
     }
 
@@ -242,6 +258,27 @@ function doPost(e) {
     Logger.log('doPost error: ' + err.message);
     return _jsonOut({ error: err.message, code: 500 });
   }
+}
+
+// Convertit { "data[token]": "abc", "data[invoice][total]": "5000" }
+// → { data: { token: "abc", invoice: { total: "5000" } } }
+function _parseIpnParams(params) {
+  var result = {};
+  for (var key in params) {
+    var val = params[key];
+    var parts = [];
+    var re = /([^\[\]]+)/g;
+    var m;
+    while ((m = re.exec(key)) !== null) parts.push(m[1]);
+    if (parts.length === 0) continue;
+    var obj = result;
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
+      obj = obj[parts[i]];
+    }
+    obj[parts[parts.length - 1]] = val;
+  }
+  return result;
 }
 
 function doGet(e) {
@@ -398,11 +435,21 @@ function createPayduniaPayment(order, cfg) {
 function handlePayduniaWebhook(payload) {
   var cfg = getCFG();
 
-  // PayDunya webhook structure: { data: { invoice: { token, status }, custom_data: { order_id } } }
-  var invoiceData  = (payload.data && payload.data.invoice)     ? payload.data.invoice     : payload;
-  var customData   = (payload.data && payload.data.custom_data) ? payload.data.custom_data : payload;
-  var token   = invoiceData.token   || payload.token;
-  var orderId = customData.order_id || payload.order_id || payload.transaction_ref || payload.reference;
+  // PayDunya IPN : deux formats possibles selon l'encodage
+  //  JSON  : { data: { token, status, invoice: {...}, custom_data: { order_id } } }
+  //  Form  : parsé par _parseIpnParams → même structure
+  var dataObj    = payload.data || {};
+  var invoiceData = dataObj.invoice || {};
+  var customData  = dataObj.custom_data || {};
+
+  // Token : d'abord dans data.token (IPN direct), sinon data.invoice.token
+  var token   = dataObj.token || invoiceData.token || payload.token;
+  // ID commande : custom_data.order_id en priorité
+  var orderId = customData.order_id || dataObj.order_id ||
+                payload.order_id   || payload.transaction_ref || payload.reference;
+
+  // Statut brut depuis le payload (avant confirmation)
+  var rawStatus = String(dataObj.status || invoiceData.status || payload.status || '').toLowerCase();
 
   Logger.log('Webhook PayDunya reçu — token: ' + token + ' order: ' + orderId);
 
@@ -432,21 +479,28 @@ function handlePayduniaWebhook(payload) {
     }
   }
 
-  // Fallback statut depuis le webhook direct
-  if (!status) {
-    status = String(invoiceData.status || payload.status || payload.payment_status || '').toLowerCase();
-  }
+  // Fallback : si confirm endpoint indisponible, utiliser statut brut du payload
+  if (!status) { status = rawStatus || String(payload.payment_status || '').toLowerCase(); }
 
   Logger.log('PayDunya — order: ' + orderId + ' status: ' + status);
 
   if (status === 'completed' || status === 'success' || status === 'successful') {
     if (!orderId) { Logger.log('⚠️ order_id introuvable dans le webhook'); return { error: 'order_id manquant' }; }
+
+    // Idempotence : si la commande est déjà marquée payée, on ne renvoie pas le ticket
+    var existingOrder = getOrderById(orderId);
+    var alreadyPaid = existingOrder && String(existingOrder.status).toLowerCase().indexOf('pay') !== -1;
+    if (alreadyPaid) {
+      Logger.log('⚠️ IPN ignoré — commande déjà traitée (idempotence): ' + orderId);
+      return { success: true, orderId: orderId, alreadyProcessed: true };
+    }
+
     updateOrderStatus(orderId, 'paid');
     var order = getOrderById(orderId);
     if (order) {
       sendTicketEmail(order, cfg);
       sendAdminNotification(order, cfg);
-      Logger.log('✅ Ticket envoyé après confirmation PayDunya: ' + orderId);
+      Logger.log('✅ Ticket envoyé après confirmation PayDunya IPN: ' + orderId);
     } else {
       Logger.log('⚠️ Commande introuvable pour: ' + orderId);
     }
@@ -564,30 +618,81 @@ function sendAdminNotification(order, cfg) {
 // ── TICKET HTML (pour e-mail) ──────────────────────────────
 function buildTicketHtml(order, cfg) {
   cfg = cfg || getCFG();
-  return '<div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:2px solid #D4AF37;border-radius:14px;overflow:hidden;font-family:Arial,sans-serif;max-width:460px;">'
+  var fullName = order.prenom + ' ' + order.nom;
+  var typeUpper = String(order.type).toUpperCase();
+  var montant = Number(order.total).toLocaleString('fr-FR') + ' FCFA';
+  var emis = new Date(order.date || new Date()).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
+
+  // QR code image via Google Charts API (fonctionne dans tous les clients email)
+  var qrData = encodeURIComponent('ENSETP|' + order.id + '|' + fullName + '|' + typeUpper);
+  var qrUrl  = 'https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=' + qrData + '&choe=UTF-8&chld=M|2';
+
+  return '<div style="background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:2px solid #D4AF37;border-radius:14px;overflow:hidden;font-family:Arial,sans-serif;max-width:480px;">'
+
+    // En-tête
     + '<div style="background:#0A0A0A;padding:16px 22px;border-bottom:1px solid rgba(212,175,55,0.3);display:flex;justify-content:space-between;align-items:center;">'
     +   '<span style="font-size:1.1rem;font-weight:bold;color:#D4AF37;letter-spacing:3px;">ENSETP</span>'
-    +   '<span style="font-size:0.6rem;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;">Dîner de Gala · 2026</span>'
+    +   '<span style="font-size:0.58rem;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;">Dîner de Gala · 2026</span>'
     + '</div>'
-    + '<div style="padding:20px 22px;">'
-    +   '<div style="font-size:1.8rem;font-style:italic;color:#D4AF37;margin-bottom:4px;">Gala</div>'
-    +   '<div style="font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:#aaa;margin-bottom:16px;">De Fin d\'Année · ENSETP 2026</div>'
-    +   '<table width="100%" style="color:#fff;border-collapse:collapse;">'
-    +     '<tr><td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Titulaire</div><div style="font-size:0.9rem;font-weight:600">' + order.prenom + ' ' + order.nom + '</div></td>'
-    +         '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Type</div><div><span style="background:linear-gradient(135deg,#D4AF37,#A07820);color:#000;font-size:0.6rem;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:18px;">' + order.type.toUpperCase() + '</span></div></td></tr>'
-    +     '<tr><td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">E-mail</div><div style="font-size:0.78rem;color:#ccc">' + order.email + '</div></td>'
-    +         '<td style="padding:6px 0;"><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Montant</div><div style="color:#D4AF37;font-weight:bold">' + Number(order.total).toLocaleString('fr-FR') + ' FCFA</div></td></tr>'
+
+    // Titre
+    + '<div style="padding:20px 22px 12px;">'
+    +   '<div style="font-size:1.8rem;font-style:italic;color:#D4AF37;margin-bottom:2px;">Gala</div>'
+    +   '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:#888;margin-bottom:18px;">De Fin d\'Année · ENSETP 2026</div>'
+
+    // Infos titulaire + type
+    +   '<table width="100%" style="color:#fff;border-collapse:collapse;margin-bottom:4px;">'
+    +     '<tr>'
+    +       '<td style="padding:6px 0;width:60%;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;">Titulaire</div>'
+    +         '<div style="font-size:1rem;font-weight:700;color:#fff;">' + fullName + '</div>'
+    +       '</td>'
+    +       '<td style="padding:6px 0;text-align:right;vertical-align:top;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px;">Type</div>'
+    +         '<span style="background:linear-gradient(135deg,#D4AF37,#A07820);color:#000;font-size:0.62rem;font-weight:700;letter-spacing:2px;padding:4px 14px;border-radius:20px;">' + typeUpper + '</span>'
+    +       '</td>'
+    +     '</tr>'
+    +     '<tr>'
+    +       '<td style="padding:6px 0;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;">E-mail</div>'
+    +         '<div style="font-size:0.78rem;color:#ccc;">' + order.email + '</div>'
+    +       '</td>'
+    +       '<td style="padding:6px 0;text-align:right;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;">Montant payé</div>'
+    +         '<div style="color:#D4AF37;font-weight:700;font-size:0.9rem;">' + montant + '</div>'
+    +       '</td>'
+    +     '</tr>'
     +   '</table>'
-    +   '<hr style="border:none;border-top:1px dashed rgba(212,175,55,0.3);margin:16px 0;" />'
-    +   '<table width="100%" style="color:#fff;border-collapse:collapse;">'
-    +     '<tr><td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Date</div><div style="font-weight:600">' + cfg.EVENT_DATE + '</div></td>'
-    +         '<td><div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:#888">Lieu</div><div style="font-weight:600">' + cfg.EVENT_LIEU + '</div></td></tr>'
+
+    +   '<hr style="border:none;border-top:1px dashed rgba(212,175,55,0.3);margin:14px 0;" />'
+
+    // Date + Lieu
+    +   '<table width="100%" style="color:#fff;border-collapse:collapse;margin-bottom:0;">'
+    +     '<tr>'
+    +       '<td style="padding:4px 0;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;">Date</div>'
+    +         '<div style="font-weight:600;font-size:0.88rem;">' + cfg.EVENT_DATE + '</div>'
+    +       '</td>'
+    +       '<td style="padding:4px 0;">'
+    +         '<div style="font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;">Lieu</div>'
+    +         '<div style="font-weight:600;font-size:0.88rem;">' + cfg.EVENT_LIEU + '</div>'
+    +       '</td>'
+    +     '</tr>'
     +   '</table>'
     + '</div>'
-    + '<div style="background:rgba(212,175,55,0.06);padding:12px 22px;border-top:1px dashed rgba(212,175,55,0.3);">'
-    +   '<div style="font-family:monospace;font-size:0.72rem;color:#D4AF37;letter-spacing:2px;">' + order.id + '</div>'
-    +   '<div style="font-size:0.6rem;color:#888;margin-top:3px;">Émis le ' + new Date(order.date||new Date()).toLocaleDateString('fr-FR') + '</div>'
+
+    // Pied avec QR code + ID
+    + '<div style="background:rgba(212,175,55,0.05);padding:14px 22px;border-top:1px dashed rgba(212,175,55,0.3);display:flex;justify-content:space-between;align-items:center;gap:14px;">'
+    +   '<div style="flex:1;">'
+    +     '<div style="font-family:monospace;font-size:0.7rem;color:#D4AF37;letter-spacing:2px;word-break:break-all;">' + order.id + '</div>'
+    +     '<div style="font-size:0.58rem;color:#666;margin-top:4px;">Émis le ' + emis + '</div>'
+    +     '<div style="font-size:0.58rem;color:#555;margin-top:2px;">Présentez ce ticket à l\'entrée</div>'
+    +   '</div>'
+    +   '<div style="background:#fff;padding:5px;border-radius:6px;flex-shrink:0;">'
+    +     '<img src="' + qrUrl + '" width="80" height="80" alt="QR Code" style="display:block;border-radius:3px;" />'
+    +   '</div>'
     + '</div>'
+
     + '</div>';
 }
 
