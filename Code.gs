@@ -23,7 +23,7 @@ var CFG = {
   PAYDUNIA_URL:     'https://paydunia.com/api/v1/payment/init',
 
   // URL de CE script Apps Script (webhook Paydunia → doPost)
-  APPS_SCRIPT_URL:  'https://script.google.com/macros/s/AKfycbxvWRz-gnuVgZhb2JY7aRulluEV4TMI_NH_fyWLwcvS0F4ifRjvxngiUIhemDe50h1_/exec',
+  APPS_SCRIPT_URL:  'https://script.google.com/macros/s/AKfycby18WcAD27h5r6Tv3uGHfFKTYo6EOd_iYCE42iuw5XA64JH5Amhul0Nuz1WO1mb9-op/exec',
 
   // URL du site public (où l'utilisateur est redirigé après paiement)
   SITE_URL:         'https://ensetp.mahu.cards'
