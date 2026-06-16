@@ -426,7 +426,7 @@ async function sendOTP(resend){
   const asUrl = localStorage.getItem('ensetp_as_url') || AS_URL_DEFAULT;
   try {
     const r = await fetch(asUrl, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({action:'sendOTP', email})
     });
     const data = await r.json();
@@ -458,7 +458,7 @@ async function verifyOTP(){
   const asUrl = localStorage.getItem('ensetp_as_url') || AS_URL_DEFAULT;
   try {
     const r = await fetch(asUrl, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({action:'verifyOTP', email:adminEmail, code})
     });
     const data = await r.json();

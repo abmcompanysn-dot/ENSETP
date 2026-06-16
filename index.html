@@ -913,7 +913,7 @@ async function processPayment(){
   const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
   if(asUrl){
     try{
-      const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'createOrder',order})});
+      const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createOrder',order})});
       const data=await r.json();
       if(data.paymentUrl){saveOrder(order);window.location.href=data.paymentUrl;return;}
     }catch(e){console.warn('Apps Script non disponible – mode démo.');}
@@ -1082,7 +1082,7 @@ function confirmPresence(){
   res.innerHTML=`<p><i class="fas fa-check-circle"></i> Présence confirmée ! Merci ${order.prenom}, à samedi 20 juin au Magic Land !</p>`;
   notify('success','Présence confirmée !','Nous avons bien enregistré votre présence.');
   const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-  if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'confirmPresence',orderId:order.id,name:order.prenom+' '+order.nom,email:order.email})}).catch(()=>{});
+  if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'confirmPresence',orderId:order.id,name:order.prenom+' '+order.nom,email:order.email})}).catch(()=>{});
 }
 
 /* ===== PAYDUNIA CALLBACK ===== */
