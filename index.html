@@ -22,7 +22,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -372,13 +371,13 @@ ok
     <a href="#hero" onclick="closeDrawer()"><i class="fas fa-home"></i>Accueil</a>
     <a href="#artistes" onclick="closeDrawer()"><i class="fas fa-music"></i>Artistes</a>
     <div class="nav-divider"></div>
-    <a href="#tickets" onclick="closeDrawer()"><i class="fas fa-ticket-alt"></i>Tickets</a>
+    <a href="#jy-serai" onclick="closeDrawer()"><i class="fas fa-check-circle"></i>Présence</a>
     <a href="#partenaires" onclick="closeDrawer()"><i class="fas fa-handshake"></i>Partenaires</a>
     <div class="nav-divider"></div>
     <a href="admin.html" class="nav-admin" onclick="closeDrawer()"><i class="fas fa-lock"></i>Admin</a>
   </nav>
   <div class="drawer-cta-wrap">
-    <a href="#tickets" class="drawer-cta" onclick="closeDrawer()"><i class="fas fa-ticket-alt"></i> Réserver mon ticket</a>
+    <a href="#jy-serai" class="drawer-cta" onclick="closeDrawer()"><i class="fas fa-check-circle"></i> Confirmer ma présence</a>
     <div class="drawer-socials">
       <a href="#"><i class="fab fa-facebook-f"></i></a>
       <a href="#"><i class="fab fa-instagram"></i></a>
@@ -422,7 +421,7 @@ ok
       <div class="hero-info-item"><i class="fas fa-music"></i><span><strong>5 Artistes</strong> en Live</span></div>
     </div>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-      <a href="#tickets" class="btn-gold"><i class="fas fa-ticket-alt"></i> Réserver ma Place</a>
+      <a href="#jy-serai" class="btn-gold"><i class="fas fa-check-circle"></i> Confirmer ma Présence</a>
       <a href="#artistes" class="btn-outline"><i class="fas fa-star"></i> Artistes</a>
     </div>
     <div style="margin-top:16px;display:flex;justify-content:center;">
@@ -466,51 +465,6 @@ ok
 </section>
 
 <!-- TICKETS -->
-<section id="tickets">
-  <div class="section-header reveal">
-    <div class="section-tag">★ Réservez Votre Place ★</div>
-    <h2 class="section-title">Achat de <span>Tickets</span></h2>
-    <div class="gold-line"></div>
-    <p class="section-desc" style="margin-top:14px">Sécurisez votre place dès maintenant. Places limitées – 500 tickets disponibles.</p>
-  </div>
-  <div class="ticket-types" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:340px;">
-    <div class="ticket-card reveal" onclick="selectTicket('solo',0)">
-      <div class="ticket-type-lbl">Solo</div>
-      <div class="ticket-price" style="font-size:2rem;">GRATUIT</div>
-      <div class="ticket-currency">1 personne</div>
-      <ul class="ticket-features">
-        <li><i class="fas fa-check"></i>Accès à la soirée Gala</li>
-        <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
-        <li><i class="fas fa-check"></i>Prestations Live</li>
-        <li><i class="fas fa-check"></i>E-Ticket avec QR Code</li>
-      </ul>
-      <button class="btn-ticket-outline">Choisir</button>
-    </div>
-  </div>
-
-  <div class="purchase-form-wrap" id="purchase-form">
-    <div class="form-title">Réservation de Place</div>
-    <div class="form-subtitle">Remplissez vos informations pour recevoir votre E-Ticket gratuit par e-mail</div>
-    <div class="form-grid">
-      <div class="form-group"><label>Prénom <span style="color:var(--gold)">*</span></label><input type="text" id="f-prenom" placeholder="Votre prénom" /></div>
-      <div class="form-group"><label>Nom <span style="color:var(--gold)">*</span></label><input type="text" id="f-nom" placeholder="Votre nom" /></div>
-      <div class="form-group full"><label>Adresse E-Mail <span style="color:var(--gold)">*</span></label><input type="email" id="f-email" placeholder="email@exemple.com" /></div>
-      <div class="form-group"><label>Téléphone <span style="color:var(--gold)">*</span></label><input type="tel" id="f-tel" placeholder="+221 XX XXX XX XX" /></div>
-      <div class="form-group"><label>Filière</label>
-        <input type="text" id="f-filiere" placeholder="Ex: Génie Civil, Informatique..." autocomplete="off" />
-      </div>
-      <div class="form-group"><label>Niveau / Année</label>
-        <input type="text" id="f-annee" placeholder="Ex: L1, M2, Doctorat..." autocomplete="off" />
-      </div>
-    </div>
-    <div class="form-total">
-      <span class="form-total-label">Ticket</span>
-      <span class="form-total-amount" id="form-total" style="color:var(--gold)">GRATUIT</span>
-    </div>
-    <button class="btn-pay" id="btn-pay" onclick="processPayment()"><i class="fas fa-envelope"></i>&nbsp; M'inscrire &amp; Recevoir mon Ticket</button>
-    <div class="secure-note"><i class="fas fa-shield-alt"></i> Places limitées – E-Ticket envoyé par e-mail instantanément</div>
-  </div>
-</section>
 
 
 <!-- COMMENTS MODAL -->
@@ -568,10 +522,10 @@ ok
 <!-- J'Y SERAI — GÉNÉRATEUR DE CARTE PERSONNALISÉE -->
 <section id="jy-serai" style="background:linear-gradient(135deg,rgba(212,175,55,0.06),rgba(10,10,10,0));border-top:1px solid rgba(212,175,55,0.12);padding:60px 5%;">
   <div class="section-header reveal" style="margin-bottom:28px;">
-    <div class="section-tag">★ Faites passer le mot ★</div>
+    <div class="section-tag">★ Confirmez votre venue ★</div>
     <h2 class="section-title">J'y <span>Serai !</span></h2>
     <div class="gold-line"></div>
-    <p class="section-desc" style="margin-top:14px">Créez votre carte personnalisée — ajoutez votre photo et partagez sur WhatsApp ou Instagram !</p>
+    <p class="section-desc" style="margin-top:14px">Indiquez votre nom et votre filière, créez votre carte personnalisée et partagez-la sur WhatsApp ou Instagram !</p>
   </div>
 
   <!-- Galerie des participants -->
@@ -581,9 +535,12 @@ ok
   </div>
 
   <div style="max-width:480px;margin:0 auto;">
-    <!-- Inputs nom + photo -->
+    <!-- Inputs nom + filière + photo -->
     <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px;">
       <input type="text" id="jys-nom" placeholder="Votre prénom et nom" oninput="liveJysCard()"
+        style="background:#1a1a1a;border:1.5px solid rgba(212,175,55,0.28);color:#fff;padding:13px 16px;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:0.92rem;outline:none;transition:border-color .3s;"
+        onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(212,175,55,0.28)'" />
+      <input type="text" id="jys-filiere" placeholder="Votre filière (Ex: Génie Civil, Informatique...)" autocomplete="off"
         style="background:#1a1a1a;border:1.5px solid rgba(212,175,55,0.28);color:#fff;padding:13px 16px;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:0.92rem;outline:none;transition:border-color .3s;"
         onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(212,175,55,0.28)'" />
       <label id="jys-photo-lbl" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:10px;border:1.5px dashed rgba(212,175,55,0.3);cursor:pointer;color:var(--gold);font-size:0.8rem;letter-spacing:1px;font-family:'Cinzel',serif;transition:all .3s;background:rgba(212,175,55,0.03);"
@@ -600,9 +557,9 @@ ok
       <canvas id="jys-canvas" width="1080" height="1080" style="width:100%;display:block;border-radius:16px;"></canvas>
     </div>
 
-    <!-- Bouton Générer -->
-    <button onclick="generateJysCard(true)" style="width:100%;margin-bottom:10px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 20px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(212,175,55,0.3)'">
-      <i class="fas fa-magic"></i> Générer ma carte J'y Serai
+    <!-- Bouton Confirmer + Générer -->
+    <button onclick="confirmJysPresence()" style="width:100%;margin-bottom:10px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 20px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(212,175,55,0.3)'">
+      <i class="fas fa-check-circle"></i> Confirmer ma présence & Générer ma carte
     </button>
 
     <!-- Télécharger + Partager -->
@@ -635,7 +592,7 @@ ok
   <ul class="footer-links">
     <li><a href="#hero">Accueil</a></li>
     <li><a href="#artistes">Artistes</a></li>
-    <li><a href="#tickets">Tickets</a></li>
+    <li><a href="#jy-serai">Présence</a></li>
     <li><a href="#partenaires">Partenaires</a></li>
   </ul>
   <div class="footer-social">
@@ -670,76 +627,6 @@ ok
   </div>
 </div>
 
-<!-- TICKET MODAL -->
-<div class="modal-overlay" id="ticket-modal">
-  <div class="modal-box">
-    <button class="modal-x" onclick="closeTicketModal()">&times;</button>
-    <div class="modal-hdr">
-      <h2>Votre Ticket est Prêt !</h2>
-      <p>Présentez ce ticket à l'entrée (imprimé ou sur téléphone).</p>
-    </div>
-    <div class="modal-body">
-      <div id="ticket-display">
-        <div class="tk-header">
-          <img src="https://i.postimg.cc/2SnCcsBJ/logo-Ensetp.png" alt="ENSETP" onerror="this.style.display='none'" style="height:34px" />
-          <div class="tk-event-tag">DÎNER DE GALA DE FIN D'ANNÉE · ENSETP 2026</div>
-        </div>
-        <div class="tk-body">
-          <div class="tk-gala">Gala</div>
-          <div class="tk-gala-sub">De Fin d'Année · ENSETP 2026</div>
-          <div class="tk-row">
-            <div>
-              <div class="tk-lbl">Titulaire</div>
-              <div class="tk-val" id="tk-nom">–</div>
-              <br>
-              <div class="tk-lbl">E-mail</div>
-              <div class="tk-val" id="tk-email" style="font-size:0.8rem">–</div>
-            </div>
-            <div>
-              <div class="tk-lbl">Type</div>
-              <div><span class="tk-badge" id="tk-type">–</span></div>
-              <br>
-              <div class="tk-lbl">Montant</div>
-              <div class="tk-val" id="tk-prix" style="color:var(--gold)">–</div>
-            </div>
-          </div>
-          <hr class="tk-hr" />
-          <div class="tk-row">
-            <div><div class="tk-lbl">Date</div><div class="tk-val">Samedi 20 Juin 2026</div></div>
-            <div><div class="tk-lbl">Lieu</div><div class="tk-val">Au Magic Land</div></div>
-          </div>
-        </div>
-        <div class="tk-footer">
-          <div>
-            <div class="tk-id" id="tk-id">TK-ENSETP-2026-0000</div>
-            <div class="tk-meta" id="tk-date">Émis le –</div>
-          </div>
-          <div class="tk-qr" id="qr-code"></div>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-print" onclick="printTicket()"><i class="fas fa-print"></i> Imprimer</button>
-        <button onclick="downloadTicketImage()" style="flex:1;padding:12px 18px;border-radius:25px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.76rem;font-weight:700;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-          <i class="fas fa-download"></i> Enregistrer en JPEG
-        </button>
-        <button class="btn-close-modal" style="border:1.5px solid var(--gold)!important;background:transparent;color:var(--gold)" onclick="closeTicketModal()">Fermer</button>
-      </div>
-      <!-- PARTAGE TICKET -->
-      <div id="ticket-share" style="margin-top:14px;display:none;">
-        <div style="font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-bottom:10px;">Partager & Inviter</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="btn-whatsapp" onclick="shareTicketWhatsApp()" style="flex:1;min-width:130px;padding:11px;border-radius:25px;border:none;cursor:pointer;background:#25D366;color:#fff;font-family:'Cinzel',serif;font-size:0.7rem;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i class="fab fa-whatsapp" style="font-size:1rem;"></i> WhatsApp
-          </button>
-          <button onclick="copyInviteLink()" style="flex:1;min-width:130px;padding:11px;border-radius:25px;border:1.5px solid rgba(212,175,55,0.4);cursor:pointer;background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i class="fas fa-link"></i> Copier l'invitation
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- NOTIFICATION -->
 <div id="notification">
   <div class="notif-inner info" id="notif-inner">
@@ -756,7 +643,6 @@ const CONTACT_EMAIL = 'contact@mahu.cards';
 const AS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby18WcAD27h5r6Tv3uGHfFKTYo6EOd_iYCE42iuw5XA64JH5Amhul0Nuz1WO1mb9-op/exec';
 
 let orders = JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-let selType = 'solo', selPrice = 1000, selPayment = 'wave';
 let currentCommentArtist = null;
 
 /* ===== PARTICLES ===== */
@@ -811,164 +697,42 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
 new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.1})
   .observe=((obs,els)=>{els.forEach(el=>obs.observe(el));return obs;})(new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.1}),document.querySelectorAll('.reveal'));
 
-/* ===== TICKET SELECTION ===== */
-function selectTicket(type,price){
-  selType=type; selPrice=price;
-  updateTotal();
-  const f=document.getElementById('purchase-form');
-  f.classList.add('active');
-  setTimeout(()=>f.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  notify('info','Ticket sélectionné',`Type ${type.toUpperCase()} — ${price===0?'Gratuit':price.toLocaleString('fr-FR')+' FCFA'}`);
-}
-
-function updateTotal(){
-  const el=document.getElementById('form-total');
-  el.textContent=selPrice===0?'GRATUIT':selPrice.toLocaleString('fr-FR')+' FCFA';
-}
-
-/* ===== PAYMENT ===== */
-function selectPayment(m){
-  selPayment=m;
-  document.querySelectorAll('.pay-method').forEach(b=>b.classList.remove('selected'));
-  const map={wave:'pm-wave',orange:'pm-om',card:'pm-card'};
-  document.getElementById(map[m]).classList.add('selected');
-}
-
-/* ===== PROCESS PAYMENT ===== */
-async function processPayment(){
-  const prenom=document.getElementById('f-prenom').value.trim();
-  const nom=document.getElementById('f-nom').value.trim();
-  const email=document.getElementById('f-email').value.trim();
-  const tel=document.getElementById('f-tel').value.trim();
-  const qty=1;
-  const filiere=document.getElementById('f-filiere').value;
-  const annee=document.getElementById('f-annee').value;
-  if(!prenom||!nom||!email||!tel){notify('error','Champs manquants','Veuillez remplir tous les champs obligatoires.');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){notify('error','E-mail invalide','Vérifiez votre adresse e-mail.');return;}
-
-  const btn=document.getElementById('btn-pay');
-  btn.disabled=true;
-  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Traitement...';
-
-  const total=selPrice;
-  const id=`TK-ENSETP-2026-${String(orders.length+1).padStart(4,'0')}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
-  const now=new Date();
-  const order={id,prenom,nom,email,tel,filiere,annee,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'pending'};
-
-  /* --- Try Apps Script / Paydunia --- */
-  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-  if(asUrl){
-    try{
-      const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createOrder',order})});
-      const data=await r.json();
-      if(data.paymentUrl){
-        saveOrder(order);
-        btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Redirection PayDunya...';
-        notify('info','Redirection en cours','Vous allez être redirigé vers PayDunya pour finaliser votre paiement sécurisé.');
-        setTimeout(()=>{window.location.href=data.paymentUrl;},500);
-        return;
-      }
-      if(data.error){
-        btn.disabled=false;
-        btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket';
-        notify('error','Erreur paiement',data.error);
-        return;
-      }
-      // Apps Script ok mais pas de lien PayDunya (mode démo — clés non encore configurées)
-      if(data.orderId){ saveOrder(order); showTicket(order); btn.disabled=false; btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket'; return; }
-    }catch(e){console.warn('Apps Script non disponible – mode démo.');}
+/* ===== CONFIRMER PRÉSENCE (J'y Serai) ===== */
+async function confirmJysPresence(){
+  const fullName=(document.getElementById('jys-nom').value||'').trim();
+  const filiere=(document.getElementById('jys-filiere').value||'').trim();
+  if(!fullName){
+    notify('error','Nom requis','Entrez votre prénom et nom avant de confirmer.');
+    document.getElementById('jys-nom').focus(); return;
   }
+  drawJysCard(fullName,_jysPhoto);
+  _jysCardReady=true;
+  const dlBtn=document.getElementById('btn-jys-dl');
+  if(dlBtn){ dlBtn.style.opacity='1'; dlBtn.style.pointerEvents='auto'; }
 
-  /* --- Demo mode (Apps Script inaccessible) --- */
+  const parts=fullName.split(' ');
+  const prenom=parts[0]||'';
+  const nom=parts.slice(1).join(' ')||'';
+  const id=`TK-ENSETP-2026-${String(orders.length+1).padStart(4,'0')}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
+  const order={id,prenom,nom,filiere,type:'RSVP',date:new Date().toISOString(),status:'confirmed'};
   saveOrder(order);
-  showTicket(order);
-  btn.disabled=false;
-  btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket';
+
+  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
+  if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createOrder',order})}).catch(()=>{});
+
+  notify('success','Présence confirmée !',`Merci ${prenom}, à samedi 20 juin au Magic Land !`);
 }
 
 function saveOrder(o){
   orders.push(o);
   localStorage.setItem('ensetp_orders',JSON.stringify(orders));
-  const jysInput=document.getElementById('jys-nom');
-  if(jysInput && !jysInput.value.trim()){ jysInput.value=(o.prenom+' '+o.nom).trim(); liveJysCard(); }
-}
-
-/* ===== SHOW TICKET ===== */
-function showTicket(o){
-  const fullName = [o.prenom, o.nom].filter(Boolean).join(' ') || '–';
-  const typeLabel = o.type ? o.type.toUpperCase() : '–';
-  const montant = (o.total && o.total > 0) ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : 'GRATUIT';
-  const emis = o.date ? new Date(o.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '–';
-
-  document.getElementById('tk-nom').textContent = fullName;
-  document.getElementById('tk-email').textContent = o.email || '–';
-  document.getElementById('tk-type').textContent = typeLabel;
-  document.getElementById('tk-prix').textContent = montant;
-  document.getElementById('tk-id').textContent = o.id;
-  document.getElementById('tk-date').textContent = 'Émis le ' + emis;
-
-  const qr = document.getElementById('qr-code');
-  qr.innerHTML = '';
-  try {
-    new QRCode(qr, {text:`https://ensetp.mahu.cards/verify?id=${o.id}`, width:88, height:88, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.H});
-    // Convertit le canvas en <img> pour que printTicket() le capture correctement via outerHTML
-    setTimeout(()=>{
-      const canvas = qr.querySelector('canvas');
-      if(canvas){
-        const img = document.createElement('img');
-        img.src = canvas.toDataURL('image/png');
-        img.width = 88; img.height = 88;
-        img.style.cssText = 'display:block;border-radius:3px;';
-        qr.innerHTML = '';
-        qr.appendChild(img);
-      }
-    }, 150);
-  } catch(e){ console.warn('QRCode error:', e); }
-
-  _currentShareOrder = o;
-  document.getElementById('ticket-share').style.display = 'block';
-  if(navigator.share){
-    const nb=document.getElementById('btn-native-share'); if(nb) nb.style.display='flex';
-  }
-  document.getElementById('ticket-modal').classList.add('active');
-  notify('success', 'Ticket généré !', `Bienvenue ${fullName} — votre e-mail est en route.`);
-}
-
-/* ===== PRINT ===== */
-function printTicket(){
-  const html=document.getElementById('ticket-display').outerHTML;
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ticket Gala ENSETP 2026</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;1,400&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-  body{margin:0;padding:24px;background:#fff;font-family:Montserrat,sans-serif;}
-  :root{--gold:#D4AF37;--gold-light:#F5D66A;--gold-dark:#A07820;--black:#0A0A0A;--dark2:#1A1A1A;--text-muted:#888;--white:#FFF;}
-  #ticket-display{max-width:460px;margin:0 auto;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:2px solid #D4AF37;border-radius:14px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .tk-header{background:linear-gradient(90deg,#0A0A0A,#1a1a1a);padding:16px 22px;border-bottom:1px solid rgba(212,175,55,0.3);display:flex;justify-content:space-between;align-items:center;}
-  .tk-event-tag{font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:3px;color:#D4AF37;}
-  .tk-body{padding:20px 22px;}
-  .tk-gala{font-family:'Playfair Display',serif;font-size:1.9rem;font-style:italic;color:#D4AF37;line-height:1;margin-bottom:4px;}
-  .tk-gala-sub{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:#aaa;margin-bottom:16px;}
-  .tk-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-  .tk-lbl{font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;}
-  .tk-val{font-size:0.9rem;font-weight:600;color:#fff;}
-  .tk-badge{display:inline-block;background:linear-gradient(135deg,#D4AF37,#A07820);color:#000;font-size:0.6rem;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:18px;text-transform:uppercase;}
-  .tk-hr{border:none;border-top:1px dashed rgba(212,175,55,0.3);margin:16px 0;}
-  .tk-footer{background:rgba(212,175,55,0.06);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
-  .tk-qr{background:white;padding:4px;border-radius:5px;}
-  .tk-id{font-family:Cinzel,serif;font-size:0.7rem;color:#D4AF37;letter-spacing:2px;}
-  .tk-meta{font-size:0.6rem;color:#888;margin-top:3px;}
-  img{max-width:100%;height:auto;}
-  </style></head><body>${html}</body></html>`);
-  w.document.close();
-  setTimeout(()=>w.print(),600);
+  _saveJysEntry((o.prenom+' '+o.nom).trim());
 }
 
 /* ===== MODALS ===== */
 function openFlyerModal(src,cap){document.getElementById('flyer-modal-img').src=src;document.getElementById('flyer-modal-cap').textContent=cap;document.getElementById('flyer-modal').classList.add('active');}
 function closeFlyerModal(){document.getElementById('flyer-modal').classList.remove('active');}
-function closeTicketModal(){document.getElementById('ticket-modal').classList.remove('active');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFlyerModal();closeTicketModal();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFlyerModal();}});
 
 /* ===== NOTIFY ===== */
 function notify(type,title,msg){
@@ -1043,216 +807,6 @@ function postComment(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeComments();});
 
 
-/* ===== PAYDUNIA CALLBACK ===== */
-(()=>{
-  const p=new URLSearchParams(location.search);
-  const payStatus=p.get('payment_status');
-  const oid=p.get('order_id');
-
-  if(payStatus==='success' && oid){
-    history.replaceState({},document.title,location.pathname); // nettoyer l'URL
-    const o=orders.find(x=>x.id===oid);
-    if(o){
-      o.status='paid';
-      localStorage.setItem('ensetp_orders',JSON.stringify(orders));
-      showTicket(o);
-    } else {
-      // Ordre introuvable en localStorage (autre device ou storage effacé) → vérifier Apps Script
-      notify('info','Vérification...','Récupération de votre ticket en cours.');
-      const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-      fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'verifyTicket',ticketId:oid})})
-        .then(r=>r.json())
-        .then(d=>{
-          if(d.valid && d.order){
-            const srv=d.order;
-            const parts=String(srv.nom||'').split(' ');
-            const prenom=parts[0]||'';
-            const nom=parts.slice(1).join(' ')||'';
-            const fake={id:oid,prenom,nom,email:srv.email||'',type:String(srv.type||'solo').toLowerCase(),qty:srv.qty||1,price:0,total:0,payment:'',date:new Date().toISOString(),status:'paid'};
-            orders.push(fake);
-            localStorage.setItem('ensetp_orders',JSON.stringify(orders));
-            showTicket(fake);
-          } else {
-            notify('info','Paiement reçu','Votre paiement est en cours de confirmation. Consultez votre e-mail pour votre ticket.');
-          }
-        })
-        .catch(()=>notify('info','Paiement reçu','Consultez votre e-mail pour recevoir votre ticket.'));
-    }
-  }
-
-  if(payStatus==='cancel'){
-    history.replaceState({},document.title,location.pathname);
-    notify('error','Paiement annulé','Le paiement a été annulé. Vous pouvez réessayer.');
-  }
-
-  if(p.get('type')) selectTicket(p.get('type'),parseInt(p.get('price')||1000));
-})();
-
-/* ===== PARTAGE TICKET ===== */
-let _currentShareOrder = null;
-
-function shareTicketWhatsApp(){
-  if(!_currentShareOrder) return;
-  const o = _currentShareOrder;
-  const msg = `🎉 J'ai mon ticket pour le Dîner de Gala ENSETP 2026 !\n\n👤 ${o.prenom} ${o.nom} — ${String(o.type).toUpperCase()}\n📅 Samedi 20 Juin 2026 · 22h\n📍 Au Magic Land, Dakar\n🎟️ Places GRATUITES → https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #MagicLand`;
-  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-}
-
-function copyInviteLink(){
-  if(!_currentShareOrder) return;
-  const o = _currentShareOrder;
-  const msg = `🎉 ${o.prenom} ${o.nom} sera au Dîner de Gala ENSETP 2026 !\n📅 Sam. 20 Juin · Magic Land, Dakar\n🎟️ Places gratuites : https://ensetp.mahu.cards\n#ENSETP #GalaDîner2026`;
-  navigator.clipboard.writeText(msg).then(()=>notify('success','Copié !','Message d\'invitation copié. Collez-le sur vos réseaux !'))
-    .catch(()=>{
-      const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      notify('success','Copié !','Message d\'invitation copié.');
-    });
-}
-
-/* ===== TÉLÉCHARGEMENT TICKET EN IMAGE ===== */
-function downloadTicketImage() {
-  const o = _currentShareOrder;
-  if (!o) { notify('error','Aucun ticket','Aucun ticket actif à télécharger.'); return; }
-
-  const W = 900, H = 1160;
-  const cv = document.createElement('canvas');
-  cv.width = W; cv.height = H;
-  const ctx = cv.getContext('2d');
-
-  // Récupérer l'image QR déjà générée dans le modal (data URL)
-  const qrEl = document.getElementById('qr-code');
-  const qrImgEl = qrEl ? qrEl.querySelector('img') : null;
-  const qrSrc = qrImgEl ? qrImgEl.src : null;
-
-  function finish(qrImg) {
-    _drawTicketCanvas(ctx, o, W, H, qrImg);
-    const nm = ((o.prenom||'')+'_'+(o.nom||'')).replace(/\s+/g,'_');
-    const a = document.createElement('a');
-    a.download = 'Ticket_GalaENSETP2026_'+nm+'.jpg';
-    a.href = cv.toDataURL('image/jpeg', 0.93);
-    a.click();
-    notify('success','Ticket enregistré !','Retrouvez votre ticket dans la galerie de votre téléphone !');
-  }
-
-  if (qrSrc && qrSrc.startsWith('data:')) {
-    const qi = new Image(); qi.onload = ()=>finish(qi); qi.src = qrSrc;
-  } else {
-    finish(null);
-  }
-}
-
-function _drawTicketCanvas(ctx, o, W, H, qrImg) {
-  const fullName = ((o.prenom||'')+' '+(o.nom||'')).trim().toUpperCase();
-  const typeText = String(o.type||'SOLO').toUpperCase();
-  const montant = (o.total && Number(o.total)>0) ? Number(o.total).toLocaleString('fr-FR')+' FCFA' : 'GRATUIT';
-  const emis = new Date(o.date||new Date()).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-
-  // Fond
-  const bg = ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#080808'); bg.addColorStop(0.6,'#0d0d0d'); bg.addColorStop(1,'#111');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-  const glow=ctx.createRadialGradient(W/2,0,0,W/2,0,420);
-  glow.addColorStop(0,'rgba(212,175,55,0.1)'); glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
-
-  // Bordures
-  ctx.strokeStyle='#D4AF37'; ctx.lineWidth=7;
-  _jysRoundRect(ctx,20,20,W-40,H-40,20); ctx.stroke();
-  ctx.strokeStyle='rgba(212,175,55,0.22)'; ctx.lineWidth=2;
-  _jysRoundRect(ctx,34,34,W-68,H-68,14); ctx.stroke();
-  [[54,54,0],[W-54,54,90],[W-54,H-54,180],[54,H-54,270]].forEach(([x,y,a])=>_jysCorner(ctx,x,y,36,a));
-
-  // Header bar
-  ctx.fillStyle='#0A0A0A'; ctx.fillRect(20,20,W-40,80);
-  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(20,100); ctx.lineTo(W-20,100); ctx.stroke();
-  ctx.fillStyle='#D4AF37'; ctx.font='bold 40px "Cinzel",Georgia,serif'; ctx.textAlign='left';
-  ctx.fillText('ENSETP',54,73);
-  ctx.fillStyle='rgba(212,175,55,0.45)'; ctx.font='500 18px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
-  ctx.fillText("DÎNER DE GALA · 2026",W-54,73);
-
-  // Titre
-  ctx.fillStyle='#D4AF37'; ctx.font='italic 68px "Playfair Display",Georgia,serif'; ctx.textAlign='left';
-  ctx.fillText('Gala',54,188);
-  ctx.fillStyle='rgba(212,175,55,0.4)'; ctx.font='500 17px "Montserrat",Arial,sans-serif';
-  ctx.fillText("DE FIN D'ANNÉE · ENSETP 2026",54,214);
-
-  // Separator
-  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1; ctx.setLineDash([7,5]);
-  ctx.beginPath(); ctx.moveTo(54,240); ctx.lineTo(W-54,240); ctx.stroke(); ctx.setLineDash([]);
-
-  // Titulaire
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('TITULAIRE',54,276);
-  ctx.fillStyle='#fff';
-  const nSize = ctx.measureText(fullName).width > W-310 ? 28 : 38;
-  ctx.font='bold '+nSize+'px "Montserrat",Arial,sans-serif';
-  ctx.fillText(fullName,54,320);
-
-  // Badge type
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
-  ctx.fillText('TYPE',W-54,276);
-  const bg2=ctx.createLinearGradient(W-200,0,W-54,0);
-  bg2.addColorStop(0,'#F5D66A'); bg2.addColorStop(0.5,'#D4AF37'); bg2.addColorStop(1,'#A07820');
-  ctx.fillStyle=bg2; _jysRoundRect(ctx,W-200,286,146,44,22); ctx.fill();
-  ctx.fillStyle='#000'; ctx.font='bold 18px "Cinzel",Georgia,serif'; ctx.textAlign='center';
-  ctx.fillText(typeText,W-127,314);
-
-  // Email + montant
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('E-MAIL',54,360);
-  ctx.fillStyle='#bbb'; ctx.font='20px "Montserrat",Arial,sans-serif';
-  ctx.fillText(o.email||'–',54,386);
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
-  ctx.fillText('MONTANT',W-54,360);
-  ctx.fillStyle='#D4AF37'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
-  ctx.fillText(montant,W-54,386);
-
-  // Separator
-  ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1; ctx.setLineDash([7,5]);
-  ctx.beginPath(); ctx.moveTo(54,414); ctx.lineTo(W-54,414); ctx.stroke(); ctx.setLineDash([]);
-
-  // Date + Lieu
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('DATE',54,450);
-  ctx.fillStyle='#fff'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
-  ctx.fillText('Samedi 20 Juin 2026',54,480);
-  ctx.fillStyle='#555'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
-  ctx.fillText('LIEU',W-54,450);
-  ctx.fillStyle='#fff'; ctx.font='bold 26px "Montserrat",Arial,sans-serif';
-  ctx.fillText('Au Magic Land · Dakar',W-54,480);
-
-  // Ligne perforée
-  ctx.strokeStyle='rgba(212,175,55,0.28)'; ctx.lineWidth=2; ctx.setLineDash([10,7]);
-  ctx.beginPath(); ctx.moveTo(54,524); ctx.lineTo(W-54,524); ctx.stroke(); ctx.setLineDash([]);
-  [[20,524],[W-20,524]].forEach(([x,y])=>{ctx.fillStyle='#0d0d0d';ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.fill();});
-
-  // QR code
-  const qrSize=162, qrX=W-54-qrSize, qrY=556;
-  ctx.fillStyle='#fff'; _jysRoundRect(ctx,qrX-6,qrY-6,qrSize+12,qrSize+12,8); ctx.fill();
-  if(qrImg){ ctx.drawImage(qrImg,qrX,qrY,qrSize,qrSize); }
-  else {
-    ctx.fillStyle='#ccc'; ctx.font='14px monospace'; ctx.textAlign='center';
-    ctx.fillText('QR CODE',qrX+qrSize/2,qrY+qrSize/2);
-  }
-  ctx.fillStyle='rgba(212,175,55,0.38)'; ctx.font='14px "Montserrat",Arial,sans-serif'; ctx.textAlign='right';
-  ctx.fillText('Scannez pour valider',W-54,qrY+qrSize+22);
-
-  // ID + meta
-  ctx.fillStyle='rgba(212,175,55,0.35)'; ctx.font='13px "Montserrat",Arial,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('ID TICKET',54,572);
-  ctx.fillStyle='#D4AF37'; ctx.font='bold 15px "Courier New",monospace';
-  ctx.fillText(o.id||'–',54,594);
-  ctx.fillStyle='#444'; ctx.font='14px "Montserrat",Arial,sans-serif';
-  ctx.fillText('Émis le '+emis,54,618);
-  ctx.fillText('Présentez ce ticket à l\'entrée',54,638);
-
-  // Branding bas
-  ctx.strokeStyle='rgba(212,175,55,0.1)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(54,H-58); ctx.lineTo(W-54,H-58); ctx.stroke();
-  ctx.fillStyle='rgba(212,175,55,0.28)'; ctx.font='15px "Montserrat",Arial,sans-serif'; ctx.textAlign='center';
-  ctx.fillText('ensetp.mahu.cards  ·  Mahu Events  ·  #ENSETP  #GalaDîner2026',W/2,H-36);
-}
 
 /* ===== J'Y SERAI — CARTE PERSONNALISÉE ===== */
 let _jysPhoto = null;

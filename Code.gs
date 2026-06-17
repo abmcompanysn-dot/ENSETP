@@ -318,10 +318,10 @@ function handleCreateOrder(order) {
     Logger.log('⚠️ Paydunia configuré mais aucun lien retourné — bascule envoi direct');
   }
 
-  // 3. Ticket gratuit ou pas de Paydunia → ticket envoyé directement
+  // 3. Ticket gratuit ou pas de Paydunia → confirmation directe
   order.status = 'paid';
   updateOrderStatus(order.id, 'paid');
-  sendTicketEmail(order, cfg);
+  if (order.email) sendTicketEmail(order, cfg);
   sendAdminNotification(order, cfg);
   return { success: true, orderId: order.id, mode: 'gratuit' };
 }
@@ -533,9 +533,9 @@ function getSheet() {
 function logToSheet(order) {
   var sh = getSheet();
   sh.appendRow([
-    order.id, order.prenom, order.nom, order.email, order.tel||'',
+    order.id, order.prenom, order.nom, order.email||'', order.tel||'',
     order.filiere||'', order.annee||'',
-    order.type.toUpperCase(), order.qty||1, order.price||0, order.total||0,
+    (order.type||'RSVP').toUpperCase(), order.qty||1, order.price||0, order.total||0,
     order.payment||'', new Date(order.date||new Date()), order.status||'pending', 'Non'
   ]);
 }
@@ -601,15 +601,14 @@ function sendTicketEmail(order, cfg) {
 
 function sendAdminNotification(order, cfg) {
   cfg = cfg || getCFG();
-  var body = '🎫 Nouvelle commande — Gala ENSETP 2026\n\n'
+  var body = '🎫 Nouvelle confirmation de présence — Gala ENSETP 2026\n\n'
     + 'ID       : ' + order.id + '\n'
     + 'Nom      : ' + order.prenom + ' ' + order.nom + '\n'
-    + 'E-mail   : ' + order.email + '\n'
+    + 'Filière  : ' + (order.filiere||'–') + '\n'
+    + 'Niveau   : ' + (order.annee||'–') + '\n'
+    + 'E-mail   : ' + (order.email||'–') + '\n'
     + 'Tél.     : ' + (order.tel||'–') + '\n'
-    + 'Type     : ' + order.type.toUpperCase() + '\n'
-    + 'Qté      : ' + (order.qty||1) + '\n'
-    + 'Total    : ' + Number(order.total).toLocaleString('fr-FR') + ' FCFA\n'
-    + 'Paiement : ' + (order.payment||'–') + '\n'
+    + 'Type     : ' + (order.type||'RSVP').toUpperCase() + '\n'
     + 'Date     : ' + new Date(order.date).toLocaleString('fr-FR') + '\n\n'
     + '—\nMahu Events · mahu.cards';
   try {
