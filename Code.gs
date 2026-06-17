@@ -14,6 +14,7 @@ var CFG = {
 
   // Ces valeurs sont lues depuis l'onglet "Configuration" en priorité
   ADMIN_EMAIL:      'contact@mahu.cards',
+  ADMIN_PASSWORD:   '',   // Mot de passe de connexion directe pour l'admin principal (sans OTP)
   EMAIL_FROM:       'contact@mahu.cards',
   EVENT_DATE:       'Samedi 20 Juin 2026 à 22h00',
   EVENT_LIEU:       'Au Magic Land',
@@ -54,6 +55,7 @@ function getCFG() {
   var sc = getSheetConfig();
   return {
     ADMIN_EMAIL:          sc.ADMIN_EMAIL          || CFG.ADMIN_EMAIL,
+    ADMIN_PASSWORD:       sc.ADMIN_PASSWORD       || CFG.ADMIN_PASSWORD,
     EMAIL_FROM:           sc.EMAIL_FROM           || CFG.EMAIL_FROM,
     EVENT_DATE:           sc.EVENT_DATE           || CFG.EVENT_DATE,
     EVENT_LIEU:           sc.EVENT_LIEU           || CFG.EVENT_LIEU,
@@ -122,6 +124,7 @@ function _initConfig(ss) {
       ['APPS_SCRIPT_URL',     CFG.APPS_SCRIPT_URL,    '🔗 URL de ce script — PayDunya envoie les confirmations ici'],
       ['SITE_URL',            CFG.SITE_URL,            '🌐 URL du site public (redirection après paiement)'],
       ['ADMIN_EMAIL',         CFG.ADMIN_EMAIL,         '📧 E-mail recevant toutes les notifications admin'],
+      ['ADMIN_PASSWORD',      '',                      '🔐 Mot de passe de connexion directe admin (en plus du code OTP)'],
       ['EMAIL_FROM',          CFG.EMAIL_FROM,          '📤 E-mail expéditeur des tickets'],
       ['EVENT_DATE',          CFG.EVENT_DATE,          '📅 Date de l\'événement (affiché sur les tickets)'],
       ['EVENT_LIEU',          CFG.EVENT_LIEU,          '📍 Lieu de l\'événement (affiché sur les tickets)']
@@ -250,6 +253,7 @@ function doPost(e) {
     else if (action === 'getStats')        result = getStats();
     else if (action === 'sendOTP')         result = handleSendOTP(payload);
     else if (action === 'verifyOTP')       result = handleVerifyOTP(payload);
+    else if (action === 'loginPassword')   result = handlePasswordLogin(payload);
     else if (action === 'verifyTicket')    result = handleVerifyTicket(payload);
     else                                   result = { error: 'Action inconnue: ' + action };
 
@@ -918,6 +922,39 @@ function handleVerifyOTP(payload) {
     return { success: true, email: email };
   } catch (err) {
     Logger.log('handleVerifyOTP error: ' + err.message);
+    return { error: err.message };
+  }
+}
+
+// ── CONNEXION PAR MOT DE PASSE (admin principal uniquement) ──
+function handlePasswordLogin(payload) {
+  try {
+    var cfg = getCFG();
+    var email = String(payload.email || '').toLowerCase().trim();
+    var password = String(payload.password || '');
+    if (!email || !password) return { error: 'Email et mot de passe requis.' };
+
+    // Rate limiting : max 5 tentatives par e-mail par heure
+    var cache = CacheService.getScriptCache();
+    var rlKey = 'pwd_rl_' + email.replace(/[^a-z0-9]/g, '_');
+    var rlCount = parseInt(cache.get(rlKey) || '0');
+    if (rlCount >= 5) return { error: 'Trop de tentatives. Attendez 1 heure avant de réessayer.' };
+    cache.put(rlKey, String(rlCount + 1), 3600);
+
+    if (email !== cfg.ADMIN_EMAIL.toLowerCase()) {
+      return { error: 'La connexion par mot de passe est réservée à l\'admin principal.' };
+    }
+    if (!cfg.ADMIN_PASSWORD) {
+      return { error: 'Aucun mot de passe configuré. Utilisez la connexion par code OTP.' };
+    }
+    if (password !== cfg.ADMIN_PASSWORD) {
+      return { error: 'Mot de passe incorrect.' };
+    }
+
+    Logger.log('✅ Connexion admin via mot de passe: ' + email);
+    return { success: true, email: email };
+  } catch (err) {
+    Logger.log('handlePasswordLogin error: ' + err.message);
     return { error: err.message };
   }
 }

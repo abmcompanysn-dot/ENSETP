@@ -557,9 +557,14 @@ ok
       <canvas id="jys-canvas" width="1080" height="1080" style="width:100%;display:block;border-radius:16px;"></canvas>
     </div>
 
-    <!-- Bouton Confirmer + Générer -->
-    <button onclick="confirmJysPresence()" style="width:100%;margin-bottom:10px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 20px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(212,175,55,0.3)'">
+    <!-- Bouton Confirmer (sauvegarde, une seule fois) -->
+    <button id="btn-jys-confirm" onclick="confirmJysPresence()" style="width:100%;margin-bottom:10px;padding:14px;border-radius:28px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#000;font-family:'Cinzel',serif;font-size:0.82rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;box-shadow:0 4px 20px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(212,175,55,0.3)'">
       <i class="fas fa-check-circle"></i> Confirmer ma présence & Générer ma carte
+    </button>
+
+    <!-- Bouton Régénérer (redessine la carte sans resauvegarder) -->
+    <button id="btn-jys-regen" onclick="regenerateJysCard()" style="display:none;width:100%;margin-bottom:10px;padding:13px;border-radius:28px;cursor:pointer;background:transparent;border:1.5px solid rgba(212,175,55,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:0.78rem;font-weight:700;letter-spacing:1.5px;align-items:center;justify-content:center;gap:10px;transition:all .3s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.4)'">
+      <i class="fas fa-sync-alt"></i> Régénérer ma carte (nouvelle photo)
     </button>
 
     <!-- Télécharger + Partager -->
@@ -721,6 +726,21 @@ async function confirmJysPresence(){
   if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createOrder',order})}).catch(()=>{});
 
   notify('success','Présence confirmée !',`Merci ${prenom}, à samedi 20 juin au Magic Land !`);
+
+  const confirmBtn=document.getElementById('btn-jys-confirm');
+  const regenBtn=document.getElementById('btn-jys-regen');
+  if(confirmBtn) confirmBtn.style.display='none';
+  if(regenBtn) regenBtn.style.display='flex';
+}
+
+function regenerateJysCard(){
+  const fullName=(document.getElementById('jys-nom').value||'').trim();
+  if(!fullName){
+    notify('error','Nom requis','Entrez votre prénom et nom.');
+    document.getElementById('jys-nom').focus(); return;
+  }
+  drawJysCard(fullName,_jysPhoto);
+  notify('success','Carte mise à jour !','Téléchargez-la ou partagez-la à nouveau.');
 }
 
 function saveOrder(o){
@@ -1063,6 +1083,15 @@ if(orders.length){
   const last=orders[orders.length-1];
   const jysInput=document.getElementById('jys-nom');
   if(jysInput) jysInput.value=(last.prenom+' '+last.nom).trim();
+  const filiereInput=document.getElementById('jys-filiere');
+  if(filiereInput && last.filiere) filiereInput.value=last.filiere;
+  const confirmBtn=document.getElementById('btn-jys-confirm');
+  const regenBtn=document.getElementById('btn-jys-regen');
+  if(confirmBtn) confirmBtn.style.display='none';
+  if(regenBtn) regenBtn.style.display='flex';
+  _jysCardReady=true;
+  const dlBtn=document.getElementById('btn-jys-dl');
+  if(dlBtn){ dlBtn.style.opacity='1'; dlBtn.style.pointerEvents='auto'; }
 }
 liveJysCard(); // affiche la carte (pré-remplie si commande existante)
 

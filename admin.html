@@ -268,9 +268,22 @@
         <input type="email" id="admin-email" placeholder="votre@email.com"
           onkeypress="if(event.key==='Enter')sendOTP()" autocomplete="email" />
       </div>
+      <div class="login-field" id="pwd-field" style="display:none">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="admin-password" placeholder="Mot de passe"
+          onkeypress="if(event.key==='Enter')loginWithPassword()" autocomplete="current-password" />
+      </div>
       <button class="btn-login" id="btn-send-otp" onclick="sendOTP()">
         <i class="fas fa-paper-plane"></i> &nbsp;Recevoir le code
       </button>
+      <button class="btn-login" id="btn-login-password" style="display:none" onclick="loginWithPassword()">
+        <i class="fas fa-sign-in-alt"></i> &nbsp;Se connecter
+      </button>
+      <div style="margin-top:14px;font-size:0.74rem;text-align:center;">
+        <a href="#" onclick="togglePasswordLogin();return false;" id="toggle-pwd-link" style="color:var(--text-muted);text-decoration:none;">
+          <i class="fas fa-key" style="font-size:0.7rem;"></i> Se connecter avec un mot de passe
+        </a>
+      </div>
     </div>
 
     <!-- Étape 2 : Code OTP -->
@@ -471,6 +484,57 @@ function _loginError(msg){
 function _loginErrorClear(){ document.getElementById('login-error').style.display='none'; }
 function _btnLoading(id,text){ const b=document.getElementById(id); b.disabled=true; b.innerHTML='<i class="fas fa-spinner fa-spin"></i> '+text; }
 function _btnReset(id,icon,text){ const b=document.getElementById(id); b.disabled=false; b.innerHTML='<i class="fas fa-'+icon+'"></i> &nbsp;'+text; }
+
+/* ── BASCULE CONNEXION MOT DE PASSE ── */
+function togglePasswordLogin(){
+  const pwdField=document.getElementById('pwd-field');
+  const pwdBtn=document.getElementById('btn-login-password');
+  const otpBtn=document.getElementById('btn-send-otp');
+  const link=document.getElementById('toggle-pwd-link');
+  const showingPwd = pwdField.style.display!=='none';
+  _loginErrorClear();
+  pwdField.style.display = showingPwd?'none':'block';
+  pwdBtn.style.display = showingPwd?'none':'block';
+  otpBtn.style.display = showingPwd?'block':'none';
+  link.innerHTML = showingPwd
+    ? '<i class="fas fa-key" style="font-size:0.7rem;"></i> Se connecter avec un mot de passe'
+    : '<i class="fas fa-paper-plane" style="font-size:0.7rem;"></i> Recevoir un code par e-mail';
+}
+
+/* ── CONNEXION PAR MOT DE PASSE (admin principal) ── */
+async function loginWithPassword(){
+  _loginErrorClear();
+  const email = document.getElementById('admin-email').value.trim().toLowerCase();
+  const password = document.getElementById('admin-password').value;
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    _loginError('Entrez une adresse e-mail valide.'); return;
+  }
+  if(!password){ _loginError('Entrez votre mot de passe.'); return; }
+  _btnLoading('btn-login-password','Connexion...');
+
+  const asUrl = localStorage.getItem('ensetp_as_url') || AS_URL_DEFAULT;
+  try {
+    const r = await fetch(asUrl, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'loginPassword', email, password})
+    });
+    const data = await r.json();
+    if(data.success){
+      adminEmail = data.email;
+      localStorage.setItem('ensetp_admin_session', JSON.stringify({email:adminEmail, t:Date.now()}));
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('admin-screen').style.display='flex';
+      document.getElementById('topbar-email').textContent=adminEmail;
+      loadAdmin();
+    } else {
+      _loginError(data.error || 'Mot de passe incorrect.');
+      _btnReset('btn-login-password','sign-in-alt','Se connecter');
+    }
+  } catch(e){
+    _loginError('Connexion Apps Script impossible. Vérifiez l\'URL dans Config.');
+    _btnReset('btn-login-password','sign-in-alt','Se connecter');
+  }
+}
 
 /* ── ÉTAPE 1 : Envoyer OTP ── */
 async function sendOTP(resend){
