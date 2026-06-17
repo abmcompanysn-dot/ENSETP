@@ -1339,7 +1339,7 @@ let _currentShareOrder = null;
 function shareTicketWhatsApp(){
   if(!_currentShareOrder) return;
   const o = _currentShareOrder;
-  const msg = `🎉 J'ai mon ticket pour le Dîner de Gala ENSETP 2026 !\n\n👤 ${o.prenom} ${o.nom} — ${String(o.type).toUpperCase()}\n📅 Samedi 20 Juin 2026 · 19h\n📍 Au Magic Land, Dakar\n🎟️ Places GRATUITES → https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #MagicLand`;
+  const msg = `🎉 J'ai mon ticket pour le Dîner de Gala ENSETP 2026 !\n\n👤 ${o.prenom} ${o.nom} — ${String(o.type).toUpperCase()}\n📅 Samedi 20 Juin 2026 · 22h\n📍 Au Magic Land, Dakar\n🎟️ Places GRATUITES → https://ensetp.mahu.cards\n\n#ENSETP #GalaDîner2026 #MagicLand`;
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
 }
 

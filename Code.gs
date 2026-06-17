@@ -15,7 +15,7 @@ var CFG = {
   // Ces valeurs sont lues depuis l'onglet "Configuration" en priorité
   ADMIN_EMAIL:      'contact@mahu.cards',
   EMAIL_FROM:       'contact@mahu.cards',
-  EVENT_DATE:       'Samedi 20 Juin 2026',
+  EVENT_DATE:       'Samedi 20 Juin 2026 à 22h00',
   EVENT_LIEU:       'Au Magic Land',
 
   PAYDUNIA_KEY:     '',   // Clé privée (PAYDUNYA-PRIVATE-KEY)
@@ -541,11 +541,13 @@ function logToSheet(order) {
 }
 
 function updateOrderStatus(orderId, status) {
+  // Colonnes : ID(1) Prénom(2) Nom(3) Email(4) Tel(5) Filière(6) Niveau(7)
+  //            Type(8) Qté(9) Prix(10) Total(11) Paiement(12) Date(13) Statut(14) EmailEnvoyé(15)
   var sh = getSheet(), data = sh.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === orderId) {
-      sh.getRange(i+1, 12).setValue(status==='paid'?'PAYÉ':status);
-      if (status==='paid') sh.getRange(i+1, 13).setValue('Oui');
+      sh.getRange(i+1, 14).setValue(status==='paid'?'PAYÉ':status);
+      if (status==='paid') sh.getRange(i+1, 15).setValue('Oui');
       return;
     }
   }
@@ -557,8 +559,9 @@ function getOrderById(orderId) {
     if (data[i][0] === orderId) {
       return {
         id:data[i][0], prenom:data[i][1], nom:data[i][2], email:data[i][3],
-        tel:data[i][4], type:data[i][5], qty:data[i][6], price:data[i][7],
-        total:data[i][8], payment:data[i][9], date:data[i][10], status:data[i][11]
+        tel:data[i][4], filiere:data[i][5], annee:data[i][6],
+        type:data[i][7], qty:data[i][8], price:data[i][9],
+        total:data[i][10], payment:data[i][11], date:data[i][12], status:data[i][13]
       };
     }
   }
@@ -570,9 +573,9 @@ function getStats() {
   var total=0, solo=0, couple=0, recettes=0;
   for (var i=1; i<data.length; i++) {
     total++;
-    var t = String(data[i][5]).toLowerCase();
+    var t = String(data[i][7]).toLowerCase(); // col 8 = Type
     if (t==='solo') solo++; else if (t==='couple') couple++;
-    recettes += Number(data[i][8])||0;
+    recettes += Number(data[i][10])||0;       // col 11 = Total
   }
   return { total:total, solo:solo, couple:couple, recettes:recettes };
 }
