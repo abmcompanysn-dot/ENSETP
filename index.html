@@ -1024,7 +1024,12 @@ async function processPayment(){
   btn.innerHTML='<i class="fas fa-lock"></i>&nbsp; Payer & Recevoir mon Ticket';
 }
 
-function saveOrder(o){orders.push(o);localStorage.setItem('ensetp_orders',JSON.stringify(orders));}
+function saveOrder(o){
+  orders.push(o);
+  localStorage.setItem('ensetp_orders',JSON.stringify(orders));
+  const jysInput=document.getElementById('jys-nom');
+  if(jysInput && !jysInput.value.trim()){ jysInput.value=(o.prenom+' '+o.nom).trim(); liveJysCard(); }
+}
 
 /* ===== SHOW TICKET ===== */
 function showTicket(o){
@@ -1638,7 +1643,12 @@ function shareEventNative(){
 if(navigator.share) document.querySelectorAll('#btn-native-share').forEach(b=>{b.style.display='flex';});
 initLikes();
 _renderJysGallery();
-liveJysCard(); // affiche la carte vide au chargement
+if(orders.length){
+  const last=orders[orders.length-1];
+  const jysInput=document.getElementById('jys-nom');
+  if(jysInput) jysInput.value=(last.prenom+' '+last.nom).trim();
+}
+liveJysCard(); // affiche la carte (pré-remplie si commande existante)
 
 /* ===== REVEAL OBSERVER ===== */
 const revObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.1});
