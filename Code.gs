@@ -326,7 +326,6 @@ function handleCreateOrder(order) {
   order.status = 'paid';
   updateOrderStatus(order.id, 'paid');
   if (order.email) sendTicketEmail(order, cfg);
-  sendAdminNotification(order, cfg);
   return { success: true, orderId: order.id, mode: 'gratuit' };
 }
 
