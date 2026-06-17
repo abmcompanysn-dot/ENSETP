@@ -371,7 +371,6 @@ ok
   <nav class="drawer-nav" id="drawer-nav">
     <a href="#hero" onclick="closeDrawer()"><i class="fas fa-home"></i>Accueil</a>
     <a href="#artistes" onclick="closeDrawer()"><i class="fas fa-music"></i>Artistes</a>
-    <a href="#conference" onclick="closeDrawer()"><i class="fas fa-chalkboard-teacher"></i>Conférence</a>
     <a href="#flyers" onclick="closeDrawer()"><i class="fas fa-images"></i>Affiches</a>
     <div class="nav-divider"></div>
     <a href="#tickets" onclick="closeDrawer()"><i class="fas fa-ticket-alt"></i>Tickets</a>
@@ -464,88 +463,6 @@ ok
         </div>
       </div>
     </div>
-    <div class="artist-card reveal" onclick="openFlyerModal('https://i.postimg.cc/T1jcHYfD/274259.jpg','ZOU NAME')">
-      <img src="https://i.postimg.cc/T1jcHYfD/274259.jpg" alt="Zou Name" />
-      <div class="artist-overlay">
-        <div class="artist-badge">Artiste Invité</div><div class="artist-name">ZOU NAME</div>
-        <div class="artist-social">
-          <button class="btn-like" onclick="event.stopPropagation();toggleLike('zou',this)" id="like-zou"><i class="fas fa-heart heart"></i><span class="like-count" id="lc-zou">0</span></button>
-          <button class="btn-comment" onclick="event.stopPropagation();openComments('zou','ZOU NAME')"><i class="fas fa-comment"></i><span class="comment-count" id="cc-zou">0</span></button>
-        </div>
-      </div>
-    </div>
-    <div class="artist-card reveal" onclick="openFlyerModal('https://i.postimg.cc/4x8nQkkX/274256.jpg','MIST CASH – Artiste Invité')">
-      <img src="https://i.postimg.cc/4x8nQkkX/274256.jpg" alt="Mist Cash" />
-      <div class="artist-overlay">
-        <div class="artist-badge">Artiste Invité</div><div class="artist-name">MIST CASH</div>
-        <div class="artist-social">
-          <button class="btn-like" onclick="event.stopPropagation();toggleLike('mist',this)" id="like-mist"><i class="fas fa-heart heart"></i><span class="like-count" id="lc-mist">0</span></button>
-          <button class="btn-comment" onclick="event.stopPropagation();openComments('mist','MIST CASH')"><i class="fas fa-comment"></i><span class="comment-count" id="cc-mist">0</span></button>
-        </div>
-      </div>
-    </div>
-    <div class="artist-card reveal" onclick="openFlyerModal('https://i.postimg.cc/sxBrpqzr/274250.jpg','BLM PRO')">
-      <img src="https://i.postimg.cc/sxBrpqzr/274250.jpg" alt="BLM Pro" />
-      <div class="artist-overlay">
-        <div class="artist-badge">Artiste Invité</div><div class="artist-name">BLM PRO</div>
-        <div class="artist-social">
-          <button class="btn-like" onclick="event.stopPropagation();toggleLike('blm',this)" id="like-blm"><i class="fas fa-heart heart"></i><span class="like-count" id="lc-blm">0</span></button>
-          <button class="btn-comment" onclick="event.stopPropagation();openComments('blm','BLM PRO')"><i class="fas fa-comment"></i><span class="comment-count" id="cc-blm">0</span></button>
-        </div>
-      </div>
-    </div>
-    <div class="artist-card reveal" onclick="openFlyerModal('https://i.postimg.cc/rpdN29qz/274262.jpg','ME MAN')">
-      <img src="https://i.postimg.cc/rpdN29qz/274262.jpg" alt="Me Man" />
-      <div class="artist-overlay">
-        <div class="artist-badge">Artiste Invité</div><div class="artist-name">ME MAN</div>
-        <div class="artist-social">
-          <button class="btn-like" onclick="event.stopPropagation();toggleLike('meman',this)" id="like-meman"><i class="fas fa-heart heart"></i><span class="like-count" id="lc-meman">0</span></button>
-          <button class="btn-comment" onclick="event.stopPropagation();openComments('meman','ME MAN')"><i class="fas fa-comment"></i><span class="comment-count" id="cc-meman">0</span></button>
-        </div>
-      </div>
-    </div>
-    <div class="artist-card reveal" onclick="openFlyerModal('https://i.postimg.cc/MTv44BFY/274253.jpg','NIKO – En Live!')">
-      <img src="https://i.postimg.cc/MTv44BFY/274253.jpg" alt="Niko" />
-      <div class="artist-overlay">
-        <div class="artist-badge">En Live !</div><div class="artist-name">NIKO</div>
-        <div class="artist-social">
-          <button class="btn-like" onclick="event.stopPropagation();toggleLike('niko',this)" id="like-niko"><i class="fas fa-heart heart"></i><span class="like-count" id="lc-niko">0</span></button>
-          <button class="btn-comment" onclick="event.stopPropagation();openComments('niko','NIKO')"><i class="fas fa-comment"></i><span class="comment-count" id="cc-niko">0</span></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CONFERENCE -->
-<section id="conference">
-  <div class="section-header reveal">
-    <div class="section-tag">★ Programme du Jour ★</div>
-    <h2 class="section-title">Journée d'<span>Orientation</span></h2>
-    <div class="gold-line"></div>
-    <p class="section-desc" style="margin-top:14px">Accompagnement des étudiants sortants en vue de leur insertion professionnelle.</p>
-  </div>
-  <div class="conference-card reveal">
-    <div class="conf-img-side">
-      <img src="https://i.postimg.cc/4ynJWnz8/274265.jpg" alt="Conférence"
-        onerror="this.outerHTML='<div class=\'conf-placeholder\'><i class=\'fas fa-chalkboard-teacher\'></i></div>'" />
-    </div>
-    <div class="conf-info">
-      <div class="conf-theme-label">Thème</div>
-      <div class="conf-theme">"La carrière du jeune enseignant dans la FPT : défis, perspectives"</div>
-      <div class="conf-speaker-label">Conférencier</div>
-      <div class="conf-speaker">M. Cheikhouna Guèye</div>
-      <div class="conf-speaker-role">Chargé des Revendications du SEPT<br>(Syndicat de l'Enseignement Professionnel et Technique)</div>
-      <div class="conf-meta-item"><i class="fas fa-calendar-alt"></i><div><strong>Samedi 20 Juin 2026 – 09H00</strong>Salle CDR, ENSETP</div></div>
-      <div class="conf-meta-item"><i class="fas fa-users"></i><div><strong>Participation ouverte</strong>Tous étudiants &amp; jeunes diplômés</div></div>
-      <div class="conf-meta-item"><i class="fas fa-handshake"></i><div><strong>Partenaires</strong>CBAO &bull; EliteCAD Solution</div></div>
-    </div>
-  </div>
-  <div class="conf-features reveal">
-    <div class="conf-feature"><i class="fas fa-briefcase"></i><p>S'informer sur les métiers de l'enseignement</p></div>
-    <div class="conf-feature"><i class="fas fa-chart-line"></i><p>Découvrir les opportunités FPT</p></div>
-    <div class="conf-feature"><i class="fas fa-handshake"></i><p>Échanger avec des professionnels</p></div>
-    <div class="conf-feature"><i class="fas fa-bullseye"></i><p>Préparer son projet professionnel</p></div>
   </div>
 </section>
 
@@ -574,7 +491,7 @@ ok
     <div class="gold-line"></div>
     <p class="section-desc" style="margin-top:14px">Sécurisez votre place dès maintenant. Places limitées – 500 tickets disponibles.</p>
   </div>
-  <div class="ticket-types" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:680px;">
+  <div class="ticket-types" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:340px;">
     <div class="ticket-card reveal" onclick="selectTicket('solo',0)">
       <div class="ticket-type-lbl">Solo</div>
       <div class="ticket-price" style="font-size:2rem;">GRATUIT</div>
@@ -586,20 +503,6 @@ ok
         <li><i class="fas fa-check"></i>E-Ticket avec QR Code</li>
       </ul>
       <button class="btn-ticket-outline">Choisir</button>
-    </div>
-    <div class="ticket-card popular reveal" onclick="selectTicket('couple',0)">
-      <div class="popular-badge">Recommandé</div>
-      <div class="ticket-type-lbl">Couple</div>
-      <div class="ticket-price" style="font-size:2rem;">GRATUIT</div>
-      <div class="ticket-currency">2 personnes</div>
-      <ul class="ticket-features">
-        <li><i class="fas fa-heart"></i>2 places ensemble</li>
-        <li><i class="fas fa-check"></i>Dîner de Gala inclus</li>
-        <li><i class="fas fa-check"></i>Prestations Live</li>
-        <li><i class="fas fa-check"></i>Table côte à côte</li>
-        <li><i class="fas fa-check"></i>2 E-Tickets QR Code</li>
-      </ul>
-      <button class="btn-ticket">Choisir</button>
     </div>
   </div>
 
@@ -616,18 +519,6 @@ ok
       </div>
       <div class="form-group"><label>Niveau / Année</label>
         <input type="text" id="f-annee" placeholder="Ex: L1, M2, Doctorat..." autocomplete="off" />
-      </div>
-      <div class="form-group"><label>Nombre de places</label>
-        <select id="f-qty" onchange="updateTotal()">
-          <option value="1">1 place</option><option value="2">2 places</option>
-          <option value="3">3 places</option><option value="4">4 places</option><option value="5">5 places</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Type de ticket</label>
-        <select id="f-type" onchange="updateTotal()">
-          <option value="solo" data-price="0">Solo – Gratuit (1 personne)</option>
-          <option value="couple" data-price="0">Couple – Gratuit (2 personnes)</option>
-        </select>
       </div>
     </div>
     <div class="form-total">
@@ -762,7 +653,6 @@ ok
   <ul class="footer-links">
     <li><a href="#hero">Accueil</a></li>
     <li><a href="#artistes">Artistes</a></li>
-    <li><a href="#conference">Conférence</a></li>
     <li><a href="#tickets">Tickets</a></li>
     <li><a href="#partenaires">Partenaires</a></li>
   </ul>
@@ -942,7 +832,6 @@ new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classLis
 /* ===== TICKET SELECTION ===== */
 function selectTicket(type,price){
   selType=type; selPrice=price;
-  document.getElementById('f-type').value=type;
   updateTotal();
   const f=document.getElementById('purchase-form');
   f.classList.add('active');
@@ -951,17 +840,8 @@ function selectTicket(type,price){
 }
 
 function updateTotal(){
-  const sel=document.getElementById('f-type');
-  const price=parseInt(sel.options[sel.selectedIndex].dataset.price)||0;
-  selPrice=price; selType=sel.value;
-  // Auto-sync qty selon type
-  const qtyEl=document.getElementById('f-qty');
-  if(selType==='solo'){qtyEl.value='1';qtyEl.disabled=true;}
-  else if(selType==='couple'){qtyEl.value='2';qtyEl.disabled=true;}
-  else{qtyEl.disabled=false;}
-  const qty=parseInt(qtyEl.value)||1;
   const el=document.getElementById('form-total');
-  el.textContent=price===0?'GRATUIT':(price*qty).toLocaleString('fr-FR')+' FCFA';
+  el.textContent=selPrice===0?'GRATUIT':selPrice.toLocaleString('fr-FR')+' FCFA';
 }
 
 /* ===== PAYMENT ===== */
@@ -978,7 +858,7 @@ async function processPayment(){
   const nom=document.getElementById('f-nom').value.trim();
   const email=document.getElementById('f-email').value.trim();
   const tel=document.getElementById('f-tel').value.trim();
-  const qty=parseInt(document.getElementById('f-qty').value)||1;
+  const qty=1;
   const filiere=document.getElementById('f-filiere').value;
   const annee=document.getElementById('f-annee').value;
   if(!prenom||!nom||!email||!tel){notify('error','Champs manquants','Veuillez remplir tous les champs obligatoires.');return;}
@@ -988,7 +868,7 @@ async function processPayment(){
   btn.disabled=true;
   btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Traitement...';
 
-  const total=selPrice*qty;
+  const total=selPrice;
   const id=`TK-ENSETP-2026-${String(orders.length+1).padStart(4,'0')}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
   const now=new Date();
   const order={id,prenom,nom,email,tel,filiere,annee,type:selType,qty,price:selPrice,total,payment:selPayment,date:now.toISOString(),status:'pending'};
@@ -1130,7 +1010,7 @@ function toggleLike(id,btn){
 function initLikes(){
   const likes=JSON.parse(localStorage.getItem('ensetp_likes')||'{}');
   const comments=JSON.parse(localStorage.getItem('ensetp_comments')||'{}');
-  ['groupe','zou','mist','blm','meman','niko'].forEach(id=>{
+  ['groupe'].forEach(id=>{
     const lc=document.getElementById('lc-'+id);
     const lb=document.getElementById('like-'+id);
     const cc=document.getElementById('cc-'+id);
