@@ -652,8 +652,14 @@ function startAdminCountdown(){
 }
 
 /* ── LOAD ADMIN ── */
-function loadAdmin(){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
+async function loadAdmin(){
+  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
+  try {
+    const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'getOrders',email:adminEmail})});
+    const data=await r.json();
+    if(data.success && Array.isArray(data.orders)) orders=data.orders;
+  } catch(e){ console.warn('getOrders impossible — affichage des données locales uniquement.'); }
+  const ords=orders;
   document.getElementById('stat-total').textContent=ords.length;
   document.getElementById('stat-solo').textContent=ords.filter(o=>o.type==='solo').length;
   document.getElementById('stat-couple').textContent=ords.filter(o=>o.type==='couple').length;
@@ -707,14 +713,11 @@ function renderOrderRows(ords){
   </tr>`).join('');
 }
 function filterOrders(q){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
   const s=q.toLowerCase();
-  renderOrderRows(s?ords.filter(o=>(o.prenom+o.nom+o.email+o.id+o.type+(o.filiere||'')+(o.annee||'')).toLowerCase().includes(s)):ords);
+  renderOrderRows(s?orders.filter(o=>(o.prenom+o.nom+o.email+o.id+o.type+(o.filiere||'')+(o.annee||'')).toLowerCase().includes(s)):orders);
 }
 function clearOrders(){
-  if(!confirm('Supprimer TOUTES les commandes ? Cette action est irréversible.'))return;
-  localStorage.removeItem('ensetp_orders'); orders=[]; loadAdmin();
-  notify('info','Données effacées','Toutes les commandes ont été supprimées.');
+  notify('info','Indisponible','Les inscriptions sont stockées dans le Google Sheet. Supprimez les lignes directement dans la feuille "Commandes" si besoin.');
 }
 function regenTicket(id){
   const o=orders.find(x=>x.id===id);
@@ -722,17 +725,16 @@ function regenTicket(id){
   notify('info','Ticket','Ouvrez le site pour régénérer ce ticket.');
 }
 function exportCSV(){
-  const ords=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  if(!ords.length){notify('error','Aucune donnée','Pas de commandes à exporter.');return;}
+  if(!orders.length){notify('error','Aucune donnée','Pas de commandes à exporter.');return;}
   const h='ID,Prénom,Nom,Email,Téléphone,Filière,Niveau,Type,Total,Paiement,Date,Statut\n';
-  const rows=ords.map(o=>[o.id,o.prenom,o.nom,o.email,o.tel||'',o.filiere||'',o.annee||'',o.type,o.total||0,o.payment||'',o.date,o.status].join(',')).join('\n');
+  const rows=orders.map(o=>[o.id,o.prenom,o.nom,o.email,o.tel||'',o.filiere||'',o.annee||'',o.type,o.total||0,o.payment||'',o.date,o.status].join(',')).join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([h+rows],{type:'text/csv;charset=utf-8;'}));
   a.download='tickets_gala_ensetp_2026.csv'; a.click();
 }
 
 /* ── PRESENCES TAB ── */
 function loadPresencesTab(){
-  const all=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
+  const all=orders;
   const confirmed=all.filter(o=>o.confirmed);
   const today=new Date().toDateString();
   const todayConf=confirmed.filter(o=>new Date(o.confirmedAt||0).toDateString()===today);

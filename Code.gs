@@ -254,6 +254,7 @@ function doPost(e) {
     else if (action === 'sendOTP')         result = handleSendOTP(payload);
     else if (action === 'verifyOTP')       result = handleVerifyOTP(payload);
     else if (action === 'loginPassword')   result = handlePasswordLogin(payload);
+    else if (action === 'getOrders')       result = handleGetOrders(payload);
     else if (action === 'verifyTicket')    result = handleVerifyTicket(payload);
     else                                   result = { error: 'Action inconnue: ' + action };
 
@@ -531,6 +532,53 @@ function getSheet() {
   var sh = ss.getSheetByName(CFG.COMMANDES_SHEET);
   if (!sh) { _initCommandes(ss); sh = ss.getSheetByName(CFG.COMMANDES_SHEET); }
   return sh;
+}
+
+// ── LISTE COMPLÈTE DES INSCRIPTIONS (pour l'admin) ────────
+function getAllOrders() {
+  var sh = getSheet(), data = sh.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    if (!row[0]) continue;
+    var rawStatus = String(row[13] || '');
+    var isPaid = /pay/i.test(rawStatus);
+    var dateVal = row[12];
+    var dateIso = (dateVal instanceof Date) ? dateVal.toISOString() : String(dateVal || '');
+    out.push({
+      id: row[0], prenom: row[1], nom: row[2], email: row[3] || '', tel: row[4] || '',
+      filiere: row[5] || '', annee: row[6] || '', type: row[7], qty: row[8] || 1,
+      price: row[9] || 0, total: row[10] || 0, payment: row[11] || '',
+      date: dateIso, status: isPaid ? 'paid' : rawStatus.toLowerCase(),
+      confirmed: isPaid, confirmedAt: dateIso
+    });
+  }
+  return out;
+}
+
+function handleGetOrders(payload) {
+  try {
+    var email = String((payload && payload.email) || '').toLowerCase().trim();
+    var cfg = getCFG();
+    var authorized = [cfg.ADMIN_EMAIL.toLowerCase()];
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sh = ss.getSheetByName(CFG.ADMINS_SHEET);
+      if (sh) {
+        var data = sh.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (data[i][1]) authorized.push(String(data[i][1]).toLowerCase().trim());
+        }
+      }
+    } catch (e) {}
+    if (!email || authorized.indexOf(email) === -1) {
+      return { error: 'Accès non autorisé.' };
+    }
+    return { success: true, orders: getAllOrders() };
+  } catch (err) {
+    Logger.log('handleGetOrders error: ' + err.message);
+    return { error: err.message };
+  }
 }
 
 function logToSheet(order) {
