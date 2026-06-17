@@ -312,22 +312,6 @@ ok
     .btn-send-comment:hover { transform:translateY(-2px); }
     .no-comments { text-align:center; color:var(--text-muted); font-size:0.82rem; padding:30px; }
 
-    /* PRESENCE CONFIRMATION */
-    #presence { background:linear-gradient(135deg,rgba(26,107,53,0.08),transparent 60%,rgba(212,175,55,0.04)); }
-    .presence-card { max-width:640px; margin:0 auto; background:var(--dark2); border:1px solid rgba(26,107,53,0.3); border-radius:20px; padding:48px 40px; text-align:center; }
-    .presence-icon { width:72px; height:72px; border-radius:50%; background:rgba(26,107,53,0.15); border:2px solid rgba(26,107,53,0.4); display:flex; align-items:center; justify-content:center; margin:0 auto 24px; }
-    .presence-icon i { font-size:1.8rem; color:var(--green-light); }
-    .presence-title { font-family:'Cinzel',serif; font-size:1.3rem; color:var(--white); margin-bottom:8px; }
-    .presence-desc { font-size:0.82rem; color:var(--text-muted); margin-bottom:32px; line-height:1.7; }
-    .presence-result { padding:20px; border-radius:12px; margin-top:20px; display:none; }
-    .presence-result.ok { background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); }
-    .presence-result.err { background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.3); }
-    .presence-result p { font-size:0.88rem; }
-    .presence-result.ok p { color:#2ecc71; }
-    .presence-result.err p { color:#e74c3c; }
-    .btn-see-ticket { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:10px 22px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:var(--black); border:none; border-radius:24px; cursor:pointer; font-family:'Cinzel',serif; font-size:0.76rem; font-weight:700; letter-spacing:1.5px; transition:all .3s; }
-    .btn-see-ticket:hover { transform:translateY(-2px); box-shadow:0 4px 20px rgba(212,175,55,0.5); }
-
 
     /* EXTRA ANIMATIONS */
     @keyframes pulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0)} 50%{box-shadow:0 0 0 8px rgba(212,175,55,0)} }
@@ -655,28 +639,6 @@ ok
   </div>
 </section>
 
-<!-- PRESENCE CONFIRMATION -->
-<section id="presence">
-  <div class="section-header reveal">
-    <div class="section-tag">★ Vous avez un ticket ? ★</div>
-    <h2 class="section-title">Confirmer ma <span>Présence</span></h2>
-    <div class="gold-line"></div>
-    <p class="section-desc" style="margin-top:14px">Confirmez votre venue pour que l'organisation prépare votre accueil.</p>
-  </div>
-  <div class="presence-card reveal">
-    <div class="presence-icon"><i class="fas fa-check-double"></i></div>
-    <div class="presence-title">Confirmation de Présence</div>
-    <div class="presence-desc">Entrez votre Numéro de Ticket et votre prénom pour confirmer votre présence au Dîner de Gala ENSETP 2026.</div>
-    <div class="form-grid" style="max-width:480px;margin:0 auto;">
-      <div class="form-group"><label>Numéro de Ticket</label><input type="text" id="p-id" placeholder="TK-ENSETP-2026-XXXX-XXXXX" /></div>
-      <div class="form-group"><label>Votre Prénom</label><input type="text" id="p-name" placeholder="Votre prénom" /></div>
-    </div>
-    <div style="margin-top:20px">
-      <button class="btn-gold" onclick="confirmPresence()" style="padding:14px 36px;"><i class="fas fa-check-circle"></i> Confirmer ma présence</button>
-    </div>
-    <div class="presence-result" id="presence-result"></div>
-  </div>
-</section>
 
 <!-- COMMENTS MODAL -->
 <div class="modal-overlay" id="comments-modal">
@@ -1213,80 +1175,6 @@ function postComment(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeComments();});
 
-/* ===== PRESENCE CONFIRMATION ===== */
-async function confirmPresence(){
-  const tid=document.getElementById('p-id').value.trim().toUpperCase();
-  const name=document.getElementById('p-name').value.trim().toLowerCase();
-  const res=document.getElementById('presence-result');
-  res.className='presence-result'; res.style.display='block';
-  if(!tid||!name){
-    res.classList.add('err');
-    res.innerHTML='<p><i class="fas fa-exclamation-circle"></i> Remplissez les deux champs.</p>'; return;
-  }
-
-  // 1. Vérification locale (même navigateur que l'achat)
-  const all=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  const order=all.find(o=>o.id===tid);
-  if(order){
-    const fullName=(order.prenom+' '+order.nom).toLowerCase();
-    if(!fullName.includes(name)){
-      res.classList.add('err');
-      res.innerHTML='<p><i class="fas fa-times-circle"></i> Le prénom ne correspond pas à ce ticket.</p>'; return;
-    }
-    if(order.confirmed){
-      res.classList.add('ok');
-      res.innerHTML=`<p><i class="fas fa-check-circle"></i> Présence déjà confirmée, ${order.prenom} ! On vous attend samedi soir.</p>
-        <button class="btn-see-ticket" onclick="_showLocalTicket('${order.id}')"><i class="fas fa-ticket-alt"></i> Voir mon Ticket</button>`; return;
-    }
-    order.confirmed=true; order.confirmedAt=new Date().toISOString();
-    localStorage.setItem('ensetp_orders',JSON.stringify(all)); orders=all;
-    res.classList.add('ok');
-    res.innerHTML=`<p><i class="fas fa-check-circle"></i> Présence confirmée ! Merci ${order.prenom}, à samedi 20 juin au Magic Land !</p>
-      <button class="btn-see-ticket" onclick="_showLocalTicket('${order.id}')"><i class="fas fa-ticket-alt"></i> Voir mon Ticket</button>`;
-    notify('success','Présence confirmée !','Nous avons bien enregistré votre présence.');
-    const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-    if(asUrl) fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'confirmPresence',orderId:order.id,name:order.prenom+' '+order.nom,email:order.email})}).catch(()=>{});
-    return;
-  }
-
-  // 2. Pas en localStorage → vérification via Apps Script (autre appareil / email reçu)
-  const asUrl=localStorage.getItem('ensetp_as_url')||AS_URL_DEFAULT;
-  res.innerHTML='<p style="color:var(--gold)"><i class="fas fa-spinner fa-spin"></i> Vérification en cours...</p>';
-  try {
-    const r=await fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'verifyTicket',ticketId:tid})});
-    const data=await r.json();
-    if(data.valid){
-      const o=data.order;
-      if(o.nom && !o.nom.toLowerCase().includes(name)){
-        res.className='presence-result err'; res.style.display='block';
-        res.innerHTML='<p><i class="fas fa-times-circle"></i> Le prénom ne correspond pas à ce ticket.</p>'; return;
-      }
-      const prenom=o.nom.split(' ')[0]||'';
-      // Enregistrer la présence dans la feuille
-      fetch(asUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'confirmPresence',orderId:tid,name:o.nom,email:o.email})}).catch(()=>{});
-      // Sauvegarder localement pour afficher le ticket
-      const partial={id:tid,prenom,nom:o.nom.split(' ').slice(1).join(' ')||'',email:o.email,type:o.type.toLowerCase(),qty:o.qty||1,price:0,total:0,payment:'',date:new Date().toISOString(),status:'paid',confirmed:true,confirmedAt:new Date().toISOString()};
-      const allOrds=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-      if(!allOrds.find(x=>x.id===tid)){allOrds.push(partial);localStorage.setItem('ensetp_orders',JSON.stringify(allOrds));orders=allOrds;}
-      res.className='presence-result ok'; res.style.display='block';
-      res.innerHTML=`<p><i class="fas fa-check-circle"></i> Présence confirmée, ${prenom} ! À samedi 20 juin au Magic Land !</p>
-        <button class="btn-see-ticket" onclick="_showLocalTicket('${tid}')"><i class="fas fa-ticket-alt"></i> Voir &amp; Imprimer mon Ticket</button>`;
-      notify('success','Présence confirmée !','Nous avons bien enregistré votre présence.');
-    } else {
-      res.className='presence-result err'; res.style.display='block';
-      res.innerHTML=`<p><i class="fas fa-times-circle"></i> ${data.error||'Ticket introuvable. Vérifiez l\'ID dans votre e-mail.'}</p>`;
-    }
-  } catch(err){
-    res.className='presence-result err'; res.style.display='block';
-    res.innerHTML='<p><i class="fas fa-times-circle"></i> Impossible de vérifier. Vérifiez votre connexion et l\'ID reçu par e-mail.</p>';
-  }
-}
-
-function _showLocalTicket(id){
-  const all=JSON.parse(localStorage.getItem('ensetp_orders')||'[]');
-  const o=all.find(x=>x.id===id);
-  if(o) showTicket(o);
-}
 
 /* ===== PAYDUNIA CALLBACK ===== */
 (()=>{
